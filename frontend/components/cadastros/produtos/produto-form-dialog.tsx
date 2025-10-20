@@ -351,103 +351,268 @@ export function ProdutoFormDialog({
                           </FormItem>
                         )}
                       />
-            </div>
 
-            <Separator />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="ncmId"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>NCM *</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecione o NCM" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent className="max-h-[300px]">
+                                  {ncms.length === 0 ? (
+                                    <div className="p-2 text-sm text-muted-foreground text-center">
+                                      Carregando NCMs...
+                                    </div>
+                                  ) : (
+                                    ncms.map((ncm) => (
+                                      <SelectItem key={ncm.id} value={ncm.id}>
+                                        {ncm.codigo} - {ncm.descricao}
+                                      </SelectItem>
+                                    ))
+                                  )}
+                                </SelectContent>
+                              </Select>
+                              <FormDescription>
+                                Nomenclatura Comum do Mercosul
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-            {/* Classificação Fiscal */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">Classificação Fiscal</h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="ncmId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>NCM</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione o NCM" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {ncms.map((ncm) => (
-                            <SelectItem key={ncm.id} value={ncm.id}>
-                              {ncm.codigo} - {ncm.descricao}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <FormField
+                          control={form.control}
+                          name="cestId"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>CEST</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecione o CEST (opcional)" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent className="max-h-[300px]">
+                                  {cests.length === 0 ? (
+                                    <div className="p-2 text-sm text-muted-foreground text-center">
+                                      Carregando CESTs...
+                                    </div>
+                                  ) : (
+                                    cests.map((cest) => (
+                                      <SelectItem key={cest.id} value={cest.id}>
+                                        {cest.codigo} - {cest.descricao}
+                                      </SelectItem>
+                                    ))
+                                  )}
+                                </SelectContent>
+                              </Select>
+                              <FormDescription>
+                                Código Especificador da ST
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
 
-                <FormField
-                  control={form.control}
-                  name="cestId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>CEST</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione o CEST" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {cests.map((cest) => (
-                            <SelectItem key={cest.id} value={cest.id}>
-                              {cest.codigo} - {cest.descricao}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="unidade"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Unidade *</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Unidade" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="UN">UN - Unidade</SelectItem>
+                                  <SelectItem value="PC">PC - Peça</SelectItem>
+                                  <SelectItem value="KG">KG - Quilograma</SelectItem>
+                                  <SelectItem value="MT">MT - Metro</SelectItem>
+                                  <SelectItem value="LT">LT - Litro</SelectItem>
+                                  <SelectItem value="CX">CX - Caixa</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormDescription>
+                                Unidade de medida
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <FormField
-                  control={form.control}
-                  name="origem"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Origem</FormLabel>
-                      <Select onValueChange={(value) => field.onChange(Number(value))} defaultValue={field.value?.toString()}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Origem" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="0">0 - Nacional</SelectItem>
-                          <SelectItem value="1">1 - Estrangeira - Importação direta</SelectItem>
-                          <SelectItem value="2">2 - Estrangeira - Adquirida no mercado interno</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <FormField
+                          control={form.control}
+                          name="valorCusto"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Valor de Custo</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  placeholder="0,00"
+                                  {...field}
+                                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                />
+                              </FormControl>
+                              <FormDescription>
+                                Custo do produto
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                <FormField
-                  control={form.control}
-                  name="cstIcms"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>CST ICMS</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="CST ICMS" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
+                        <FormField
+                          control={form.control}
+                          name="valorUnitario"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Valor de Venda *</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  placeholder="0,00"
+                                  {...field}
+                                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                />
+                              </FormControl>
+                              <FormDescription>
+                                Preço de venda
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <FormField
+                        control={form.control}
+                        name="fornecedorId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Fornecedor</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione o fornecedor (opcional)" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent className="max-h-[300px]">
+                                {fornecedores.length === 0 ? (
+                                  <div className="p-2 text-sm text-muted-foreground text-center">
+                                    Carregando fornecedores...
+                                  </div>
+                                ) : (
+                                  fornecedores.map((fornecedor) => (
+                                    <SelectItem key={fornecedor.id} value={fornecedor.id}>
+                                      {fornecedor.nome}
+                                    </SelectItem>
+                                  ))
+                                )}
+                              </SelectContent>
+                            </Select>
+                            <FormDescription>
+                              Fornecedor principal do produto
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="ativo"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                              <FormLabel className="text-base">
+                                Produto Ativo
+                              </FormLabel>
+                              <FormDescription>
+                                Desative para impedir vendas deste produto
+                              </FormDescription>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                {/* Tab: Tributação */}
+                <TabsContent value="tributacao" className="space-y-4 mt-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Receipt className="h-5 w-5" />
+                        Informações Tributárias
+                      </CardTitle>
+                      <CardDescription>
+                        Configurações fiscais do produto
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="origem"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Origem da Mercadoria *</FormLabel>
+                            <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione a origem" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="0">0 - Nacional</SelectItem>
+                                <SelectItem value="1">1 - Estrangeira - Importação direta</SelectItem>
+                                <SelectItem value="2">2 - Estrangeira - Adquirida no mercado interno</SelectItem>
+                                <SelectItem value="3">3 - Nacional com mais de 40% de conteúdo estrangeiro</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormDescription>
+                              Origem da mercadoria para fins fiscais
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="cstIcms"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>CST ICMS *</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecione o CST ICMS" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
                           <SelectItem value="00">00 - Tributada integralmente</SelectItem>
                           <SelectItem value="10">10 - Tributada e com cobrança do ICMS por substituição tributária</SelectItem>
                           <SelectItem value="20">20 - Com redução de base de cálculo</SelectItem>
