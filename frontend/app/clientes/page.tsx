@@ -2,23 +2,14 @@
 
 import { AppSidebar } from "@/components/layout/app-sidebar"
 import { SiteHeader } from "@/components/layout/site-header"
+import { SidebarLayout } from "@/components/layout/sidebar-layout"
 import { ClientesSectionCards } from "@/components/cadastros/clientes/clientes-section-cards"
 import { ClientesDataTable } from "@/components/cadastros/clientes/clientes-data-table"
-import {
-  SidebarInset,
-  SidebarProvider,
-} from "@/components/ui/sidebar"
+import { SidebarInset } from "@/components/ui/sidebar"
 
 export default function ClientesPage() {
   return (
-    <SidebarProvider
-      style={
-        {
-          "--sidebar-width": "calc(var(--spacing) * 72)",
-          "--header-height": "calc(var(--spacing) * 12)",
-        } as React.CSSProperties
-      }
-    >
+    <SidebarLayout>
       <AppSidebar variant="inset" />
       <SidebarInset>
         <SiteHeader />
@@ -31,6 +22,6 @@ export default function ClientesPage() {
           </div>
         </div>
       </SidebarInset>
-    </SidebarProvider>
+    </SidebarLayout>
   )
 }

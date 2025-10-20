@@ -2,23 +2,14 @@
 
 import { AppSidebar } from "@/components/layout/app-sidebar"
 import { SiteHeader } from "@/components/layout/site-header"
+import { SidebarLayout } from "@/components/layout/sidebar-layout"
 import { ProdutosSectionCards } from "@/components/cadastros/produtos/produtos-section-cards"
 import { ProdutosDataTable } from "@/components/cadastros/produtos/produtos-data-table"
-import {
-  SidebarInset,
-  SidebarProvider,
-} from "@/components/ui/sidebar"
+import { SidebarInset } from "@/components/ui/sidebar"
 
 export default function ProdutosPage() {
   return (
-    <SidebarProvider
-      style={
-        {
-          "--sidebar-width": "calc(var(--spacing) * 72)",
-          "--header-height": "calc(var(--spacing) * 12)",
-        } as React.CSSProperties
-      }
-    >
+    <SidebarLayout>
       <AppSidebar variant="inset" />
       <SidebarInset>
         <SiteHeader />
@@ -31,6 +22,6 @@ export default function ProdutosPage() {
           </div>
         </div>
       </SidebarInset>
-    </SidebarProvider>
+    </SidebarLayout>
   )
 }

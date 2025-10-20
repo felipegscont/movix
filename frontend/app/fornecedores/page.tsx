@@ -2,23 +2,14 @@
 
 import { AppSidebar } from "@/components/layout/app-sidebar"
 import { SiteHeader } from "@/components/layout/site-header"
+import { SidebarLayout } from "@/components/layout/sidebar-layout"
 import { FornecedoresSectionCards } from "@/components/cadastros/fornecedores/fornecedores-section-cards"
 import { FornecedoresDataTable } from "@/components/cadastros/fornecedores/fornecedores-data-table"
-import {
-  SidebarInset,
-  SidebarProvider,
-} from "@/components/ui/sidebar"
+import { SidebarInset } from "@/components/ui/sidebar"
 
 export default function FornecedoresPage() {
   return (
-    <SidebarProvider
-      style={
-        {
-          "--sidebar-width": "calc(var(--spacing) * 72)",
-          "--header-height": "calc(var(--spacing) * 12)",
-        } as React.CSSProperties
-      }
-    >
+    <SidebarLayout>
       <AppSidebar variant="inset" />
       <SidebarInset>
         <SiteHeader />
@@ -31,6 +22,6 @@ export default function FornecedoresPage() {
           </div>
         </div>
       </SidebarInset>
-    </SidebarProvider>
+    </SidebarLayout>
   )
 }

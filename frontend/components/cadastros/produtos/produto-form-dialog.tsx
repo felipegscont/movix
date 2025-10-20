@@ -32,11 +32,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Badge } from "@/components/ui/badge"
 import { ProdutoService } from "@/lib/services/produto.service"
 import { AuxiliarService, type NCM, type CEST } from "@/lib/services/auxiliar.service"
 import { FornecedorService, type Fornecedor } from "@/lib/services/fornecedor.service"
 import { toast } from "sonner"
+import { Package, Receipt, Warehouse, Settings } from "lucide-react"
 
 const produtoFormSchema = z.object({
   codigo: z.string().min(1, "Código é obrigatório"),
@@ -90,6 +93,7 @@ export function ProdutoFormDialog({
 
   const form = useForm<ProdutoFormValues>({
     resolver: zodResolver(produtoFormSchema),
+    mode: "onBlur", // Valida apenas quando o campo perde o foco
     defaultValues: {
       codigo: "",
       codigoBarras: "",
@@ -213,83 +217,140 @@ export function ProdutoFormDialog({
     }
   }
 
+  const formErrors = Object.keys(form.formState.errors).length
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {produtoId ? "Editar Produto" : "Novo Produto"}
-          </DialogTitle>
-          <DialogDescription>
-            {produtoId
-              ? "Edite as informações do produto"
-              : "Cadastre um novo produto"}
-          </DialogDescription>
+      <DialogContent className="max-w-[90vw] w-[90vw] max-h-[90vh] h-[90vh] sm:max-w-[90vw] flex flex-col p-0">
+        <DialogHeader className="px-6 py-4 border-b">
+          <div className="flex items-center justify-between">
+            <div>
+              <DialogTitle className="text-xl font-semibold">
+                {produtoId ? "Editar Produto" : "Novo Produto"}
+              </DialogTitle>
+              <DialogDescription className="text-sm text-muted-foreground">
+                {produtoId
+                  ? "Edite as informações do produto abaixo"
+                  : "Preencha os dados para cadastrar um novo produto"}
+              </DialogDescription>
+            </div>
+            {formErrors > 0 && (
+              <Badge variant="destructive" className="ml-4">
+                {formErrors} {formErrors === 1 ? "erro" : "erros"}
+              </Badge>
+            )}
+          </div>
         </DialogHeader>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Informações Básicas */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">Informações Básicas</h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="codigo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Código</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <Tabs defaultValue="dados-basicos" className="w-full">
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="dados-basicos" className="gap-2">
+                    <Package className="h-4 w-4" />
+                    Dados Básicos
+                  </TabsTrigger>
+                  <TabsTrigger value="tributacao" className="gap-2">
+                    <Receipt className="h-4 w-4" />
+                    Tributação
+                  </TabsTrigger>
+                  <TabsTrigger value="estoque" className="gap-2">
+                    <Warehouse className="h-4 w-4" />
+                    Estoque
+                  </TabsTrigger>
+                  <TabsTrigger value="outros" className="gap-2">
+                    <Settings className="h-4 w-4" />
+                    Outros
+                  </TabsTrigger>
+                </TabsList>
 
-                <FormField
-                  control={form.control}
-                  name="codigoBarras"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Código de Barras</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+                {/* Tab: Dados Básicos */}
+                <TabsContent value="dados-basicos" className="space-y-4 mt-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Package className="h-5 w-5" />
+                        Informações Básicas
+                      </CardTitle>
+                      <CardDescription>
+                        Dados principais do produto
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="codigo"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Código *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Ex: PROD001" {...field} />
+                              </FormControl>
+                              <FormDescription>
+                                Código interno do produto
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-              <FormField
-                control={form.control}
-                name="descricao"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Descrição</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                        <FormField
+                          control={form.control}
+                          name="codigoBarras"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Código de Barras</FormLabel>
+                              <FormControl>
+                                <Input placeholder="EAN-13" {...field} />
+                              </FormControl>
+                              <FormDescription>
+                                Código de barras (EAN)
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
 
-              <FormField
-                control={form.control}
-                name="descricaoComplementar"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Descrição Complementar</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormField
+                        control={form.control}
+                        name="descricao"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Descrição *</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Nome do produto" {...field} />
+                            </FormControl>
+                            <FormDescription>
+                              Descrição principal do produto
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="descricaoComplementar"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Descrição Complementar</FormLabel>
+                            <FormControl>
+                              <Textarea
+                                placeholder="Informações adicionais sobre o produto..."
+                                className="min-h-[80px]"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              Detalhes adicionais do produto
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
             </div>
 
             <Separator />

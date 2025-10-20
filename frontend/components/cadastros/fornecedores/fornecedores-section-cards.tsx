@@ -1,13 +1,19 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { IconBuilding, IconBuildingStore, IconTrendingUp, IconCheck } from "@tabler/icons-react"
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { IconTrendingUp, IconUsers, IconUserCheck, IconUserPlus } from "@tabler/icons-react"
+
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 
 interface FornecedorStats {
   totalFornecedores: number
   fornecedoresAtivos: number
-  fornecedoresPJ: number
+  fornecedoresNovos: number
   crescimentoMes: number
 }
 
@@ -15,7 +21,7 @@ export function FornecedoresSectionCards() {
   const [stats, setStats] = useState<FornecedorStats>({
     totalFornecedores: 0,
     fornecedoresAtivos: 0,
-    fornecedoresPJ: 0,
+    fornecedoresNovos: 0,
     crescimentoMes: 0,
   })
   const [loading, setLoading] = useState(true)
@@ -28,10 +34,10 @@ export function FornecedoresSectionCards() {
     try {
       // Simular dados por enquanto - depois integrar com API real
       setStats({
-        totalFornecedores: 142,
-        fornecedoresAtivos: 138,
-        fornecedoresPJ: 89,
-        crescimentoMes: 8.2,
+        totalFornecedores: 156,
+        fornecedoresAtivos: 142,
+        fornecedoresNovos: 8,
+        crescimentoMes: 5.2,
       })
     } catch (error) {
       console.error('Erro ao carregar estatísticas:', error)
@@ -41,11 +47,7 @@ export function FornecedoresSectionCards() {
   }
 
   const formatPercentage = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'percent',
-      minimumFractionDigits: 1,
-      maximumFractionDigits: 1,
-    }).format(value / 100)
+    return `${value > 0 ? '+' : ''}${value.toFixed(1)}%`
   }
 
   if (loading) {
@@ -68,7 +70,7 @@ export function FornecedoresSectionCards() {
       <Card>
         <CardHeader className="pb-3">
           <CardDescription className="flex items-center gap-2">
-            <IconBuilding className="h-4 w-4" />
+            <IconUsers className="h-4 w-4" />
             Total
           </CardDescription>
           <CardTitle className="text-3xl font-bold tabular-nums">
@@ -80,7 +82,7 @@ export function FornecedoresSectionCards() {
       <Card>
         <CardHeader className="pb-3">
           <CardDescription className="flex items-center gap-2">
-            <IconCheck className="h-4 w-4 text-green-600" />
+            <IconUserCheck className="h-4 w-4 text-green-600" />
             Ativos
           </CardDescription>
           <CardTitle className="text-3xl font-bold tabular-nums">
@@ -95,14 +97,11 @@ export function FornecedoresSectionCards() {
       <Card>
         <CardHeader className="pb-3">
           <CardDescription className="flex items-center gap-2">
-            <IconBuildingStore className="h-4 w-4 text-blue-600" />
-            Pessoa Jurídica
+            <IconUserPlus className="h-4 w-4 text-blue-600" />
+            Novos (mês)
           </CardDescription>
           <CardTitle className="text-3xl font-bold tabular-nums">
-            {stats.fornecedoresPJ.toLocaleString('pt-BR')}
-            <span className="ml-2 text-sm font-normal text-blue-600">
-              {((stats.fornecedoresPJ / stats.totalFornecedores) * 100).toFixed(1)}%
-            </span>
+            {stats.fornecedoresNovos.toLocaleString('pt-BR')}
           </CardTitle>
         </CardHeader>
       </Card>
@@ -114,7 +113,7 @@ export function FornecedoresSectionCards() {
             Crescimento
           </CardDescription>
           <CardTitle className="text-3xl font-bold tabular-nums">
-            +{stats.crescimentoMes.toFixed(1)}%
+            {formatPercentage(stats.crescimentoMes)}
           </CardTitle>
         </CardHeader>
       </Card>

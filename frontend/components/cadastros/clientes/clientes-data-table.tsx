@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import {
   IconEdit,
   IconTrash,
@@ -18,6 +19,7 @@ import {
   IconMail,
   IconFileText,
   IconCircleCheck,
+  IconEye,
 } from "@tabler/icons-react"
 import {
   ColumnDef,
@@ -138,6 +140,7 @@ const filterColumnsConfig = [
 ] as const
 
 export function ClientesDataTable() {
+  const router = useRouter()
   const [data, setData] = useState<Cliente[]>([])
   const [loading, setLoading] = useState(true)
   const [rowSelection, setRowSelection] = useState({})
@@ -282,9 +285,15 @@ export function ClientesDataTable() {
       cell: ({ row }) => {
         const nome = row.getValue("nome") as string
         const nomeFantasia = row.original.nomeFantasia
+        const clienteId = row.original.id
         return (
           <div className="flex flex-col">
-            <span className="font-medium">{nome}</span>
+            <button
+              onClick={() => router.push(`/clientes/${clienteId}`)}
+              className="font-medium text-left hover:text-primary hover:underline transition-colors"
+            >
+              {nome}
+            </button>
             {nomeFantasia && (
               <span className="text-xs text-muted-foreground">{nomeFantasia}</span>
             )}
@@ -357,13 +366,18 @@ export function ClientesDataTable() {
                 <span className="sr-only">Abrir menu</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-32">
+            <DropdownMenuContent align="end" className="w-40">
               <DropdownMenuLabel>Ações</DropdownMenuLabel>
               <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => router.push(`/clientes/${cliente.id}`)}>
+                <IconEye className="mr-2 h-4 w-4" />
+                Visualizar
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleEdit(cliente.id)}>
                 <IconEdit className="mr-2 h-4 w-4" />
                 Editar
               </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => handleDelete(cliente.id)}
                 className="text-destructive"
