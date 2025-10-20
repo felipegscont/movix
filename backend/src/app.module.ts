@@ -6,6 +6,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { CommonModule } from './common/common.module';
 import { EmitenteModule } from './modules/emitente/emitente.module';
 import { ClienteModule } from './modules/cliente/cliente.module';
+import { FornecedorModule } from './modules/fornecedor/fornecedor.module';
 import { ProdutoModule } from './modules/produto/produto.module';
 import { NfeModule } from './modules/nfe/nfe.module';
 import { AuxiliaresModule } from './modules/auxiliares/auxiliares.module';
@@ -22,6 +23,7 @@ import configuration from './config/configuration';
     CommonModule,
     EmitenteModule,
     ClienteModule,
+    FornecedorModule,
     ProdutoModule,
     NfeModule,
     AuxiliaresModule,

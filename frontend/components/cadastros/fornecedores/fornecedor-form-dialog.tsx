@@ -43,22 +43,22 @@ const fornecedorFormSchema = z.object({
   }),
   documento: z.string().min(11, "Documento deve ter pelo menos 11 caracteres"),
   nome: z.string().min(1, "Nome é obrigatório"),
-  nomeFantasia: z.string().optional(),
-  inscricaoEstadual: z.string().optional(),
-  inscricaoMunicipal: z.string().optional(),
+  nomeFantasia: z.string().optional().or(z.literal("")),
+  inscricaoEstadual: z.string().optional().or(z.literal("")),
+  inscricaoMunicipal: z.string().optional().or(z.literal("")),
   logradouro: z.string().min(1, "Logradouro é obrigatório"),
   numero: z.string().min(1, "Número é obrigatório"),
-  complemento: z.string().optional(),
+  complemento: z.string().optional().or(z.literal("")),
   bairro: z.string().min(1, "Bairro é obrigatório"),
   cep: z.string().min(8, "CEP deve ter 8 caracteres"),
   municipioId: z.string().min(1, "Município é obrigatório"),
   estadoId: z.string().min(1, "Estado é obrigatório"),
-  telefone: z.string().optional(),
-  celular: z.string().optional(),
+  telefone: z.string().optional().or(z.literal("")),
+  celular: z.string().optional().or(z.literal("")),
   email: z.string().email("Email inválido").optional().or(z.literal("")),
-  site: z.string().optional(),
-  contato: z.string().optional(),
-  observacoes: z.string().optional(),
+  site: z.string().optional().or(z.literal("")),
+  contato: z.string().optional().or(z.literal("")),
+  observacoes: z.string().optional().or(z.literal("")),
   ativo: z.boolean().default(true),
 })
 
@@ -186,11 +186,26 @@ export function FornecedorFormDialog({
     try {
       setLoading(true)
 
+      // Limpa campos opcionais vazios (converte string vazia para undefined)
+      const cleanedValues = {
+        ...values,
+        nomeFantasia: values.nomeFantasia?.trim() || undefined,
+        inscricaoEstadual: values.inscricaoEstadual?.trim() || undefined,
+        inscricaoMunicipal: values.inscricaoMunicipal?.trim() || undefined,
+        complemento: values.complemento?.trim() || undefined,
+        telefone: values.telefone?.trim() || undefined,
+        celular: values.celular?.trim() || undefined,
+        email: values.email?.trim() || undefined,
+        site: values.site?.trim() || undefined,
+        contato: values.contato?.trim() || undefined,
+        observacoes: values.observacoes?.trim() || undefined,
+      }
+
       if (fornecedorId) {
-        await FornecedorService.update(fornecedorId, values)
+        await FornecedorService.update(fornecedorId, cleanedValues)
         toast.success("Fornecedor atualizado com sucesso!")
       } else {
-        await FornecedorService.create(values)
+        await FornecedorService.create(cleanedValues)
         toast.success("Fornecedor criado com sucesso!")
       }
 
@@ -337,7 +352,7 @@ export function FornecedorFormDialog({
                       <FormLabel>Estado</FormLabel>
                       <Select
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
+                        value={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -365,7 +380,7 @@ export function FornecedorFormDialog({
                       <FormLabel>Município</FormLabel>
                       <Select
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
+                        value={field.value}
                         disabled={!watchEstadoId}
                       >
                         <FormControl>

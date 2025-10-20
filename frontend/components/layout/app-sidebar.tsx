@@ -19,11 +19,10 @@ import {
   IconUsers,
 } from "@tabler/icons-react"
 
-import { NavClouds } from "@/components/layout/nav-clouds"
-import { NavDocuments } from "@/components/layout/nav-documents"
 import { NavMain } from "@/components/layout/nav-main"
 import { NavSecondary } from "@/components/layout/nav-secondary"
 import { NavUser } from "@/components/layout/nav-user"
+import { ThemeToggle } from "@/components/theme-toggle"
 import {
   Sidebar,
   SidebarContent,
@@ -47,30 +46,8 @@ const data = {
       icon: IconDashboard,
     },
     {
-      title: "NFes",
-      url: "/nfes",
-      icon: IconFileDescription,
-    },
-    {
-      title: "Clientes",
-      url: "/clientes",
-      icon: IconUsers,
-    },
-    {
-      title: "Produtos",
-      url: "/produtos",
-      icon: IconDatabase,
-    },
-    {
-      title: "Configurações",
-      url: "/configuracoes/emitente",
-      icon: IconSettings,
-    },
-  ],
-  navClouds: [
-    {
       title: "NFe",
-      icon: IconFileDescription,
+      icon: IconFileInvoice,
       isActive: true,
       url: "/nfes",
       items: [
@@ -83,12 +60,16 @@ const data = {
           url: "/nfes/nova",
         },
         {
-          title: "Digitação",
+          title: "Em Digitação",
           url: "/nfes?status=DIGITACAO",
         },
         {
           title: "Autorizadas",
           url: "/nfes?status=AUTORIZADA",
+        },
+        {
+          title: "Canceladas",
+          url: "/nfes?status=CANCELADA",
         },
       ],
     },
@@ -100,49 +81,41 @@ const data = {
         {
           title: "Clientes",
           url: "/clientes",
+          icon: IconUsers,
         },
         {
           title: "Fornecedores",
           url: "/fornecedores",
+          icon: IconBuilding,
         },
         {
           title: "Produtos",
           url: "/produtos",
-        },
-        {
-          title: "Configurações",
-          url: "/configuracoes/emitente",
+          icon: IconPackage,
         },
       ],
+    },
+    {
+      title: "Relatórios",
+      url: "/relatorios",
+      icon: IconChartBar,
+    },
+    {
+      title: "Configurações",
+      url: "/configuracoes/emitente",
+      icon: IconSettings,
     },
   ],
   navSecondary: [
     {
-      title: "Settings",
-      url: "#",
-      icon: IconSettings,
-    },
-    {
-      title: "Get Help",
-      url: "#",
+      title: "Ajuda",
+      url: "/ajuda",
       icon: IconHelp,
     },
     {
-      title: "Search",
+      title: "Buscar",
       url: "#",
       icon: IconSearch,
-    },
-  ],
-  documents: [
-    {
-      name: "Relatórios",
-      url: "/relatorios",
-      icon: IconReport,
-    },
-    {
-      name: "Configurações",
-      url: "/configuracoes",
-      icon: IconSettings,
     },
   ],
 }
@@ -167,12 +140,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavClouds items={data.navClouds} />
-        <NavDocuments items={data.documents} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <div className="flex items-center gap-2 px-2 py-2">
+          <div className="flex-1">
+            <NavUser user={data.user} />
+          </div>
+          <ThemeToggle />
+        </div>
       </SidebarFooter>
     </Sidebar>
   )

@@ -3,12 +3,9 @@
 import { useState, useEffect } from "react"
 import { IconTrendingUp, IconPackage, IconPackageExport, IconCurrencyReal } from "@tabler/icons-react"
 
-import { Badge } from "@/components/ui/badge"
 import {
   Card,
-  CardAction,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -62,12 +59,12 @@ export function ProdutosSectionCards() {
 
   if (loading) {
     return (
-      <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
         {[1, 2, 3, 4].map((i) => (
-          <Card key={i} className="@container/card animate-pulse">
-            <CardHeader>
-              <div className="h-4 bg-muted rounded w-24"></div>
-              <div className="h-8 bg-muted rounded w-32"></div>
+          <Card key={i} className="animate-pulse">
+            <CardHeader className="pb-3">
+              <div className="h-4 bg-muted rounded w-20 mb-2"></div>
+              <div className="h-9 bg-muted rounded w-24"></div>
             </CardHeader>
           </Card>
         ))}
@@ -76,97 +73,56 @@ export function ProdutosSectionCards() {
   }
 
   return (
-    <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
-      <Card className="@container/card">
-        <CardHeader>
-          <CardDescription>Total de Produtos</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+    <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+      <Card>
+        <CardHeader className="pb-3">
+          <CardDescription className="flex items-center gap-2">
+            <IconPackage className="h-4 w-4" />
+            Total
+          </CardDescription>
+          <CardTitle className="text-3xl font-bold tabular-nums">
             {stats.totalProdutos.toLocaleString('pt-BR')}
           </CardTitle>
-          <CardAction>
-            <Badge variant="outline">
-              <IconPackage />
-              Cadastrados
-            </Badge>
-          </CardAction>
         </CardHeader>
-        <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Catálogo diversificado <IconPackage className="size-4" />
-          </div>
-          <div className="text-muted-foreground">
-            Total de produtos cadastrados no sistema
-          </div>
-        </CardFooter>
       </Card>
 
-      <Card className="@container/card">
-        <CardHeader>
-          <CardDescription>Produtos Ativos</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+      <Card>
+        <CardHeader className="pb-3">
+          <CardDescription className="flex items-center gap-2">
+            <IconPackageExport className="h-4 w-4 text-green-600" />
+            Ativos
+          </CardDescription>
+          <CardTitle className="text-3xl font-bold tabular-nums">
             {stats.produtosAtivos.toLocaleString('pt-BR')}
-          </CardTitle>
-          <CardAction>
-            <Badge variant="outline" className="text-green-600">
-              <IconPackageExport />
+            <span className="ml-2 text-sm font-normal text-green-600">
               {((stats.produtosAtivos / stats.totalProdutos) * 100).toFixed(1)}%
-            </Badge>
-          </CardAction>
+            </span>
+          </CardTitle>
         </CardHeader>
-        <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Disponíveis para venda <IconPackageExport className="size-4 text-green-600" />
-          </div>
-          <div className="text-muted-foreground">
-            Produtos com status ativo para comercialização
-          </div>
-        </CardFooter>
       </Card>
 
-      <Card className="@container/card">
-        <CardHeader>
-          <CardDescription>Valor Médio</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+      <Card>
+        <CardHeader className="pb-3">
+          <CardDescription className="flex items-center gap-2">
+            <IconCurrencyReal className="h-4 w-4 text-blue-600" />
+            Valor Médio
+          </CardDescription>
+          <CardTitle className="text-3xl font-bold tabular-nums">
             {formatCurrency(stats.valorMedioUnitario)}
           </CardTitle>
-          <CardAction>
-            <Badge variant="outline" className="text-blue-600">
-              <IconCurrencyReal />
-              Unitário
-            </Badge>
-          </CardAction>
         </CardHeader>
-        <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Preço médio dos produtos <IconCurrencyReal className="size-4 text-blue-600" />
-          </div>
-          <div className="text-muted-foreground">
-            Valor médio unitário do catálogo
-          </div>
-        </CardFooter>
       </Card>
 
-      <Card className="@container/card">
-        <CardHeader>
-          <CardDescription>Crescimento</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {formatPercentage(stats.crescimentoMes)}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardDescription className="flex items-center gap-2">
+            <IconTrendingUp className="h-4 w-4" />
+            Crescimento
+          </CardDescription>
+          <CardTitle className="text-3xl font-bold tabular-nums">
+            +{stats.crescimentoMes.toFixed(1)}%
           </CardTitle>
-          <CardAction>
-            <Badge variant="outline">
-              <IconTrendingUp />
-              Mensal
-            </Badge>
-          </CardAction>
         </CardHeader>
-        <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Expansão do catálogo <IconTrendingUp className="size-4" />
-          </div>
-          <div className="text-muted-foreground">
-            Crescimento do número de produtos
-          </div>
-        </CardFooter>
       </Card>
     </div>
   )

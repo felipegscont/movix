@@ -1,26 +1,45 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { IbgeCacheService } from '../external-apis/services/ibge-cache.service';
 
 @Controller()
 export class AuxiliaresController {
-  constructor(private prisma: PrismaService) {}
+  private readonly logger = new Logger(AuxiliaresController.name);
+
+  constructor(
+    private prisma: PrismaService,
+    private ibgeCacheService: IbgeCacheService,
+  ) {}
 
   @Get('estados')
   async getEstados(@Query('search') search?: string) {
-    const where = search ? {
-      OR: [
-        { nome: { contains: search, mode: 'insensitive' as const } },
-        { uf: { contains: search, mode: 'insensitive' as const } },
-      ],
-    } : {};
+    try {
+      // Verifica se há estados no banco
+      const count = await this.prisma.estado.count();
 
-    const estados = await this.prisma.estado.findMany({
-      where,
-      orderBy: { nome: 'asc' },
-      take: 50,
-    });
+      // Se não houver estados, popula via API IBGE
+      if (count === 0) {
+        this.logger.log('Nenhum estado encontrado, populando via API IBGE...');
+        await this.ibgeCacheService.getEstados();
+      }
 
-    return { data: estados };
+      const where = search ? {
+        OR: [
+          { nome: { contains: search, mode: 'insensitive' as const } },
+          { uf: { contains: search, mode: 'insensitive' as const } },
+        ],
+      } : {};
+
+      const estados = await this.prisma.estado.findMany({
+        where,
+        orderBy: { nome: 'asc' },
+      });
+
+      return { data: estados };
+    } catch (error) {
+      this.logger.error(`Erro ao buscar estados: ${error.message}`);
+      throw error;
+    }
   }
 
   @Get('municipios')
@@ -28,24 +47,44 @@ export class AuxiliaresController {
     @Query('estadoId') estadoId?: string,
     @Query('search') search?: string,
   ) {
-    const where: any = {};
-    
-    if (estadoId) {
-      where.estadoId = estadoId;
-    }
-    
-    if (search) {
-      where.nome = { contains: search, mode: 'insensitive' as const };
-    }
+    try {
+      const where: any = {};
 
-    const municipios = await this.prisma.municipio.findMany({
-      where,
-      include: { estado: true },
-      orderBy: { nome: 'asc' },
-      take: 100,
-    });
+      if (estadoId) {
+        where.estadoId = estadoId;
 
-    return { data: municipios };
+        // Verifica se há municípios para este estado
+        const count = await this.prisma.municipio.count({ where: { estadoId } });
+
+        // Se não houver municípios, popula via API IBGE
+        if (count === 0) {
+          const estado = await this.prisma.estado.findUnique({
+            where: { id: estadoId },
+          });
+
+          if (estado) {
+            this.logger.log(`Nenhum município encontrado para ${estado.uf}, populando via API IBGE...`);
+            await this.ibgeCacheService.getMunicipiosByEstado(estado.uf);
+          }
+        }
+      }
+
+      if (search) {
+        where.nome = { contains: search, mode: 'insensitive' as const };
+      }
+
+      const municipios = await this.prisma.municipio.findMany({
+        where,
+        include: { estado: true },
+        orderBy: { nome: 'asc' },
+        take: 1000, // Aumentado para retornar todos os municípios
+      });
+
+      return { data: municipios };
+    } catch (error) {
+      this.logger.error(`Erro ao buscar municípios: ${error.message}`);
+      throw error;
+    }
   }
 
   @Get('ncms')

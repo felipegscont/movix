@@ -3,12 +3,9 @@
 import { useState, useEffect } from "react"
 import { IconTrendingUp, IconUsers, IconUserCheck, IconUserPlus } from "@tabler/icons-react"
 
-import { Badge } from "@/components/ui/badge"
 import {
   Card,
-  CardAction,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -55,12 +52,12 @@ export function ClientesSectionCards() {
 
   if (loading) {
     return (
-      <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
         {[1, 2, 3, 4].map((i) => (
-          <Card key={i} className="@container/card animate-pulse">
-            <CardHeader>
-              <div className="h-4 bg-muted rounded w-24"></div>
-              <div className="h-8 bg-muted rounded w-32"></div>
+          <Card key={i} className="animate-pulse">
+            <CardHeader className="pb-3">
+              <div className="h-4 bg-muted rounded w-20 mb-2"></div>
+              <div className="h-9 bg-muted rounded w-24"></div>
             </CardHeader>
           </Card>
         ))}
@@ -69,97 +66,56 @@ export function ClientesSectionCards() {
   }
 
   return (
-    <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
-      <Card className="@container/card">
-        <CardHeader>
-          <CardDescription>Total de Clientes</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+    <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+      <Card>
+        <CardHeader className="pb-3">
+          <CardDescription className="flex items-center gap-2">
+            <IconUsers className="h-4 w-4" />
+            Total
+          </CardDescription>
+          <CardTitle className="text-3xl font-bold tabular-nums">
             {stats.totalClientes.toLocaleString('pt-BR')}
           </CardTitle>
-          <CardAction>
-            <Badge variant="outline">
-              <IconUsers />
-              Cadastrados
-            </Badge>
-          </CardAction>
         </CardHeader>
-        <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Base sólida de clientes <IconUsers className="size-4" />
-          </div>
-          <div className="text-muted-foreground">
-            Total de clientes cadastrados no sistema
-          </div>
-        </CardFooter>
       </Card>
 
-      <Card className="@container/card">
-        <CardHeader>
-          <CardDescription>Clientes Ativos</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+      <Card>
+        <CardHeader className="pb-3">
+          <CardDescription className="flex items-center gap-2">
+            <IconUserCheck className="h-4 w-4 text-green-600" />
+            Ativos
+          </CardDescription>
+          <CardTitle className="text-3xl font-bold tabular-nums">
             {stats.clientesAtivos.toLocaleString('pt-BR')}
-          </CardTitle>
-          <CardAction>
-            <Badge variant="outline" className="text-green-600">
-              <IconUserCheck />
+            <span className="ml-2 text-sm font-normal text-green-600">
               {((stats.clientesAtivos / stats.totalClientes) * 100).toFixed(1)}%
-            </Badge>
-          </CardAction>
+            </span>
+          </CardTitle>
         </CardHeader>
-        <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Alta taxa de atividade <IconUserCheck className="size-4 text-green-600" />
-          </div>
-          <div className="text-muted-foreground">
-            Clientes com status ativo no sistema
-          </div>
-        </CardFooter>
       </Card>
 
-      <Card className="@container/card">
-        <CardHeader>
-          <CardDescription>Novos Clientes</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+      <Card>
+        <CardHeader className="pb-3">
+          <CardDescription className="flex items-center gap-2">
+            <IconUserPlus className="h-4 w-4 text-blue-600" />
+            Novos (mês)
+          </CardDescription>
+          <CardTitle className="text-3xl font-bold tabular-nums">
             {stats.clientesNovos.toLocaleString('pt-BR')}
           </CardTitle>
-          <CardAction>
-            <Badge variant="outline" className="text-blue-600">
-              <IconUserPlus />
-              Este mês
-            </Badge>
-          </CardAction>
         </CardHeader>
-        <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Crescimento constante <IconUserPlus className="size-4 text-blue-600" />
-          </div>
-          <div className="text-muted-foreground">
-            Novos clientes cadastrados no mês atual
-          </div>
-        </CardFooter>
       </Card>
 
-      <Card className="@container/card">
-        <CardHeader>
-          <CardDescription>Crescimento</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+      <Card>
+        <CardHeader className="pb-3">
+          <CardDescription className="flex items-center gap-2">
+            <IconTrendingUp className="h-4 w-4" />
+            Crescimento
+          </CardDescription>
+          <CardTitle className="text-3xl font-bold tabular-nums">
             {formatPercentage(stats.crescimentoMes)}
           </CardTitle>
-          <CardAction>
-            <Badge variant="outline">
-              <IconTrendingUp />
-              Mensal
-            </Badge>
-          </CardAction>
         </CardHeader>
-        <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Tendência positiva <IconTrendingUp className="size-4" />
-          </div>
-          <div className="text-muted-foreground">
-            Crescimento da base de clientes
-          </div>
-        </CardFooter>
       </Card>
     </div>
   )

@@ -1,9 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { IconBuilding, IconUsers, IconTrendingUp, IconCheck } from "@tabler/icons-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
+import { IconBuilding, IconBuildingStore, IconTrendingUp, IconCheck } from "@tabler/icons-react"
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface FornecedorStats {
   totalFornecedores: number
@@ -51,17 +50,13 @@ export function FornecedoresSectionCards() {
 
   if (loading) {
     return (
-      <div className="grid gap-4 px-4 lg:px-6 md:grid-cols-2 lg:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Card key={i}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <Skeleton className="h-4 w-[100px]" />
-              <Skeleton className="h-4 w-4" />
+      <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+        {[1, 2, 3, 4].map((i) => (
+          <Card key={i} className="animate-pulse">
+            <CardHeader className="pb-3">
+              <div className="h-4 bg-muted rounded w-20 mb-2"></div>
+              <div className="h-9 bg-muted rounded w-24"></div>
             </CardHeader>
-            <CardContent>
-              <Skeleton className="h-7 w-[60px] mb-1" />
-              <Skeleton className="h-3 w-[120px]" />
-            </CardContent>
           </Card>
         ))}
       </div>
@@ -69,57 +64,59 @@ export function FornecedoresSectionCards() {
   }
 
   return (
-    <div className="grid gap-4 px-4 lg:px-6 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total de Fornecedores</CardTitle>
-          <IconUsers className="h-4 w-4 text-muted-foreground" />
+        <CardHeader className="pb-3">
+          <CardDescription className="flex items-center gap-2">
+            <IconBuilding className="h-4 w-4" />
+            Total
+          </CardDescription>
+          <CardTitle className="text-3xl font-bold tabular-nums">
+            {stats.totalFornecedores.toLocaleString('pt-BR')}
+          </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.totalFornecedores.toLocaleString('pt-BR')}</div>
-          <p className="text-xs text-muted-foreground">
-            Fornecedores cadastrados
-          </p>
-        </CardContent>
       </Card>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Fornecedores Ativos</CardTitle>
-          <IconCheck className="h-4 w-4 text-muted-foreground" />
+        <CardHeader className="pb-3">
+          <CardDescription className="flex items-center gap-2">
+            <IconCheck className="h-4 w-4 text-green-600" />
+            Ativos
+          </CardDescription>
+          <CardTitle className="text-3xl font-bold tabular-nums">
+            {stats.fornecedoresAtivos.toLocaleString('pt-BR')}
+            <span className="ml-2 text-sm font-normal text-green-600">
+              {((stats.fornecedoresAtivos / stats.totalFornecedores) * 100).toFixed(1)}%
+            </span>
+          </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.fornecedoresAtivos.toLocaleString('pt-BR')}</div>
-          <p className="text-xs text-muted-foreground">
-            {formatPercentage((stats.fornecedoresAtivos / stats.totalFornecedores) * 100)} do total
-          </p>
-        </CardContent>
       </Card>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Pessoas Jurídicas</CardTitle>
-          <IconBuilding className="h-4 w-4 text-muted-foreground" />
+        <CardHeader className="pb-3">
+          <CardDescription className="flex items-center gap-2">
+            <IconBuildingStore className="h-4 w-4 text-blue-600" />
+            Pessoa Jurídica
+          </CardDescription>
+          <CardTitle className="text-3xl font-bold tabular-nums">
+            {stats.fornecedoresPJ.toLocaleString('pt-BR')}
+            <span className="ml-2 text-sm font-normal text-blue-600">
+              {((stats.fornecedoresPJ / stats.totalFornecedores) * 100).toFixed(1)}%
+            </span>
+          </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.fornecedoresPJ.toLocaleString('pt-BR')}</div>
-          <p className="text-xs text-muted-foreground">
-            {formatPercentage((stats.fornecedoresPJ / stats.totalFornecedores) * 100)} do total
-          </p>
-        </CardContent>
       </Card>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Crescimento</CardTitle>
-          <IconTrendingUp className="h-4 w-4 text-muted-foreground" />
+        <CardHeader className="pb-3">
+          <CardDescription className="flex items-center gap-2">
+            <IconTrendingUp className="h-4 w-4" />
+            Crescimento
+          </CardDescription>
+          <CardTitle className="text-3xl font-bold tabular-nums">
+            +{stats.crescimentoMes.toFixed(1)}%
+          </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">+{formatPercentage(stats.crescimentoMes)}</div>
-          <p className="text-xs text-muted-foreground">
-            Crescimento no mês
-          </p>
-        </CardContent>
       </Card>
     </div>
   )
