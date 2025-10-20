@@ -3,18 +3,55 @@
 import * as React from "react"
 import { useState, useEffect } from "react"
 import {
+  IconEdit,
+  IconTrash,
+  IconDotsVertical,
+  IconUsers,
+  IconBuilding,
+  IconLayoutColumns,
+  IconChevronDown,
+  IconChevronLeft,
+  IconChevronRight,
+  IconChevronsLeft,
+  IconChevronsRight,
+  IconPlus,
+} from "@tabler/icons-react"
+import {
   ColumnDef,
+  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  SortingState,
   useReactTable,
+  VisibilityState,
 } from "@tanstack/react-table"
-import { IconEdit, IconTrash, IconEye, IconUsers, IconBuilding } from "@tabler/icons-react"
+import { toast } from "sonner"
 
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import {
   Table,
   TableBody,
@@ -23,18 +60,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
 import { ClienteService } from "@/lib/services/cliente.service"
 import { ClienteFormDialog } from "./cliente-form-dialog"
-import { toast } from "sonner"
+import { DataTableFilter } from "@/components/data-table-filter"
+import { useDataTableFilters } from "@/components/data-table-filter"
+import { createColumnConfigBuilder } from "@/components/data-table-filter/core/filters"
 
 interface Cliente {
   id: string
@@ -54,14 +84,47 @@ interface Cliente {
   }
 }
 
-export function ClientesDataTable() {
+export function ClientesDataTableV2() {
   const [data, setData] = useState<Cliente[]>([])
   const [loading, setLoading] = useState(true)
-  const [globalFilter, setGlobalFilter] = useState("")
+  const [rowSelection, setRowSelection] = useState({})
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  })
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedClienteId, setSelectedClienteId] = useState<string | undefined>()
 
   const columns: ColumnDef<Cliente>[] = [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <div className="flex items-center justify-center">
+          <Checkbox
+            checked={
+              table.getIsAllPageRowsSelected() ||
+              (table.getIsSomePageRowsSelected() && "indeterminate")
+            }
+            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+            aria-label="Selecionar todos"
+          />
+        </div>
+      ),
+      cell: ({ row }) => (
+        <div className="flex items-center justify-center">
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            aria-label="Selecionar linha"
+          />
+        </div>
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
     {
       accessorKey: "tipo",
       header: "Tipo",
@@ -74,7 +137,9 @@ export function ClientesDataTable() {
             ) : (
               <IconUsers className="h-4 w-4 text-green-600" />
             )}
-            <span className="text-xs">{tipo === "JURIDICA" ? "PJ" : "PF"}</span>
+            <Badge variant="outline" className="text-xs">
+              {tipo === "JURIDICA" ? "PJ" : "PF"}
+            </Badge>
           </div>
         )
       },
@@ -106,6 +171,7 @@ export function ClientesDataTable() {
           </div>
         )
       },
+      enableHiding: false,
     },
     {
       accessorKey: "email",
@@ -162,12 +228,16 @@ export function ClientesDataTable() {
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
+              <Button
+                variant="ghost"
+                className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
+                size="icon"
+              >
+                <IconDotsVertical />
                 <span className="sr-only">Abrir menu</span>
-                <IconEye className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="w-32">
               <DropdownMenuLabel>Ações</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => handleEdit(cliente.id)}>
@@ -191,15 +261,25 @@ export function ClientesDataTable() {
   const table = useReactTable({
     data,
     columns,
+    state: {
+      sorting,
+      columnVisibility,
+      rowSelection,
+      columnFilters,
+      pagination,
+    },
+    enableRowSelection: true,
+    onRowSelectionChange: setRowSelection,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
+    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    state: {
-      globalFilter,
-    },
-    onGlobalFilterChange: setGlobalFilter,
-    globalFilterFn: "includesString",
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
   })
 
   useEffect(() => {
@@ -237,22 +317,17 @@ export function ClientesDataTable() {
     }
   }
 
-  const handleDialogClose = () => {
-    setDialogOpen(false)
-    setSelectedClienteId(undefined)
-  }
-
   const handleSuccess = () => {
     loadData()
   }
 
   if (loading) {
     return (
-      <div className="px-4 lg:px-6">
-        <div className="rounded-lg border bg-card p-8 text-center">
-          <div className="flex items-center justify-center gap-2">
+      <div className="flex flex-col gap-4 px-4 lg:px-6">
+        <div className="flex h-32 items-center justify-center rounded-lg border">
+          <div className="flex items-center gap-2 text-muted-foreground">
             <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-            <span className="text-muted-foreground">Carregando clientes...</span>
+            <span>Carregando clientes...</span>
           </div>
         </div>
       </div>
@@ -260,115 +335,5 @@ export function ClientesDataTable() {
   }
 
   return (
-    <div className="px-4 lg:px-6">
-      <div className="rounded-lg border bg-card">
-        {/* Header da Tabela */}
-        <div className="flex items-center justify-between gap-4 border-b p-4">
-          <div className="flex flex-1 items-center gap-4">
-            <Input
-              placeholder="Buscar por nome, documento, email..."
-              value={globalFilter ?? ""}
-              onChange={(event) => setGlobalFilter(event.target.value)}
-              className="max-w-md"
-            />
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground">
-              {table.getFilteredRowModel().rows.length} de {data.length} cliente(s)
-            </span>
-          </div>
-        </div>
-
-        {/* Tabela */}
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id} className="whitespace-nowrap">
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                    className="hover:bg-muted/50"
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="whitespace-nowrap">
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-32 text-center">
-                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                      <IconUsers className="h-8 w-8 opacity-50" />
-                      <p>Nenhum cliente encontrado.</p>
-                      {globalFilter && (
-                        <p className="text-sm">
-                          Tente ajustar sua busca ou{" "}
-                          <button
-                            onClick={() => setGlobalFilter("")}
-                            className="text-primary underline underline-offset-4"
-                          >
-                            limpar filtros
-                          </button>
-                        </p>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-
-        {/* Footer da Tabela */}
-        <div className="flex items-center justify-between border-t p-4">
-          <div className="text-sm text-muted-foreground">
-            Página {table.getState().pagination.pageIndex + 1} de{" "}
-            {table.getPageCount()}
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              Anterior
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              Próxima
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      <ClienteFormDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        clienteId={selectedClienteId}
-        onSuccess={handleSuccess}
-      />
-    </div>
-  )
-}
+    <>
 

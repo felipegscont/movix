@@ -1,0 +1,57 @@
+{
+  "filter": {
+    "add": "Adicionar filtro",
+    "clear": "Limpar",
+    "clearAll": "Limpar tudo",
+    "apply": "Aplicar",
+    "cancel": "Cancelar",
+    "remove": "Remover",
+    "edit": "Editar",
+    "save": "Salvar",
+    "search": "Buscar",
+    "searchPlaceholder": "Buscar...",
+    "noResults": "Nenhum resultado encontrado",
+    "selectColumn": "Selecionar coluna",
+    "selectOperator": "Selecionar operador",
+    "enterValue": "Digite um valor",
+    "selectValue": "Selecionar valor",
+    "selectValues": "Selecionar valores",
+    "activeFilters": "Filtros ativos",
+    "noActiveFilters": "Nenhum filtro ativo"
+  },
+  "operators": {
+    "is": "é",
+    "isNot": "não é",
+    "contains": "contém",
+    "doesNotContain": "não contém",
+    "startsWith": "começa com",
+    "endsWith": "termina com",
+    "isEmpty": "está vazio",
+    "isNotEmpty": "não está vazio",
+    "isAnyOf": "é qualquer um de",
+    "isNoneOf": "não é nenhum de",
+    "greaterThan": "maior que",
+    "greaterThanOrEqual": "maior ou igual a",
+    "lessThan": "menor que",
+    "lessThanOrEqual": "menor ou igual a",
+    "equals": "igual a",
+    "notEquals": "diferente de",
+    "between": "entre",
+    "notBetween": "não entre",
+    "before": "antes de",
+    "after": "depois de",
+    "onOrBefore": "em ou antes de",
+    "onOrAfter": "em ou depois de",
+    "isTrue": "é verdadeiro",
+    "isFalse": "é falso"
+  },
+  "columns": {
+    "text": "Texto",
+    "number": "Número",
+    "date": "Data",
+    "boolean": "Booleano",
+    "select": "Seleção",
+    "multiSelect": "Seleção Múltipla"
+  }
+}
+
