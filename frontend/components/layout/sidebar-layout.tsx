@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { SidebarProvider } from "@/components/ui/sidebar"
-import { useSidebarState } from "@/hooks/shared/use-sidebar-state"
+import { useSidebarState } from "@/hooks/use-sidebar-state"
 
 interface SidebarLayoutProps {
   children: React.ReactNode
