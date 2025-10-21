@@ -1,0 +1,33 @@
+# Arquivos de ambiente
+.env
+.env.local
+.env.*.local
+
+# Permitir .env.example
+!.env.example
+!backend/.env.example
+!backend/nfe-service/.env.example
+!frontend/.env.example
+
+# Node modules
+node_modules/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporários
+*.tmp
+.temp/
+

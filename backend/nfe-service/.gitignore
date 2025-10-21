@@ -1,0 +1,41 @@
+# Composer
+/vendor/
+composer.lock
+
+# Environment files
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Logs
+/logs/*.log
+/storage/logs/*.log
+
+# Storage
+/storage/xmls/*
+!/storage/xmls/.gitkeep
+/storage/uploads/*
+!/storage/uploads/.gitkeep
+
+# Certificates (NUNCA commitar certificados reais!)
+/certificates/*.pfx
+/certificates/*.pem
+/certificates/*.key
+!/certificates/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+.temp/
+
