@@ -139,14 +139,18 @@ export class CreateNfePagamentoDto {
 }
 
 export class CreateNfeDto {
+  // Emitente é opcional - será buscado automaticamente o emitente ativo
+  @IsOptional()
   @IsString()
-  emitenteId: string;
+  emitenteId?: string;
 
   @IsString()
   clienteId: string;
 
+  // Série é opcional - será usada a série do emitente se não informada
+  @IsOptional()
   @IsInt()
-  serie: number;
+  serie?: number;
 
   @IsString()
   naturezaOperacao: string;

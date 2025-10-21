@@ -16,8 +16,8 @@ export class NfeService {
   ) {}
 
   async create(createNfeDto: CreateNfeDto) {
-    // Verificar se emitente existe
-    const emitente = await this.emitenteService.findOne(createNfeDto.emitenteId);
+    // Buscar emitente ativo (sempre o mesmo para o sistema)
+    const emitente = await this.emitenteService.getEmitenteAtivo();
 
     // Verificar se cliente existe
     const cliente = await this.prisma.cliente.findUnique({
@@ -29,7 +29,7 @@ export class NfeService {
     }
 
     // Obter próximo número da NFe
-    const proximoNumero = await this.emitenteService.getProximoNumeroNfe(createNfeDto.emitenteId);
+    const proximoNumero = await this.emitenteService.getProximoNumeroNfe(emitente.id);
 
     // Calcular totais
     const totais = await this.calcularTotais(createNfeDto);
@@ -37,10 +37,10 @@ export class NfeService {
     // Criar NFe no banco
     const nfe = await this.prisma.nfe.create({
       data: {
-        emitenteId: createNfeDto.emitenteId,
+        emitenteId: emitente.id, // Usar emitente ativo
         clienteId: createNfeDto.clienteId,
         numero: proximoNumero,
-        serie: createNfeDto.serie,
+        serie: createNfeDto.serie || emitente.serieNfe, // Usar série do emitente se não informada
         codigoNumerico: String(Math.floor(Math.random() * 100000000)).padStart(8, '0'),
         naturezaOperacao: createNfeDto.naturezaOperacao,
         tipoOperacao: createNfeDto.tipoOperacao,

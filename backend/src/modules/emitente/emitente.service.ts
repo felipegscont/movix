@@ -147,9 +147,9 @@ export class EmitenteService {
 
   async getProximoNumeroNfe(emitenteId: string): Promise<number> {
     const emitente = await this.findOne(emitenteId);
-    
+
     const proximoNumero = emitente.proximoNumeroNfe;
-    
+
     // Incrementar o próximo número
     await this.prisma.emitente.update({
       where: { id: emitenteId },
@@ -157,5 +157,24 @@ export class EmitenteService {
     });
 
     return proximoNumero;
+  }
+
+  async getEmitenteAtivo() {
+    const emitente = await this.prisma.emitente.findFirst({
+      where: { ativo: true },
+      include: {
+        municipio: {
+          include: { estado: true },
+        },
+        estado: true,
+      },
+      orderBy: { createdAt: 'asc' }, // Pega o primeiro cadastrado
+    });
+
+    if (!emitente) {
+      throw new NotFoundException('Nenhum emitente ativo encontrado. Configure um emitente antes de emitir NFe.');
+    }
+
+    return emitente;
   }
 }

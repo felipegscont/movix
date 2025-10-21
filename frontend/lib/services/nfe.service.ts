@@ -158,21 +158,43 @@ export interface NfesResponse {
 }
 
 export class NfeService {
-  static async getAll(page = 1, limit = 10, emitenteId?: string, status?: string): Promise<NfesResponse> {
-    const params = new URLSearchParams({
-      page: page.toString(),
-      limit: limit.toString(),
-    });
-    
-    if (emitenteId) {
-      params.append('emitenteId', emitenteId);
-    }
-    
-    if (status) {
-      params.append('status', status);
+  static async getAll(params?: { page?: number; limit?: number; search?: string; emitenteId?: string; status?: string } | number, limit?: number, emitenteId?: string, status?: string): Promise<NfesResponse> {
+    // Suportar ambas as assinaturas para compatibilidade
+    let queryParams: URLSearchParams;
+
+    if (typeof params === 'object' && params !== null) {
+      queryParams = new URLSearchParams({
+        page: (params.page || 1).toString(),
+        limit: (params.limit || 10).toString(),
+      });
+
+      if (params.search) {
+        queryParams.append('search', params.search);
+      }
+
+      if (params.emitenteId) {
+        queryParams.append('emitenteId', params.emitenteId);
+      }
+
+      if (params.status) {
+        queryParams.append('status', params.status);
+      }
+    } else {
+      queryParams = new URLSearchParams({
+        page: (params || 1).toString(),
+        limit: (limit || 10).toString(),
+      });
+
+      if (emitenteId) {
+        queryParams.append('emitenteId', emitenteId);
+      }
+
+      if (status) {
+        queryParams.append('status', status);
+      }
     }
 
-    const response = await fetch(`${API_BASE_URL}/nfes?${params}`);
+    const response = await fetch(`${API_BASE_URL}/nfes?${queryParams}`);
     if (!response.ok) {
       throw new Error('Erro ao buscar NFes');
     }

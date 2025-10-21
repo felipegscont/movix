@@ -79,6 +79,15 @@ export class EmitenteService {
     return data.data || data;
   }
 
+  static async getEmitenteAtivo(): Promise<Emitente> {
+    const response = await fetch(`${API_BASE_URL}/emitentes/ativo/principal`);
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Erro ao buscar emitente ativo');
+    }
+    return response.json();
+  }
+
   static async getById(id: string): Promise<Emitente> {
     const response = await fetch(`${API_BASE_URL}/emitentes/${id}`);
     if (!response.ok) {

@@ -29,6 +29,11 @@ export class EmitenteController {
     return this.emitenteService.findAll();
   }
 
+  @Get('ativo/principal')
+  getEmitenteAtivo() {
+    return this.emitenteService.getEmitenteAtivo();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.emitenteService.findOne(id);

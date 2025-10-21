@@ -47,16 +47,17 @@ interface NfeItemForm {
 export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
   const [loading, setLoading] = useState(false)
   const [loadingData, setLoadingData] = useState(true)
-  
+
   // Listas
-  const [emitentes, setEmitentes] = useState<any[]>([])
   const [clientes, setClientes] = useState<any[]>([])
   const [produtos, setProdutos] = useState<any[]>([])
   const [ncms, setNcms] = useState<any[]>([])
   const [cfops, setCfops] = useState<any[]>([])
-  
+
+  // Emitente ativo (fixo do sistema)
+  const [emitente, setEmitente] = useState<any>(null)
+
   // Dados básicos
-  const [emitenteId, setEmitenteId] = useState("")
   const [clienteId, setClienteId] = useState("")
   const [naturezaOperacao, setNaturezaOperacao] = useState("Venda de mercadoria")
   const [serie, setSerie] = useState(1)
@@ -115,34 +116,65 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
   const loadInitialData = async () => {
     try {
       setLoadingData(true)
-      const [emitentesData, clientesData, produtosData, ncmsData, cfopsData] = await Promise.all([
-        EmitenteService.getAll({ page: 1, limit: 100 }),
+
+      // Carregar dados em paralelo com tratamento de erro individual
+      const results = await Promise.allSettled([
+        EmitenteService.getEmitenteAtivo(), // Buscar emitente ativo
         ClienteService.getAll({ page: 1, limit: 1000 }),
         ProdutoService.getAll({ page: 1, limit: 1000 }),
         AuxiliarService.getNcms(),
         AuxiliarService.getCfops(),
       ])
-      
-      setEmitentes(emitentesData.data)
-      setClientes(clientesData.data)
-      setProdutos(produtosData.data)
-      setNcms(ncmsData)
-      setCfops(cfopsData)
-      
-      // Selecionar primeiro emitente ativo por padrão
-      const emitenteAtivo = emitentesData.data.find((e: any) => e.ativo)
-      if (emitenteAtivo) {
-        setEmitenteId(emitenteAtivo.id)
+
+      // Processar emitente ativo
+      if (results[0].status === 'fulfilled') {
+        const emitenteAtivo = results[0].value
+        setEmitente(emitenteAtivo)
         setSerie(emitenteAtivo.serieNfe || 1)
+      } else {
+        console.error("Erro ao carregar emitente:", results[0].reason)
+        toast.error("Erro ao carregar emitente. Configure um emitente ativo antes de criar NFe.")
+        // Não permitir continuar sem emitente
+        return
       }
 
-      // Selecionar primeiro CFOP de saída por padrão
-      const cfopSaida = cfopsData.find((c: any) => c.tipo === 'SAIDA')
-      if (cfopSaida) {
-        setCfopItem(cfopSaida.id)
+      // Processar clientes
+      if (results[1].status === 'fulfilled') {
+        setClientes(results[1].value.data || [])
+      } else {
+        console.error("Erro ao carregar clientes:", results[1].reason)
+        toast.error("Erro ao carregar clientes")
+      }
+
+      // Processar produtos
+      if (results[2].status === 'fulfilled') {
+        setProdutos(results[2].value.data || [])
+      } else {
+        console.error("Erro ao carregar produtos:", results[2].reason)
+        toast.error("Erro ao carregar produtos")
+      }
+
+      // Processar NCMs
+      if (results[3].status === 'fulfilled') {
+        setNcms(results[3].value || [])
+      } else {
+        console.error("Erro ao carregar NCMs:", results[3].reason)
+        toast.error("Erro ao carregar NCMs")
+      }
+
+      // Processar CFOPs
+      if (results[4].status === 'fulfilled') {
+        setCfops(results[4].value || [])
+        const cfopSaida = results[4].value?.find((c: any) => c.tipo === 'SAIDA')
+        if (cfopSaida) {
+          setCfopItem(cfopSaida.id)
+        }
+      } else {
+        console.error("Erro ao carregar CFOPs:", results[4].reason)
+        toast.error("Erro ao carregar CFOPs")
       }
     } catch (error) {
-      console.error("Erro ao carregar dados:", error)
+      console.error("Erro geral ao carregar dados:", error)
       toast.error("Erro ao carregar dados iniciais")
     } finally {
       setLoadingData(false)
@@ -153,9 +185,8 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
     try {
       setLoadingData(true)
       const nfe = await NfeService.getById(nfeId!)
-      
+
       // Preencher formulário
-      setEmitenteId(nfe.emitenteId)
       setClienteId(nfe.clienteId)
       setNaturezaOperacao(nfe.naturezaOperacao)
       setSerie(nfe.serie)
@@ -253,13 +284,13 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     // Validações básicas
-    if (!emitenteId) {
-      toast.error("Selecione um emitente")
+    if (!emitente) {
+      toast.error("Emitente não configurado. Configure um emitente ativo antes de criar NFe.")
       return
     }
-    
+
     if (!clienteId) {
       toast.error("Selecione um cliente")
       return
@@ -281,9 +312,9 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
     
     try {
       setLoading(true)
-      
+
       const data = {
-        emitenteId,
+        // emitenteId não é mais necessário - será buscado automaticamente no backend
         clienteId,
         serie,
         naturezaOperacao,
@@ -351,23 +382,26 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
               <CardDescription>Informações básicas da NFe</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="emitente">Emitente *</Label>
-                  <Select value={emitenteId} onValueChange={setEmitenteId}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o emitente" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {emitentes.map((emitente) => (
-                        <SelectItem key={emitente.id} value={emitente.id}>
-                          {emitente.razaoSocial}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              {/* Card informativo do Emitente */}
+              {emitente && (
+                <div className="p-4 bg-muted rounded-lg border">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Emitente</p>
+                      <p className="text-lg font-semibold">{emitente.razaoSocial}</p>
+                      <p className="text-sm text-muted-foreground">
+                        CNPJ: {emitente.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5')}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-muted-foreground">Série NFe</p>
+                      <p className="text-2xl font-bold">{emitente.serieNfe || 1}</p>
+                    </div>
+                  </div>
                 </div>
-                
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="cliente">Cliente *</Label>
                   <Select value={clienteId} onValueChange={setClienteId}>
