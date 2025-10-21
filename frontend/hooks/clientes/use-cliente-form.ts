@@ -12,27 +12,61 @@ import { useExternalApis } from "@/hooks/shared/use-external-apis"
 import type { CnpjData, CepData } from "@/lib/services/external-api.service"
 
 const clienteFormSchema = z.object({
-  tipo: z.enum(["FISICA", "JURIDICA"]).default("FISICA"),
-  documento: z.string().min(11, "Documento deve ter pelo menos 11 caracteres"),
+  tipo: z.enum(["FISICA", "JURIDICA"]).default("JURIDICA"),
+  documento: z.string()
+    .min(11, "Documento deve ter pelo menos 11 caracteres")
+    .max(14, "Documento deve ter no máximo 14 caracteres")
+    .refine((val) => /^\d+$/.test(val.replace(/\D/g, '')), "Documento deve conter apenas números"),
   nome: z.string().min(1, "Nome é obrigatório"),
-  nomeFantasia: z.string().optional(),
-  inscricaoEstadual: z.string().optional(),
-  inscricaoMunicipal: z.string().optional(),
+  nomeFantasia: z.string().optional().or(z.literal("")),
+  inscricaoEstadual: z.string().optional().or(z.literal("")),
+  inscricaoMunicipal: z.string().optional().or(z.literal("")),
   logradouro: z.string().min(1, "Logradouro é obrigatório"),
   numero: z.string().min(1, "Número é obrigatório"),
-  complemento: z.string().optional(),
+  complemento: z.string().optional().or(z.literal("")),
   bairro: z.string().min(1, "Bairro é obrigatório"),
-  cep: z.string().min(8, "CEP deve ter 8 caracteres"),
+  cep: z.string()
+    .min(8, "CEP deve ter 8 caracteres")
+    .refine((val) => /^\d{8}$/.test(val.replace(/\D/g, '')), "CEP deve conter apenas números"),
   municipioId: z.string().min(1, "Município é obrigatório"),
   estadoId: z.string().min(1, "Estado é obrigatório"),
-  telefone: z.string().optional(),
-  celular: z.string().optional(),
-  email: z.string().email("Email inválido").optional(),
+  telefone: z.string().optional().or(z.literal("")),
+  celular: z.string().optional().or(z.literal("")),
+  email: z.string().email("Email inválido").optional().or(z.literal("")),
   indicadorIE: z.number().optional(),
   ativo: z.boolean().default(true),
 })
 
 export type ClienteFormValues = z.infer<typeof clienteFormSchema>
+
+// Funções de máscara
+const formatCnpj = (value: string) => {
+  const numbers = value.replace(/\D/g, '')
+  if (numbers.length <= 11) {
+    // Máscara CPF: 000.000.000-00
+    return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')
+  } else {
+    // Máscara CNPJ: 00.000.000/0000-00
+    return numbers.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5')
+  }
+}
+
+const formatCep = (value: string) => {
+  const numbers = value.replace(/\D/g, '')
+  // Máscara CEP: 00000-000
+  return numbers.replace(/(\d{5})(\d{3})/, '$1-$2')
+}
+
+const formatPhone = (value: string) => {
+  const numbers = value.replace(/\D/g, '')
+  if (numbers.length <= 10) {
+    // Telefone fixo: (00) 0000-0000
+    return numbers.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3')
+  } else {
+    // Celular: (00) 00000-0000
+    return numbers.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3')
+  }
+}
 
 interface UseClienteFormProps {
   clienteId?: string
@@ -61,6 +95,11 @@ interface UseClienteFormReturn {
   // External data
   estados: any[]
   municipios: any[]
+
+  // Mask functions
+  formatCnpj: (value: string) => string
+  formatCep: (value: string) => string
+  formatPhone: (value: string) => string
 }
 
 export function useClienteForm({ clienteId, onSuccess }: UseClienteFormProps): UseClienteFormReturn {
@@ -87,7 +126,7 @@ export function useClienteForm({ clienteId, onSuccess }: UseClienteFormProps): U
     resolver: zodResolver(clienteFormSchema),
     mode: "onBlur",
     defaultValues: {
-      tipo: "FISICA",
+      tipo: "JURIDICA",
       documento: "",
       nome: "",
       nomeFantasia: "",
@@ -245,20 +284,23 @@ export function useClienteForm({ clienteId, onSuccess }: UseClienteFormProps): U
   const handleDocumentoChange = useCallback(async (value: string) => {
     const numbers = value.replace(/\D/g, '')
 
-    // Auto-detect type based on document
-    if (numbers.length <= 11) {
+    // Auto-detect type based on document length
+    if (numbers.length === 11) {
+      // Exatamente 11 dígitos = CPF
       form.setValue('tipo', 'FISICA')
-    } else if (numbers.length <= 14) {
+    } else if (numbers.length === 14) {
+      // Exatamente 14 dígitos = CNPJ
       form.setValue('tipo', 'JURIDICA')
 
       // Auto-query CNPJ when exactly 14 digits
-      if (numbers.length === 14 && !loadingCnpj) {
+      if (!loadingCnpj) {
         const cnpjData = await consultarCnpj(numbers)
         if (cnpjData) {
           await handleCnpjDataLoaded(cnpjData)
         }
       }
     }
+    // Para outros tamanhos, mantém o tipo atual (padrão JURIDICA)
   }, [form, loadingCnpj, consultarCnpj, handleCnpjDataLoaded])
 
   const handleCepSearch = useCallback(async () => {
@@ -278,15 +320,34 @@ export function useClienteForm({ clienteId, onSuccess }: UseClienteFormProps): U
   const handleSubmit = useCallback(async (data: ClienteFormValues) => {
     try {
       setLoading(true)
-      
+
+      // Limpa e valida os dados antes de enviar
+      const cleanedData = {
+        ...data,
+        // Remove caracteres não numéricos do documento
+        documento: data.documento?.replace(/\D/g, '') || '',
+        // Converte strings vazias para undefined para campos opcionais
+        nomeFantasia: data.nomeFantasia?.trim() || undefined,
+        inscricaoEstadual: data.inscricaoEstadual?.trim() || undefined,
+        inscricaoMunicipal: data.inscricaoMunicipal?.trim() || undefined,
+        complemento: data.complemento?.trim() || undefined,
+        telefone: data.telefone?.trim() || undefined,
+        celular: data.celular?.trim() || undefined,
+        email: data.email?.trim() || undefined,
+        // Remove caracteres não numéricos do CEP
+        cep: data.cep?.replace(/\D/g, '') || '',
+      }
+
+      console.log("Dados limpos para envio:", cleanedData)
+
       if (clienteId) {
-        await ClienteService.update(clienteId, data)
+        await ClienteService.update(clienteId, cleanedData)
         toast.success("Cliente atualizado com sucesso!")
       } else {
-        await ClienteService.create(data)
+        await ClienteService.create(cleanedData)
         toast.success("Cliente criado com sucesso!")
       }
-      
+
       onSuccess?.()
     } catch (error) {
       console.error("Erro ao salvar cliente:", error)
@@ -315,5 +376,9 @@ export function useClienteForm({ clienteId, onSuccess }: UseClienteFormProps): U
     loadMunicipios,
     estados,
     municipios,
+    // Funções de máscara
+    formatCnpj,
+    formatCep,
+    formatPhone,
   }
 }

@@ -65,6 +65,9 @@ export function ClienteFormDialog({
     loadMunicipios,
     estados,
     municipios,
+    formatCnpj,
+    formatCep,
+    formatPhone,
   } = useClienteForm({ clienteId, onSuccess })
 
   const watchEstadoId = form.watch("estadoId")
@@ -128,10 +131,12 @@ export function ClienteFormDialog({
                           <div className="relative">
                             <Input
                               {...field}
-                              placeholder="000.000.000-00 ou 00.000.000/0000-00"
+                              placeholder="00.000.000/0000-00 ou 000.000.000-00"
+                              value={formatCnpj(field.value || '')}
                               onChange={(e) => {
-                                field.onChange(e.target.value)
-                                handleDocumentoChange(e.target.value)
+                                const numbersOnly = e.target.value.replace(/\D/g, '')
+                                field.onChange(numbersOnly)
+                                handleDocumentoChange(numbersOnly)
                               }}
                             />
                             {loadingCnpj && (
@@ -144,7 +149,7 @@ export function ClienteFormDialog({
                         <FormDescription>
                           {form.watch("documento")?.replace(/\D/g, '').length > 11
                             ? "CNPJ será consultado automaticamente ao completar 14 dígitos"
-                            : "Digite o CPF ou CNPJ do cliente"}
+                            : "Digite o CNPJ (padrão) ou CPF do cliente"}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -258,6 +263,11 @@ export function ClienteFormDialog({
                                 <Input
                                   {...field}
                                   placeholder="00000-000"
+                                  value={formatCep(field.value || '')}
+                                  onChange={(e) => {
+                                    const numbersOnly = e.target.value.replace(/\D/g, '')
+                                    field.onChange(numbersOnly)
+                                  }}
                                   maxLength={9}
                                 />
                                 <Button
@@ -454,7 +464,14 @@ export function ClienteFormDialog({
                             <FormItem>
                               <FormLabel>Telefone</FormLabel>
                               <FormControl>
-                                <Input placeholder="(00) 0000-0000" {...field} />
+                                <Input
+                                  placeholder="(00) 0000-0000"
+                                  value={formatPhone(field.value || '')}
+                                  onChange={(e) => {
+                                    const numbersOnly = e.target.value.replace(/\D/g, '')
+                                    field.onChange(numbersOnly)
+                                  }}
+                                />
                               </FormControl>
                               <FormDescription>
                                 Telefone fixo do cliente
@@ -471,7 +488,14 @@ export function ClienteFormDialog({
                             <FormItem>
                               <FormLabel>Celular</FormLabel>
                               <FormControl>
-                                <Input placeholder="(00) 00000-0000" {...field} />
+                                <Input
+                                  placeholder="(00) 00000-0000"
+                                  value={formatPhone(field.value || '')}
+                                  onChange={(e) => {
+                                    const numbersOnly = e.target.value.replace(/\D/g, '')
+                                    field.onChange(numbersOnly)
+                                  }}
+                                />
                               </FormControl>
                               <FormDescription>
                                 Telefone celular do cliente
