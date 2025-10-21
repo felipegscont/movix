@@ -59,7 +59,7 @@ export function NavMain({
             if (item.items && item.items.length > 0) {
               return (
                 <Collapsible
-                  key={item.title}
+                  key={`${item.title}-${pathname}`}
                   asChild
                   defaultOpen={isActive}
                   className="group/collapsible"
