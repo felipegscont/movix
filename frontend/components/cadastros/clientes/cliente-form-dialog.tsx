@@ -676,8 +676,8 @@ export function ClienteFormDialog({
       </DialogContent>
     </Dialog>
 
-    {/* Alert Dialog para erros - modal={false} permite interação com Dialog pai */}
-    <AlertDialog open={alertDialog.open} onOpenChange={alertDialog.onClose} modal={false}>
+    {/* Alert Dialog para erros - z-index maior para ficar acima do Dialog */}
+    <AlertDialog open={alertDialog.open} onOpenChange={alertDialog.onClose}>
       <AlertDialogContent className="z-[60]">
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
