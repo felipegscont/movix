@@ -44,7 +44,7 @@ import { toast } from "sonner"
 import { User, MapPin, Phone, FileText, Settings } from "lucide-react"
 
 const clienteFormSchema = z.object({
-  tipo: z.enum(["FISICA", "JURIDICA"]).optional().default("FISICA"),
+  tipo: z.enum(["FISICA", "JURIDICA"]).default("FISICA"),
   documento: z.string().min(11, "Documento deve ter pelo menos 11 caracteres"),
   nome: z.string().min(1, "Nome é obrigatório"),
   nomeFantasia: z.string().optional().or(z.literal("")),
@@ -83,7 +83,7 @@ export function ClienteFormDialog({
   const [estados, setEstados] = useState<Estado[]>([])
   const [municipios, setMunicipios] = useState<Municipio[]>([])
 
-  const form = useForm<ClienteFormValues>({
+  const form = useForm({
     resolver: zodResolver(clienteFormSchema),
     mode: "onBlur", // Valida apenas quando o campo perde o foco
     defaultValues: {
@@ -323,12 +323,116 @@ export function ClienteFormDialog({
         <div className="flex-1 overflow-y-auto px-6 py-4">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <Tabs defaultValue="dados-basicos" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
-                  <TabsTrigger value="dados-basicos" className="gap-2">
-                    <User className="h-4 w-4" />
+              {/* Dados Básicos - Sempre visíveis no topo */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <User className="h-5 w-5" />
                     Dados Básicos
-                  </TabsTrigger>
+                  </CardTitle>
+                  <CardDescription>
+                    Informações principais do cliente
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Documento CPF/CNPJ */}
+                  <FormField
+                    control={form.control}
+                    name="documento"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>CPF/CNPJ</FormLabel>
+                        <FormControl>
+                          <DocumentoInput
+                            value={field.value}
+                            onChange={(value) => {
+                              field.onChange(value)
+                              // Detecta automaticamente o tipo baseado no documento
+                              const numbers = value.replace(/\D/g, '')
+                              if (numbers.length <= 11) {
+                                form.setValue('tipo', 'FISICA')
+                              } else if (numbers.length <= 14) {
+                                form.setValue('tipo', 'JURIDICA')
+                              }
+                            }}
+                            onDataLoaded={handleCnpjDataLoaded}
+                            tipo="AUTO" // Detecção automática
+                            autoFill={true} // Auto-preenchimento para CNPJ
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Nome */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="nome"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            {form.watch("documento")?.replace(/\D/g, '').length > 11
+                              ? "Razão Social"
+                              : "Nome"}
+                          </FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {form.watch("documento")?.replace(/\D/g, '').length > 11 && (
+                      <FormField
+                        control={form.control}
+                        name="nomeFantasia"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Nome Fantasia</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+                  </div>
+
+                  {/* Status Ativo */}
+                  <FormField
+                    control={form.control}
+                    name="ativo"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-base">
+                            Cliente Ativo
+                          </FormLabel>
+                          <FormDescription>
+                            Desative para impedir novas transações com este cliente
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+
+              <Separator />
+
+              {/* Tabs para demais informações */}
+              <Tabs defaultValue="endereco" className="w-full">
+                <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="endereco" className="gap-2">
                     <MapPin className="h-4 w-4" />
                     Endereço
@@ -343,466 +447,359 @@ export function ClienteFormDialog({
                   </TabsTrigger>
                 </TabsList>
 
-                {/* Tab: Dados Básicos */}
-                <TabsContent value="dados-basicos" className="space-y-4 mt-4">
+                {/* Tab: Endereço */}
+                <TabsContent value="endereco" className="space-y-4 mt-4">
                   <Card>
                     <CardHeader>
                       <CardTitle className="text-lg flex items-center gap-2">
-                        <User className="h-5 w-5" />
-                        Informações Básicas
+                        <MapPin className="h-5 w-5" />
+                        Endereço
                       </CardTitle>
                       <CardDescription>
-                        Dados principais do cliente
+                        Localização do cliente
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                {/* Documento CPF/CNPJ */}
-                <FormField
-                  control={form.control}
-                  name="documento"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>CPF/CNPJ</FormLabel>
-                      <FormControl>
-                        <DocumentoInput
-                          value={field.value}
-                          onChange={(value) => {
-                            field.onChange(value)
-                            // Detecta automaticamente o tipo baseado no documento
-                            const numbers = value.replace(/\D/g, '')
-                            if (numbers.length <= 11) {
-                              form.setValue('tipo', 'FISICA')
-                            } else if (numbers.length <= 14) {
-                              form.setValue('tipo', 'JURIDICA')
-                            }
-                          }}
-                          onDataLoaded={handleCnpjDataLoaded}
-                          tipo="AUTO" // Detecção automática
-                          autoFill={true} // Auto-preenchimento para CNPJ
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
 
-            {/* Nome */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="nome"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      {form.watch("documento")?.replace(/\D/g, '').length > 11
-                        ? "Razão Social"
-                        : "Nome"}
-                    </FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {form.watch("documento")?.replace(/\D/g, '').length > 11 && (
-                <FormField
-                  control={form.control}
-                  name="nomeFantasia"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nome Fantasia</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-                      {/* Status Ativo */}
                       <FormField
                         control={form.control}
-                        name="ativo"
+                        name="cep"
                         render={({ field }) => (
-                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                            <div className="space-y-0.5">
-                              <FormLabel className="text-base">
-                                Cliente Ativo
-                              </FormLabel>
-                              <FormDescription>
-                                Desative para impedir novas transações com este cliente
-                              </FormDescription>
-                            </div>
+                          <FormItem>
+                            <FormLabel>CEP *</FormLabel>
                             <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
+                              <CepInput
+                                value={field.value}
+                                onChange={field.onChange}
+                                onDataLoaded={handleCepDataLoaded}
                               />
                             </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              {/* Tab: Endereço */}
-              <TabsContent value="endereco" className="space-y-4 mt-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <MapPin className="h-5 w-5" />
-                      Endereço
-                    </CardTitle>
-                    <CardDescription>
-                      Localização do cliente
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-
-              <FormField
-                control={form.control}
-                name="cep"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>CEP *</FormLabel>
-                    <FormControl>
-                      <CepInput
-                        value={field.value}
-                        onChange={field.onChange}
-                        onDataLoaded={handleCepDataLoaded}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Digite o CEP e clique na lupa para buscar o endereço
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                <FormField
-                  control={form.control}
-                  name="estadoId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Estado *</FormLabel>
-                      <Select
-                        onValueChange={(value) => {
-                          field.onChange(value)
-                          // Limpa o município quando o estado muda
-                          form.setValue("municipioId", "")
-                          // Carrega municípios do novo estado
-                          loadMunicipios(value)
-                        }}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione o estado" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="max-h-[300px]">
-                          {estados.length === 0 ? (
-                            <div className="p-2 text-sm text-muted-foreground text-center">
-                              Carregando estados...
-                            </div>
-                          ) : (
-                            estados.map((estado) => (
-                              <SelectItem key={estado.id} value={estado.id}>
-                                {estado.uf} - {estado.nome}
-                              </SelectItem>
-                            ))
-                          )}
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>
-                        Selecione o estado (UF)
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="municipioId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Município *</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        disabled={!watchEstadoId}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder={
-                              !watchEstadoId
-                                ? "Selecione primeiro o estado"
-                                : "Selecione o município"
-                            } />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="max-h-[300px]">
-                          {municipios.length === 0 && watchEstadoId ? (
-                            <div className="p-2 text-sm text-muted-foreground text-center">
-                              Carregando municípios...
-                            </div>
-                          ) : (
-                            municipios.map((municipio) => (
-                              <SelectItem key={municipio.id} value={municipio.id}>
-                                {municipio.nome}
-                              </SelectItem>
-                            ))
-                          )}
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>
-                        {!watchEstadoId
-                          ? "Selecione o estado primeiro"
-                          : "Selecione o município"}
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                <FormField
-                  control={form.control}
-                  name="logradouro"
-                  render={({ field }) => (
-                    <FormItem className="md:col-span-6">
-                      <FormLabel>Logradouro *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Rua, Avenida, etc." {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="numero"
-                  render={({ field }) => (
-                    <FormItem className="md:col-span-2">
-                      <FormLabel>Número *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="123" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="complemento"
-                  render={({ field }) => (
-                    <FormItem className="md:col-span-4">
-                      <FormLabel>Complemento</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Apto, Sala, etc." {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="bairro"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Bairro *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Nome do bairro" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              {/* Tab: Contato */}
-              <TabsContent value="contato" className="space-y-4 mt-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <Phone className="h-5 w-5" />
-                      Informações de Contato
-                    </CardTitle>
-                    <CardDescription>
-                      Telefones e email do cliente
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="telefone"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Telefone</FormLabel>
-                            <FormControl>
-                              <Input placeholder="(00) 0000-0000" {...field} />
-                            </FormControl>
                             <FormDescription>
-                              Telefone fixo do cliente
+                              Digite o CEP e clique na lupa para buscar o endereço
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
 
-                      <FormField
-                        control={form.control}
-                        name="celular"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Celular</FormLabel>
-                            <FormControl>
-                              <Input placeholder="(00) 00000-0000" {...field} />
-                            </FormControl>
-                            <FormDescription>
-                              Telefone celular do cliente
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="email"
-                              placeholder="email@exemplo.com"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            Email principal para comunicação e envio de documentos fiscais
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              {/* Tab: Dados Fiscais */}
-              <TabsContent value="fiscal" className="space-y-4 mt-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <FileText className="h-5 w-5" />
-                      Dados Fiscais
-                    </CardTitle>
-                    <CardDescription>
-                      Informações fiscais e tributárias
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {form.watch("documento")?.replace(/\D/g, '').length > 11 && (
-                      <>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <FormField
-                            control={form.control}
-                            name="inscricaoEstadual"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Inscrição Estadual</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="000.000.000.000" {...field} />
-                                </FormControl>
-                                <FormDescription>
-                                  Inscrição estadual da empresa (se aplicável)
-                                </FormDescription>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={form.control}
-                            name="inscricaoMunicipal"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Inscrição Municipal</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="000000000" {...field} />
-                                </FormControl>
-                                <FormDescription>
-                                  Inscrição municipal da empresa (se aplicável)
-                                </FormDescription>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <FormField
                           control={form.control}
-                          name="indicadorIE"
+                          name="estadoId"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Indicador de Inscrição Estadual</FormLabel>
+                              <FormLabel>Estado *</FormLabel>
                               <Select
-                                onValueChange={(value) => field.onChange(Number(value))}
-                                value={field.value?.toString()}
+                                onValueChange={(value) => {
+                                  field.onChange(value)
+                                  // Limpa o município quando o estado muda
+                                  form.setValue("municipioId", "")
+                                  // Carrega municípios do novo estado
+                                  loadMunicipios(value)
+                                }}
+                                value={field.value}
                               >
                                 <FormControl>
                                   <SelectTrigger>
-                                    <SelectValue placeholder="Selecione o indicador" />
+                                    <SelectValue placeholder="Selecione o estado" />
                                   </SelectTrigger>
                                 </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="1">1 - Contribuinte ICMS</SelectItem>
-                                  <SelectItem value="2">2 - Contribuinte isento</SelectItem>
-                                  <SelectItem value="9">9 - Não Contribuinte</SelectItem>
+                                <SelectContent className="max-h-[300px]">
+                                  {estados.length === 0 ? (
+                                    <div className="p-2 text-sm text-muted-foreground text-center">
+                                      Carregando estados...
+                                    </div>
+                                  ) : (
+                                    estados.map((estado) => (
+                                      <SelectItem key={estado.id} value={estado.id}>
+                                        {estado.uf} - {estado.nome}
+                                      </SelectItem>
+                                    ))
+                                  )}
                                 </SelectContent>
                               </Select>
                               <FormDescription>
-                                Indica a situação do cliente em relação ao ICMS
+                                Selecione o estado (UF)
                               </FormDescription>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
-                      </>
-                    )}
 
-                    {form.watch("documento")?.replace(/\D/g, '').length <= 11 && (
-                      <div className="flex items-center justify-center p-8 text-center">
-                        <div className="space-y-2">
-                          <FileText className="h-12 w-12 mx-auto text-muted-foreground" />
-                          <p className="text-sm text-muted-foreground">
-                            Dados fiscais são aplicáveis apenas para pessoas jurídicas (CNPJ)
-                          </p>
-                        </div>
+                        <FormField
+                          control={form.control}
+                          name="municipioId"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Município *</FormLabel>
+                              <Select
+                                onValueChange={field.onChange}
+                                value={field.value}
+                                disabled={!watchEstadoId}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder={
+                                      !watchEstadoId
+                                        ? "Selecione primeiro o estado"
+                                        : "Selecione o município"
+                                    } />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent className="max-h-[300px]">
+                                  {municipios.length === 0 && watchEstadoId ? (
+                                    <div className="p-2 text-sm text-muted-foreground text-center">
+                                      Carregando municípios...
+                                    </div>
+                                  ) : (
+                                    municipios.map((municipio) => (
+                                      <SelectItem key={municipio.id} value={municipio.id}>
+                                        {municipio.nome}
+                                      </SelectItem>
+                                    ))
+                                  )}
+                                </SelectContent>
+                              </Select>
+                              <FormDescription>
+                                {!watchEstadoId
+                                  ? "Selecione o estado primeiro"
+                                  : "Selecione o município"}
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
+
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="logradouro"
+                          render={({ field }) => (
+                            <FormItem className="md:col-span-6">
+                              <FormLabel>Logradouro *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Rua, Avenida, etc." {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="numero"
+                          render={({ field }) => (
+                            <FormItem className="md:col-span-2">
+                              <FormLabel>Número *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="123" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="complemento"
+                          render={({ field }) => (
+                            <FormItem className="md:col-span-4">
+                              <FormLabel>Complemento</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Apto, Sala, etc." {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <FormField
+                        control={form.control}
+                        name="bairro"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Bairro *</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Nome do bairro" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                {/* Tab: Contato */}
+                <TabsContent value="contato" className="space-y-4 mt-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Phone className="h-5 w-5" />
+                        Informações de Contato
+                      </CardTitle>
+                      <CardDescription>
+                        Telefones e email do cliente
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="telefone"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Telefone</FormLabel>
+                              <FormControl>
+                                <Input placeholder="(00) 0000-0000" {...field} />
+                              </FormControl>
+                              <FormDescription>
+                                Telefone fixo do cliente
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="celular"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Celular</FormLabel>
+                              <FormControl>
+                                <Input placeholder="(00) 00000-0000" {...field} />
+                              </FormControl>
+                              <FormDescription>
+                                Telefone celular do cliente
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Email</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="email"
+                                placeholder="email@exemplo.com"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              Email principal para comunicação e envio de documentos fiscais
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                {/* Tab: Dados Fiscais */}
+                <TabsContent value="fiscal" className="space-y-4 mt-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        Dados Fiscais
+                      </CardTitle>
+                      <CardDescription>
+                        Informações fiscais e tributárias
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {form.watch("documento")?.replace(/\D/g, '').length > 11 && (
+                        <>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField
+                              control={form.control}
+                              name="inscricaoEstadual"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Inscrição Estadual</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="000.000.000.000" {...field} />
+                                  </FormControl>
+                                  <FormDescription>
+                                    Inscrição estadual da empresa (se aplicável)
+                                  </FormDescription>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name="inscricaoMunicipal"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Inscrição Municipal</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="000000000" {...field} />
+                                  </FormControl>
+                                  <FormDescription>
+                                    Inscrição municipal da empresa (se aplicável)
+                                  </FormDescription>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+
+                          <FormField
+                            control={form.control}
+                            name="indicadorIE"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Indicador de Inscrição Estadual</FormLabel>
+                                <Select
+                                  onValueChange={(value) => field.onChange(Number(value))}
+                                  value={field.value?.toString()}
+                                >
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Selecione o indicador" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="1">1 - Contribuinte ICMS</SelectItem>
+                                    <SelectItem value="2">2 - Contribuinte isento</SelectItem>
+                                    <SelectItem value="9">9 - Não Contribuinte</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormDescription>
+                                  Indica a situação do cliente em relação ao ICMS
+                                </FormDescription>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </>
+                      )}
+
+                      {form.watch("documento")?.replace(/\D/g, '').length <= 11 && (
+                        <div className="flex items-center justify-center p-8 text-center">
+                          <div className="space-y-2">
+                            <FileText className="h-12 w-12 mx-auto text-muted-foreground" />
+                            <p className="text-sm text-muted-foreground">
+                              Dados fiscais são aplicáveis apenas para pessoas jurídicas (CNPJ)
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
               </Tabs>
             </form>
           </Form>

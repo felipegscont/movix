@@ -122,14 +122,7 @@ export class ProdutoService {
     return response.json();
   }
 
-  static async getForSelect(): Promise<{ id: string; codigo: string; descricao: string; valorUnitario: number }[]> {
-    const response = await fetch(`${API_BASE_URL}/produtos/select`);
-    if (!response.ok) {
-      throw new Error('Erro ao buscar produtos para seleção');
-    }
-    const data = await response.json();
-    return data.data;
-  }
+
 
   static async create(data: CreateProdutoData): Promise<Produto> {
     const response = await fetch(`${API_BASE_URL}/produtos`, {

@@ -35,9 +35,16 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
 import { ProdutoService } from "@/lib/services/produto.service"
 import { AuxiliarService, type NCM, type CEST } from "@/lib/services/auxiliar.service"
 import { FornecedorService, type Fornecedor } from "@/lib/services/fornecedor.service"
+
+type FornecedorSelect = {
+  id: string
+  nome: string
+  documento: string
+}
 import { toast } from "sonner"
 import { Package, Receipt, Warehouse, Settings } from "lucide-react"
 
@@ -89,9 +96,9 @@ export function ProdutoFormDialog({
   const [loading, setLoading] = useState(false)
   const [ncms, setNcms] = useState<NCM[]>([])
   const [cests, setCests] = useState<CEST[]>([])
-  const [fornecedores, setFornecedores] = useState<Fornecedor[]>([])
+  const [fornecedores, setFornecedores] = useState<FornecedorSelect[]>([])
 
-  const form = useForm<ProdutoFormValues>({
+  const form = useForm({
     resolver: zodResolver(produtoFormSchema),
     mode: "onBlur", // Valida apenas quando o campo perde o foco
     defaultValues: {
@@ -613,23 +620,23 @@ export function ProdutoFormDialog({
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                          <SelectItem value="00">00 - Tributada integralmente</SelectItem>
-                          <SelectItem value="10">10 - Tributada e com cobrança do ICMS por substituição tributária</SelectItem>
-                          <SelectItem value="20">20 - Com redução de base de cálculo</SelectItem>
-                          <SelectItem value="30">30 - Isenta ou não tributada e com cobrança do ICMS por substituição tributária</SelectItem>
-                          <SelectItem value="40">40 - Isenta</SelectItem>
-                          <SelectItem value="41">41 - Não tributada</SelectItem>
-                          <SelectItem value="50">50 - Suspensão</SelectItem>
-                          <SelectItem value="51">51 - Diferimento</SelectItem>
-                          <SelectItem value="60">60 - ICMS cobrado anteriormente por substituição tributária</SelectItem>
-                          <SelectItem value="70">70 - Com redução de base de cálculo e cobrança do ICMS por substituição tributária</SelectItem>
-                          <SelectItem value="90">90 - Outras</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                                  <SelectItem value="00">00 - Tributada integralmente</SelectItem>
+                                  <SelectItem value="10">10 - Tributada e com cobrança do ICMS por substituição tributária</SelectItem>
+                                  <SelectItem value="20">20 - Com redução de base de cálculo</SelectItem>
+                                  <SelectItem value="30">30 - Isenta ou não tributada e com cobrança do ICMS por substituição tributária</SelectItem>
+                                  <SelectItem value="40">40 - Isenta</SelectItem>
+                                  <SelectItem value="41">41 - Não tributada</SelectItem>
+                                  <SelectItem value="50">50 - Suspensão</SelectItem>
+                                  <SelectItem value="51">51 - Diferimento</SelectItem>
+                                  <SelectItem value="60">60 - ICMS cobrado anteriormente por substituição tributária</SelectItem>
+                                  <SelectItem value="70">70 - Com redução de base de cálculo e cobrança do ICMS por substituição tributária</SelectItem>
+                                  <SelectItem value="90">90 - Outras</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
                 <FormField
                   control={form.control}
@@ -649,13 +656,24 @@ export function ProdutoFormDialog({
                     </FormItem>
                   )}
                 />
-              </div>
-            </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
 
-            <Separator />
-
-            {/* Valores e Estoque */}
-            <div className="space-y-4">
+                {/* Tab: Estoque */}
+                <TabsContent value="estoque" className="space-y-4 mt-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Warehouse className="h-5 w-5" />
+                        Valores e Estoque
+                      </CardTitle>
+                      <CardDescription>
+                        Informações de preço e controle de estoque
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
               <h3 className="text-lg font-medium">Valores e Estoque</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -767,12 +785,23 @@ export function ProdutoFormDialog({
                   )}
                 />
               </div>
-            </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
 
-            <Separator />
-
-            {/* Fornecedor e Observações */}
-            <div className="space-y-4">
+                {/* Tab: Outros */}
+                <TabsContent value="outros" className="space-y-4 mt-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Settings className="h-5 w-5" />
+                        Fornecedor e Observações
+                      </CardTitle>
+                      <CardDescription>
+                        Informações adicionais do produto
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
               <FormField
                 control={form.control}
                 name="fornecedorId"
@@ -811,12 +840,11 @@ export function ProdutoFormDialog({
                   </FormItem>
                 )}
               />
-            </div>
 
-            <Separator />
+                      <Separator />
 
-            {/* Status */}
-            <FormField
+                      {/* Status */}
+                      <FormField
               control={form.control}
               name="ativo"
               render={({ field }) => (
@@ -836,8 +864,12 @@ export function ProdutoFormDialog({
                 </FormItem>
               )}
             />
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
 
-            <DialogFooter>
+              <DialogFooter>
               <Button
                 type="button"
                 variant="outline"
@@ -853,8 +885,9 @@ export function ProdutoFormDialog({
                   : "Criar"}
               </Button>
             </DialogFooter>
-          </form>
-        </Form>
+            </form>
+          </Form>
+        </div>
       </DialogContent>
     </Dialog>
   )

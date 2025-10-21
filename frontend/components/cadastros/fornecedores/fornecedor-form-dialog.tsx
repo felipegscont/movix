@@ -44,7 +44,7 @@ import { toast } from "sonner"
 import { User, MapPin, Phone, FileText, Settings } from "lucide-react"
 
 const fornecedorFormSchema = z.object({
-  tipo: z.enum(["FISICA", "JURIDICA"]).optional().default("JURIDICA"),
+  tipo: z.enum(["FISICA", "JURIDICA"]).default("JURIDICA"),
   documento: z.string().min(11, "Documento deve ter pelo menos 11 caracteres"),
   nome: z.string().min(1, "Nome é obrigatório"),
   nomeFantasia: z.string().optional().or(z.literal("")),
@@ -85,7 +85,7 @@ export function FornecedorFormDialog({
   const [estados, setEstados] = useState<Estado[]>([])
   const [municipios, setMunicipios] = useState<Municipio[]>([])
 
-  const form = useForm<FornecedorFormValues>({
+  const form = useForm({
     resolver: zodResolver(fornecedorFormSchema),
     mode: "onBlur", // Valida apenas quando o campo perde o foco
     defaultValues: {

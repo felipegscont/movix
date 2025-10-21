@@ -145,7 +145,7 @@ const columns: ColumnDef<Produto>[] = [
     header: "Unidade",
     cell: ({ row }) => (
       <div className="text-center">
-        {row.original.unidadeComercial}
+        {row.original.unidade}
       </div>
     ),
   },
@@ -258,10 +258,9 @@ const columns: ColumnDef<Produto>[] = [
           codigo: 'PROD001',
           descricao: 'Produto de Exemplo',
           ncmId: '1',
-          cfopId: '1',
-          unidadeComercial: 'UN',
-          unidadeTributavel: 'UN',
+          unidade: 'UN',
           valorUnitario: 125.50,
+          estoqueAtual: 10,
           origem: 0,
           cstIcms: '00',
           ativo: true,

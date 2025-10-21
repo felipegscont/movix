@@ -168,10 +168,10 @@ export default function ProdutoViewPage() {
                         Unidade: {produto.unidade}
                       </div>
                     )}
-                    {produto.valorVenda && (
+                    {produto.valorUnitario && (
                       <div className="flex items-center gap-1 font-semibold text-green-600">
                         <IconCurrencyReal className="h-4 w-4" />
-                        {formatCurrency(produto.valorVenda)}
+                        {formatCurrency(produto.valorUnitario)}
                       </div>
                     )}
                   </div>
@@ -197,7 +197,7 @@ export default function ProdutoViewPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Estoque Atual</p>
-                      <p className="text-2xl font-bold">{produto.estoque || 0}</p>
+                      <p className="text-2xl font-bold">{produto.estoqueAtual || 0}</p>
                     </div>
                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
                       <IconPackage className="h-6 w-6 text-blue-600 dark:text-blue-400" />
@@ -211,7 +211,7 @@ export default function ProdutoViewPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Valor Venda</p>
-                      <p className="text-2xl font-bold">{formatCurrency(produto.valorVenda || 0)}</p>
+                      <p className="text-2xl font-bold">{formatCurrency(produto.valorUnitario || 0)}</p>
                     </div>
                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
                       <IconCurrencyReal className="h-6 w-6 text-green-600 dark:text-green-400" />
@@ -240,7 +240,7 @@ export default function ProdutoViewPage() {
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Valor Estoque</p>
                       <p className="text-2xl font-bold">
-                        {formatCurrency((produto.estoque || 0) * (produto.valorVenda || 0))}
+                        {formatCurrency((produto.estoqueAtual || 0) * (produto.valorUnitario || 0))}
                       </p>
                     </div>
                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900">
@@ -279,7 +279,7 @@ export default function ProdutoViewPage() {
                       </div>
                       <div className="space-y-1">
                         <p className="text-sm font-medium text-muted-foreground">Estoque</p>
-                        <p className="text-sm font-semibold">{produto.estoque || 0}</p>
+                        <p className="text-sm font-semibold">{produto.estoqueAtual || 0}</p>
                       </div>
                       <div className="space-y-1">
                         <p className="text-sm font-medium text-muted-foreground">Valor Custo</p>
@@ -288,7 +288,7 @@ export default function ProdutoViewPage() {
                       <div className="space-y-1">
                         <p className="text-sm font-medium text-muted-foreground">Valor Venda</p>
                         <p className="text-sm font-semibold text-green-600">
-                          {formatCurrency(produto.valorVenda || 0)}
+                          {formatCurrency(produto.valorUnitario || 0)}
                         </p>
                       </div>
                     </div>
@@ -307,15 +307,15 @@ export default function ProdutoViewPage() {
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div className="space-y-1">
                         <p className="text-sm font-medium text-muted-foreground">NCM</p>
-                        <p className="text-sm font-mono">{produto.ncm || "-"}</p>
+                        <p className="text-sm font-mono">{produto.ncm?.codigo || "-"}</p>
                       </div>
                       <div className="space-y-1">
                         <p className="text-sm font-medium text-muted-foreground">CEST</p>
-                        <p className="text-sm font-mono">{produto.cest || "-"}</p>
+                        <p className="text-sm font-mono">{produto.cest?.codigo || "-"}</p>
                       </div>
                       <div className="space-y-1">
                         <p className="text-sm font-medium text-muted-foreground">CFOP</p>
-                        <p className="text-sm font-mono">{produto.cfop || "-"}</p>
+                        <p className="text-sm font-mono">-</p>
                       </div>
                       <div className="space-y-1">
                         <p className="text-sm font-medium text-muted-foreground">Origem</p>
@@ -409,8 +409,8 @@ export default function ProdutoViewPage() {
                     <div className="space-y-1">
                       <p className="text-sm font-medium text-muted-foreground">Margem de Lucro</p>
                       <p className="text-sm font-semibold text-green-600">
-                        {produto.valorCusto && produto.valorVenda
-                          ? `${(((produto.valorVenda - produto.valorCusto) / produto.valorCusto) * 100).toFixed(1)}%`
+                        {produto.valorCusto && produto.valorUnitario
+                          ? `${(((produto.valorUnitario - produto.valorCusto) / produto.valorCusto) * 100).toFixed(1)}%`
                           : "-"}
                       </p>
                     </div>

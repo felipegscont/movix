@@ -71,24 +71,7 @@ import { DataTableFilter } from "@/components/data-table-filter"
 import { useDataTableFilters } from "@/components/data-table-filter"
 import { createColumnConfigHelper } from "@/components/data-table-filter/core/filters"
 import type { Locale } from "@/components/data-table-filter/lib/i18n"
-
-interface Cliente {
-  id: string
-  tipo: "FISICA" | "JURIDICA"
-  documento: string
-  nome: string
-  nomeFantasia?: string
-  email?: string
-  telefone?: string
-  celular?: string
-  ativo: boolean
-  municipio?: {
-    nome: string
-    estado: {
-      sigla: string
-    }
-  }
-}
+import { Cliente } from "@/lib/services/cliente.service"
 
 // Configuração dos filtros do Bazza UI
 const dtf = createColumnConfigHelper<Cliente>()
@@ -331,7 +314,7 @@ export function ClientesDataTable() {
         const municipio = row.original.municipio
         return municipio ? (
           <span className="text-sm">
-            {municipio.nome}/{municipio.estado.sigla}
+            {municipio.nome}/{municipio.estado.uf}
           </span>
         ) : (
           <span className="text-muted-foreground">-</span>
