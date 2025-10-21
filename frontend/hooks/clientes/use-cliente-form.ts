@@ -239,27 +239,55 @@ export function useClienteForm({ clienteId, onSuccess }: UseClienteFormProps): U
     }
 
     // Busca e seleciona estado pela UF
-    if (cnpjData.uf && estados.length > 0) {
-      const estado = estados.find(e => e.uf === cnpjData.uf)
-      if (estado) {
-        form.setValue("estadoId", estado.id)
+    if (cnpjData.uf) {
+      try {
+        // Se estados ainda não foram carregados, carrega agora
+        let estadosDisponiveis = estados
+        if (estadosDisponiveis.length === 0) {
+          estadosDisponiveis = await AuxiliarService.getEstados()
+        }
 
-        // Se tem município, carrega municípios e seleciona
-        if (cnpjData.municipio) {
-          try {
+        const estado = estadosDisponiveis.find(e => e.uf === cnpjData.uf)
+        if (estado) {
+          form.setValue("estadoId", estado.id)
+
+          // Se tem município, carrega municípios e seleciona
+          if (cnpjData.municipio) {
+            // Aguarda um pouco para garantir que o estado foi setado
+            await new Promise(resolve => setTimeout(resolve, 100))
+
+            // Carrega municípios do estado (backend popula automaticamente se não existir)
             await loadMunicipios(estado.id)
+
+            // Aguarda mais um pouco para garantir que os municípios foram carregados
+            await new Promise(resolve => setTimeout(resolve, 200))
+
+            // Busca novamente os municípios para garantir que temos os dados atualizados
             const municipiosData = await AuxiliarService.getMunicipiosByEstado(estado.id)
-            const municipio = municipiosData.find(m =>
-              m.nome.toLowerCase().includes(cnpjData.municipio?.toLowerCase() || '') ||
-              cnpjData.municipio?.toLowerCase().includes(m.nome.toLowerCase() || '')
-            )
+
+            // Tenta encontrar o município por nome (busca flexível)
+            const municipio = municipiosData.find(m => {
+              const nomeMunicipio = m.nome.toLowerCase().trim()
+              const nomeCnpj = cnpjData.municipio?.toLowerCase().trim() || ''
+
+              return nomeMunicipio === nomeCnpj ||
+                     nomeMunicipio.includes(nomeCnpj) ||
+                     nomeCnpj.includes(nomeMunicipio)
+            })
+
             if (municipio) {
               form.setValue("municipioId", municipio.id)
+              toast.success(`Município ${municipio.nome} selecionado automaticamente`)
+            } else {
+              toast.warning(`Município "${cnpjData.municipio}" não encontrado. Selecione manualmente.`)
             }
-          } catch (error) {
-            console.warn('Erro ao carregar municípios para CNPJ:', error)
           }
+        } else {
+          toast.warning(`Estado ${cnpjData.uf} não encontrado`)
         }
+      } catch (error) {
+        console.error('Erro ao carregar estado/município para CNPJ:', error)
+        toast.error('Erro ao carregar dados de localização')
       }
     }
   }, [form, estados, loadMunicipios])

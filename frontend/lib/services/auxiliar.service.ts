@@ -79,6 +79,14 @@ export class AuxiliarService {
     return data.data;
   }
 
+  /**
+   * Busca municípios por estado (alias para getMunicipios com estadoId)
+   * O backend popula automaticamente os municípios se não existirem
+   */
+  static async getMunicipiosByEstado(estadoId: string): Promise<Municipio[]> {
+    return this.getMunicipios(estadoId);
+  }
+
   static async getMunicipiosByEstado(estadoId: string): Promise<Municipio[]> {
     return this.getMunicipios(estadoId);
   }

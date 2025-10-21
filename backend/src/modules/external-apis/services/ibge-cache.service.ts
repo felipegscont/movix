@@ -173,11 +173,37 @@ export class IbgeCacheService {
       const municipiosExternos = await this.ibgeService.getMunicipiosByEstado(uf);
 
       if (municipiosExternos.success && municipiosExternos.data && estadoLocal) {
-        // 4. Salva todos no banco local
-        for (const municipio of municipiosExternos.data) {
-          await this.salvarMunicipioLocal(municipio, estadoLocal.id);
+        // 4. Salva todos no banco local em batch
+        try {
+          const municipiosParaSalvar = municipiosExternos.data.map(municipio => ({
+            codigo: municipio.id.toString(),
+            nome: municipio.nome,
+            estadoId: estadoLocal.id,
+            ativo: true
+          }));
+
+          // Usa createMany com skipDuplicates para evitar erros
+          const result = await this.prisma.municipio.createMany({
+            data: municipiosParaSalvar,
+            skipDuplicates: true
+          });
+
+          this.logger.log(`${result.count} municípios de ${uf} salvos no cache local (total: ${municipiosExternos.data.length})`);
+        } catch (error) {
+          this.logger.error(`Erro ao salvar municípios em batch: ${error.message}`);
+          // Fallback: tenta salvar um por um
+          this.logger.log('Tentando salvar municípios individualmente...');
+          let salvos = 0;
+          for (const municipio of municipiosExternos.data) {
+            try {
+              await this.salvarMunicipioLocal(municipio, estadoLocal.id);
+              salvos++;
+            } catch (err) {
+              this.logger.error(`Erro ao salvar município ${municipio.nome}: ${err.message}`);
+            }
+          }
+          this.logger.log(`${salvos} municípios de ${uf} salvos individualmente`);
         }
-        this.logger.log(`${municipiosExternos.data.length} municípios de ${uf} salvos no cache local`);
       }
 
       return municipiosExternos;
