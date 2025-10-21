@@ -356,11 +356,15 @@ model Nfe {
   // Totais de Impostos
   baseCalculoICMS       Decimal @default(0) @db.Decimal(15,2)
   valorICMS             Decimal @default(0) @db.Decimal(15,2)
+  valorICMSDesonerado   Decimal @default(0) @db.Decimal(15,2)
+  valorFCP              Decimal @default(0) @db.Decimal(15,2)
   baseCalculoICMSST     Decimal @default(0) @db.Decimal(15,2)
   valorICMSST           Decimal @default(0) @db.Decimal(15,2)
   valorIPI              Decimal @default(0) @db.Decimal(15,2)
   valorPIS              Decimal @default(0) @db.Decimal(15,2)
   valorCOFINS           Decimal @default(0) @db.Decimal(15,2)
+  valorII               Decimal @default(0) @db.Decimal(15,2)
+  valorOutrasDespesas   Decimal @default(0) @db.Decimal(15,2)
 
   // Transporte
   modalidadeFrete       Int @default(9) // 0=Emitente, 1=Destinatário, 9=Sem frete
@@ -387,6 +391,7 @@ model Nfe {
   emitente               Emitente @relation(fields: [emitenteId], references: [id])
   cliente               Cliente @relation(fields: [clienteId], references: [id])
   itens                 NfeItem[]
+  duplicatas            NfeDuplicata[]
   pagamentos            NfePagamento[]
   eventos               NfeEvento[]
 
@@ -584,8 +589,26 @@ model NfeItemCOFINS {
 }
 
 // ================================
-// TABELAS DE PAGAMENTO E EVENTOS
+// TABELAS DE COBRANÇA, PAGAMENTO E EVENTOS
 // ================================
+
+// Duplicatas da NFe (Cobrança/Parcelamento)
+model NfeDuplicata {
+  id                    String @id @default(cuid())
+  nfeId                 String
+
+  numero                String @db.VarChar(20) // Número da duplicata (ex: 001, 002, 003)
+  dataVencimento        DateTime
+  valor                 Decimal @db.Decimal(15,2)
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  // Relacionamentos
+  nfe                   Nfe @relation(fields: [nfeId], references: [id], onDelete: Cascade)
+
+  @@map("nfe_duplicatas")
+}
 
 // Pagamentos da NFe
 model NfePagamento {

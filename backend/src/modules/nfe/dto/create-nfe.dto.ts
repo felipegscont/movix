@@ -1,5 +1,6 @@
 import { IsString, IsInt, IsOptional, IsArray, ValidateNested, IsNumber, IsDateString, IsIn } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
+import { CreateNfeDuplicataDto } from './create-nfe-duplicata.dto';
 
 export class CreateNfeItemDto {
   @IsString()
@@ -195,6 +196,31 @@ export class CreateNfeDto {
   @IsNumber({ maxDecimalPlaces: 2 })
   valorOutros?: number;
 
+  // Totalizadores Raros (baseado em XMLs reais)
+  // XML: <vICMSDeson>0.00</vICMSDeson>
+  @IsOptional()
+  @Transform(({ value }) => value ? parseFloat(value) : 0)
+  @IsNumber({ maxDecimalPlaces: 2 })
+  valorICMSDesonerado?: number;
+
+  // XML: <vFCP>0.00</vFCP> (Fundo de Combate à Pobreza)
+  @IsOptional()
+  @Transform(({ value }) => value ? parseFloat(value) : 0)
+  @IsNumber({ maxDecimalPlaces: 2 })
+  valorFCP?: number;
+
+  // XML: <vII>0.00</vII> (Imposto de Importação)
+  @IsOptional()
+  @Transform(({ value }) => value ? parseFloat(value) : 0)
+  @IsNumber({ maxDecimalPlaces: 2 })
+  valorII?: number;
+
+  // XML: <vOutro>0.00</vOutro> (Outras Despesas Acessórias)
+  @IsOptional()
+  @Transform(({ value }) => value ? parseFloat(value) : 0)
+  @IsNumber({ maxDecimalPlaces: 2 })
+  valorOutrasDespesas?: number;
+
   @IsOptional()
   @IsString()
   informacoesAdicionais?: string;
@@ -207,6 +233,14 @@ export class CreateNfeDto {
   @ValidateNested({ each: true })
   @Type(() => CreateNfeItemDto)
   itens: CreateNfeItemDto[];
+
+  // Duplicatas (baseado em XML real)
+  // XML: <dup><nDup>001</nDup><dVenc>2025-10-06</dVenc><vDup>7200.00</vDup></dup>
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateNfeDuplicataDto)
+  duplicatas?: CreateNfeDuplicataDto[];
 
   @IsOptional()
   @IsArray()

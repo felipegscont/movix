@@ -24,6 +24,13 @@ export interface NfeItem {
   };
 }
 
+export interface NfeDuplicata {
+  id?: string;
+  numero: string;
+  dataVencimento: string;
+  valor: number;
+}
+
 export interface NfePagamento {
   id: string;
   formaPagamento: string;
@@ -56,6 +63,11 @@ export interface Nfe {
   valorTotal: number;
   valorTotalProdutos: number;
   valorTotalTributos: number;
+  // Totalizadores raros (baseado em XMLs reais)
+  valorICMSDesonerado?: number;
+  valorFCP?: number;
+  valorII?: number;
+  valorOutrasDespesas?: number;
   informacoesAdicionais?: string;
   informacoesFisco?: string;
   status: 'DIGITACAO' | 'AUTORIZADA' | 'CANCELADA' | 'REJEITADA';
@@ -77,6 +89,7 @@ export interface Nfe {
     tipo: string;
   };
   itens?: NfeItem[];
+  duplicatas?: NfeDuplicata[];
   pagamentos?: NfePagamento[];
 }
 
@@ -89,6 +102,12 @@ export interface CreateNfeItemData {
   valorDesconto?: number;
   valorFrete?: number;
   valorSeguro?: number;
+}
+
+export interface CreateNfeDuplicataData {
+  numero: string;
+  dataVencimento: string;
+  valor: number;
 }
 
 export interface CreateNfePagamentoData {
@@ -116,9 +135,15 @@ export interface CreateNfeData {
   valorSeguro?: number;
   valorDesconto?: number;
   valorOutros?: number;
+  // Totalizadores raros (baseado em XMLs reais)
+  valorICMSDesonerado?: number;
+  valorFCP?: number;
+  valorII?: number;
+  valorOutrasDespesas?: number;
   informacoesAdicionais?: string;
   informacoesFisco?: string;
   itens: CreateNfeItemData[];
+  duplicatas?: CreateNfeDuplicataData[];
   pagamentos?: CreateNfePagamentoData[];
 }
 

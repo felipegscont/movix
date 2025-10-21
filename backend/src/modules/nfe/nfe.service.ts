@@ -60,6 +60,11 @@ export class NfeService {
         valorIPI: totais.valorIPI,
         valorPIS: totais.valorPIS,
         valorCOFINS: totais.valorCOFINS,
+        // Totalizadores raros (baseado em XMLs reais)
+        valorICMSDesonerado: createNfeDto.valorICMSDesonerado || 0,
+        valorFCP: createNfeDto.valorFCP || 0,
+        valorII: createNfeDto.valorII || 0,
+        valorOutrasDespesas: createNfeDto.valorOutrasDespesas || 0,
         informacoesAdicionais: createNfeDto.informacoesAdicionais,
         informacoesFisco: createNfeDto.informacoesFisco,
         status: 'DIGITACAO',
@@ -149,6 +154,29 @@ export class NfeService {
           valor: itemDto.cofinsValor || 0,
         },
       });
+    }
+
+    // Criar duplicatas se fornecidas (baseado em XML real)
+    // XML: <dup><nDup>001</nDup><dVenc>2025-10-06</dVenc><vDup>7200.00</vDup></dup>
+    if (createNfeDto.duplicatas && createNfeDto.duplicatas.length > 0) {
+      // Validar soma das duplicatas = valor total da NFe
+      const somaDuplicatas = createNfeDto.duplicatas.reduce((sum, dup) => sum + dup.valor, 0);
+      if (Math.abs(somaDuplicatas - totais.valorTotal) > 0.01) {
+        throw new BadRequestException(
+          `Soma das duplicatas (${somaDuplicatas.toFixed(2)}) deve ser igual ao valor total da NFe (${totais.valorTotal.toFixed(2)})`
+        );
+      }
+
+      for (const duplicataDto of createNfeDto.duplicatas) {
+        await this.prisma.nfeDuplicata.create({
+          data: {
+            nfeId: nfe.id,
+            numero: duplicataDto.numero,
+            dataVencimento: new Date(duplicataDto.dataVencimento),
+            valor: duplicataDto.valor,
+          },
+        });
+      }
     }
 
     // Criar pagamentos se fornecidos
@@ -245,6 +273,9 @@ export class NfeService {
           },
           orderBy: { numeroItem: 'asc' },
         },
+        duplicatas: {
+          orderBy: { numero: 'asc' },
+        },
         pagamentos: true,
         eventos: {
           orderBy: { dataEvento: 'desc' },
@@ -263,6 +294,7 @@ export class NfeService {
     // Verificar se a NFe existe
     const nfeExistente = await this.prisma.nfe.findUnique({
       where: { id },
+      include: { duplicatas: true },
     });
 
     if (!nfeExistente) {
@@ -274,40 +306,86 @@ export class NfeService {
       throw new ConflictException('NFe não pode ser editada após transmissão');
     }
 
-    // Atualizar a NFe
-    const nfeAtualizada = await this.prisma.nfe.update({
-      where: { id },
-      data: updateNfeDto,
-      include: {
-        emitente: {
-          include: {
-            municipio: { include: { estado: true } },
-            estado: true,
+    // Extrair duplicatas do DTO
+    const { duplicatas, ...dadosNfe } = updateNfeDto as any;
+
+    // Usar transação para garantir atomicidade
+    const nfeAtualizada = await this.prisma.$transaction(async (prisma) => {
+      // Atualizar dados da NFe
+      const nfe = await prisma.nfe.update({
+        where: { id },
+        data: dadosNfe,
+      });
+
+      // Gerenciar duplicatas se fornecidas
+      if (duplicatas !== undefined) {
+        // Deletar duplicatas antigas
+        await prisma.nfeDuplicata.deleteMany({
+          where: { nfeId: id },
+        });
+
+        // Criar novas duplicatas
+        if (duplicatas && duplicatas.length > 0) {
+          // Validar soma das duplicatas
+          const somaDuplicatas = duplicatas.reduce((sum, dup) => sum + dup.valor, 0);
+          const valorTotal = dadosNfe.valorTotal || nfeExistente.valorTotal;
+
+          if (Math.abs(somaDuplicatas - valorTotal) > 0.01) {
+            throw new BadRequestException(
+              `Soma das duplicatas (${somaDuplicatas.toFixed(2)}) deve ser igual ao valor total da NFe (${valorTotal.toFixed(2)})`
+            );
+          }
+
+          for (const duplicataDto of duplicatas) {
+            await prisma.nfeDuplicata.create({
+              data: {
+                nfeId: id,
+                numero: duplicataDto.numero,
+                dataVencimento: new Date(duplicataDto.dataVencimento),
+                valor: duplicataDto.valor,
+              },
+            });
+          }
+        }
+      }
+
+      // Buscar NFe atualizada com todos os relacionamentos
+      return prisma.nfe.findUnique({
+        where: { id },
+        include: {
+          emitente: {
+            include: {
+              municipio: { include: { estado: true } },
+              estado: true,
+            },
+          },
+          cliente: {
+            include: {
+              municipio: { include: { estado: true } },
+              estado: true,
+            },
+          },
+          itens: {
+            include: {
+              produto: { include: { ncm: true } },
+              ncm: true,
+              cfop: true,
+              icms: { include: { cst: true, csosn: true } },
+              ipi: { include: { cst: true } },
+              pis: { include: { cst: true } },
+              cofins: { include: { cst: true } },
+            },
+            orderBy: { numeroItem: 'asc' },
+          },
+          duplicatas: {
+            orderBy: { numero: 'asc' },
+          },
+          pagamentos: true,
+          eventos: {
+            orderBy: { dataEvento: 'desc' },
           },
         },
-        cliente: {
-          include: {
-            municipio: { include: { estado: true } },
-            estado: true,
-          },
-        },
-        itens: {
-          include: {
-            produto: { include: { ncm: true } },
-            ncm: true,
-            cfop: true,
-            icms: { include: { cst: true, csosn: true } },
-            ipi: { include: { cst: true } },
-            pis: { include: { cst: true } },
-            cofins: { include: { cst: true } },
-          },
-          orderBy: { numeroItem: 'asc' },
-        },
-        pagamentos: true,
-        eventos: {
-          orderBy: { dataEvento: 'desc' },
-        },
-      },
+      });
     });
 
     return nfeAtualizada;
