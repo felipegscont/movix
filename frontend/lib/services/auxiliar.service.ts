@@ -87,10 +87,6 @@ export class AuxiliarService {
     return this.getMunicipios(estadoId);
   }
 
-  static async getMunicipiosByEstado(estadoId: string): Promise<Municipio[]> {
-    return this.getMunicipios(estadoId);
-  }
-
   static async getNCMs(search?: string): Promise<NCM[]> {
     const params = new URLSearchParams();
     if (search) {
