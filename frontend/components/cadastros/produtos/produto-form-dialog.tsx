@@ -228,7 +228,13 @@ export function ProdutoFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[90vw] w-[90vw] max-h-[90vh] h-[90vh] sm:max-w-[90vw] flex flex-col p-0">
+      <DialogContent
+        className="max-w-[90vw] w-[90vw] max-h-[90vh] h-[90vh] sm:max-w-[90vw] flex flex-col p-0"
+        onInteractOutside={(e) => {
+          // Previne o fechamento do dialog ao clicar fora (overlay ou toasts)
+          e.preventDefault()
+        }}
+      >
         <DialogHeader className="px-6 py-4 border-b">
           <div className="flex items-center justify-between">
             <div>
