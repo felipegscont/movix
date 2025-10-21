@@ -15,7 +15,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { IconChevronDown, IconDeviceFloppy, IconX, IconPlus, IconTrash, IconLoader2 } from "@tabler/icons-react"
+import { IconChevronDown, IconDeviceFloppy, IconX, IconPlus, IconTrash, IconLoader2, IconAlertCircle } from "@tabler/icons-react"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import Link from "next/link"
 import { DuplicatasForm } from "./duplicatas-form"
 import { CreateNfeDuplicataData, NfeService } from "@/lib/services/nfe.service"
 import { EmitenteService } from "@/lib/services/emitente.service"
@@ -133,9 +135,8 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
         setSerie(emitenteAtivo.serieNfe || 1)
       } else {
         console.error("Erro ao carregar emitente:", results[0].reason)
-        toast.error("Erro ao carregar emitente. Configure um emitente ativo antes de criar NFe.")
-        // Não permitir continuar sem emitente
-        return
+        // Emitente não configurado - não é erro fatal, apenas aviso
+        setEmitente(null)
       }
 
       // Processar clientes
@@ -383,7 +384,7 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Card informativo do Emitente */}
-              {emitente && (
+              {emitente ? (
                 <div className="p-4 bg-muted rounded-lg border">
                   <div className="flex items-center justify-between">
                     <div>
@@ -399,6 +400,17 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
                     </div>
                   </div>
                 </div>
+              ) : (
+                <Alert variant="destructive">
+                  <IconAlertCircle className="h-4 w-4" />
+                  <AlertTitle>Emitente não configurado</AlertTitle>
+                  <AlertDescription>
+                    Você precisa cadastrar um emitente antes de criar NFe.{" "}
+                    <Link href="/configuracoes/emitente" className="underline font-medium">
+                      Clique aqui para configurar
+                    </Link>
+                  </AlertDescription>
+                </Alert>
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
