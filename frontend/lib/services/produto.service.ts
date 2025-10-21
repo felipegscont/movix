@@ -89,17 +89,17 @@ export interface ProdutosResponse {
 }
 
 export class ProdutoService {
-  static async getAll(page = 1, limit = 10, search?: string): Promise<ProdutosResponse> {
-    const params = new URLSearchParams({
-      page: page.toString(),
-      limit: limit.toString(),
+  static async getAll(params?: { page?: number; limit?: number; search?: string }): Promise<ProdutosResponse> {
+    const queryParams = new URLSearchParams({
+      page: (params?.page || 1).toString(),
+      limit: (params?.limit || 10).toString(),
     });
-    
-    if (search) {
-      params.append('search', search);
+
+    if (params?.search) {
+      queryParams.append('search', params.search);
     }
 
-    const response = await fetch(`${API_BASE_URL}/produtos?${params}`);
+    const response = await fetch(`${API_BASE_URL}/produtos?${queryParams}`);
     if (!response.ok) {
       throw new Error('Erro ao buscar produtos');
     }

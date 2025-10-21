@@ -87,7 +87,7 @@ export class AuxiliarService {
     return this.getMunicipios(estadoId);
   }
 
-  static async getNCMs(search?: string): Promise<NCM[]> {
+  static async getNcms(search?: string): Promise<NCM[]> {
     const params = new URLSearchParams();
     if (search) {
       params.append('search', search);
@@ -101,7 +101,12 @@ export class AuxiliarService {
     return data.data;
   }
 
-  static async getCFOPs(search?: string): Promise<CFOP[]> {
+  // Alias para compatibilidade
+  static async getNCMs(search?: string): Promise<NCM[]> {
+    return this.getNcms(search);
+  }
+
+  static async getCfops(search?: string): Promise<CFOP[]> {
     const params = new URLSearchParams();
     if (search) {
       params.append('search', search);
@@ -113,6 +118,11 @@ export class AuxiliarService {
     }
     const data = await response.json();
     return data.data;
+  }
+
+  // Alias para compatibilidade
+  static async getCFOPs(search?: string): Promise<CFOP[]> {
+    return this.getCfops(search);
   }
 
   static async getCSTs(tipo?: string): Promise<CST[]> {
