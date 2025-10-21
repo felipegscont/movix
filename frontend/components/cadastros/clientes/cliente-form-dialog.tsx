@@ -1,9 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
+import { useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -35,34 +32,10 @@ import { Separator } from "@/components/ui/separator"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { ClienteService } from "@/lib/services/cliente.service"
-import { AuxiliarService, type Estado, type Municipio } from "@/lib/services/auxiliar.service"
-import { ExternalApiService, type CnpjData, type CepData } from "@/lib/services/external-api.service"
-import { toast } from "sonner"
-import { User, MapPin, Phone, FileText, Settings, Search } from "lucide-react"
+import { useClienteForm } from "@/hooks/clientes/use-cliente-form"
+import { User, MapPin, Phone, FileText, Search } from "lucide-react"
 
-const clienteFormSchema = z.object({
-  tipo: z.enum(["FISICA", "JURIDICA"]).default("FISICA"),
-  documento: z.string().min(11, "Documento deve ter pelo menos 11 caracteres"),
-  nome: z.string().min(1, "Nome é obrigatório"),
-  nomeFantasia: z.string().optional().or(z.literal("")),
-  inscricaoEstadual: z.string().optional().or(z.literal("")),
-  inscricaoMunicipal: z.string().optional().or(z.literal("")),
-  logradouro: z.string().min(1, "Logradouro é obrigatório"),
-  numero: z.string().min(1, "Número é obrigatório"),
-  complemento: z.string().optional().or(z.literal("")),
-  bairro: z.string().min(1, "Bairro é obrigatório"),
-  cep: z.string().min(8, "CEP deve ter 8 caracteres"),
-  municipioId: z.string().min(1, "Município é obrigatório"),
-  estadoId: z.string().min(1, "Estado é obrigatório"),
-  telefone: z.string().optional().or(z.literal("")),
-  celular: z.string().optional().or(z.literal("")),
-  email: z.string().email("Email inválido").optional().or(z.literal("")),
-  indicadorIE: z.number().optional(),
-  ativo: z.boolean().default(true),
-})
 
-type ClienteFormValues = z.infer<typeof clienteFormSchema>
 
 interface ClienteFormDialogProps {
   open: boolean
@@ -77,286 +50,42 @@ export function ClienteFormDialog({
   clienteId,
   onSuccess,
 }: ClienteFormDialogProps) {
-  const [loading, setLoading] = useState(false)
-  const [estados, setEstados] = useState<Estado[]>([])
-  const [municipios, setMunicipios] = useState<Municipio[]>([])
-  const [loadingCnpj, setLoadingCnpj] = useState(false)
-  const [loadingCep, setLoadingCep] = useState(false)
-
-  const form = useForm({
-    resolver: zodResolver(clienteFormSchema),
-    mode: "onBlur", // Valida apenas quando o campo perde o foco
-    defaultValues: {
-      tipo: "FISICA",
-      documento: "",
-      nome: "",
-      nomeFantasia: "",
-      inscricaoEstadual: "",
-      inscricaoMunicipal: "",
-      logradouro: "",
-      numero: "",
-      complemento: "",
-      bairro: "",
-      cep: "",
-      municipioId: "",
-      estadoId: "",
-      telefone: "",
-      celular: "",
-      email: "",
-      indicadorIE: 9,
-      ativo: true,
-    },
-  })
+  const {
+    form,
+    loading,
+    loadingCnpj,
+    loadingCep,
+    loadingEstados,
+    loadingMunicipios,
+    handleSubmit,
+    handleDocumentoChange,
+    handleCepSearch,
+    loadCliente,
+    resetForm,
+    loadMunicipios,
+    estados,
+    municipios,
+  } = useClienteForm({ clienteId, onSuccess })
 
   const watchEstadoId = form.watch("estadoId")
-
-  useEffect(() => {
-    loadEstados()
-  }, [])
 
   useEffect(() => {
     if (open && clienteId) {
       loadCliente()
     } else if (open) {
-      form.reset()
+      resetForm()
     }
-  }, [open, clienteId])
+  }, [open, clienteId, loadCliente, resetForm])
 
-  useEffect(() => {
-    if (watchEstadoId) {
-      loadMunicipios(watchEstadoId)
-      form.setValue("municipioId", "")
-    }
-  }, [watchEstadoId])
 
-  const loadEstados = async () => {
-    try {
-      const data = await AuxiliarService.getEstados()
-      setEstados(data)
-    } catch (error) {
-      console.error("Erro ao carregar estados:", error)
-    }
-  }
 
-  const loadMunicipios = async (estadoId: string): Promise<void> => {
-    try {
-      const data = await AuxiliarService.getMunicipiosByEstado(estadoId)
-      setMunicipios(data)
-    } catch (error) {
-      console.error("Erro ao carregar municípios:", error)
-    }
-  }
 
-  // Consulta automática de CNPJ quando o documento tem 14 dígitos
-  const handleDocumentoChange = async (value: string) => {
-    const numbers = value.replace(/\D/g, '')
 
-    // Detecta automaticamente o tipo baseado no documento
-    if (numbers.length <= 11) {
-      form.setValue('tipo', 'FISICA')
-    } else if (numbers.length <= 14) {
-      form.setValue('tipo', 'JURIDICA')
 
-      // Se tem exatamente 14 dígitos, consulta o CNPJ automaticamente
-      if (numbers.length === 14 && !loadingCnpj) {
-        setLoadingCnpj(true)
-        try {
-          const cnpjData = await ExternalApiService.consultarCnpj(numbers)
-          if (cnpjData) {
-            handleCnpjDataLoaded(cnpjData)
-            toast.success("Dados do CNPJ carregados automaticamente!")
-          }
-        } catch (error) {
-          console.warn("Erro ao consultar CNPJ:", error)
-          // Não mostra erro para o usuário, apenas não preenche automaticamente
-        } finally {
-          setLoadingCnpj(false)
-        }
-      }
-    }
-  }
 
-  // Busca manual de CEP
-  const handleCepSearch = async () => {
-    const cep = form.getValues("cep")?.replace(/\D/g, '')
-
-    if (!cep || cep.length !== 8) {
-      toast.error("Digite um CEP válido com 8 dígitos")
-      return
-    }
-
-    setLoadingCep(true)
-    try {
-      const cepData = await ExternalApiService.consultarCep(cep)
-      if (cepData) {
-        handleCepDataLoaded(cepData)
-        toast.success("Endereço encontrado!")
-      }
-    } catch (error) {
-      console.error("Erro ao consultar CEP:", error)
-      toast.error("Erro ao consultar CEP. Verifique se o CEP está correto.")
-    } finally {
-      setLoadingCep(false)
-    }
-  }
-
-  // Auto-preenchimento por CNPJ
-  const handleCnpjDataLoaded = (cnpjData: CnpjData) => {
-    if (!cnpjData) {
-      console.warn('Dados do CNPJ não recebidos')
-      return
-    }
-
-    // Preenche dados da empresa
-    form.setValue("nome", cnpjData.razaoSocial || "")
-    form.setValue("nomeFantasia", cnpjData.nomeFantasia || "")
-    form.setValue("telefone", cnpjData.telefone || "")
-    form.setValue("email", cnpjData.email || "")
-    form.setValue("inscricaoEstadual", cnpjData.inscricoesEstaduais?.find(ie => ie.ativo)?.numero || "")
-
-    // Preenche dados do endereço
-    form.setValue("logradouro", cnpjData.logradouro || "")
-    form.setValue("numero", cnpjData.numero || "")
-    form.setValue("complemento", cnpjData.complemento || "")
-    form.setValue("bairro", cnpjData.bairro || "")
-    form.setValue("cep", typeof cnpjData.cep === 'string' ? cnpjData.cep.replace(/\D/g, '') : "")
-
-    // Se tem UF, busca e seleciona o estado
-    if (cnpjData.uf) {
-      const estado = estados.find(e => e.uf === cnpjData.uf)
-      if (estado) {
-        form.setValue("estadoId", estado.id)
-
-        // Se tem município, carrega municípios e seleciona
-        if (cnpjData.municipio) {
-          loadMunicipios(estado.id).then(() => {
-            // Busca o município após carregar a lista
-            AuxiliarService.getMunicipiosByEstado(estado.id).then(municipiosData => {
-              const municipio = municipiosData.find(m =>
-                m.nome.toLowerCase() === cnpjData.municipio?.toLowerCase()
-              )
-              if (municipio) {
-                form.setValue("municipioId", municipio.id)
-              }
-            }).catch(error => {
-              console.warn('Erro ao buscar municípios:', error)
-            })
-          }).catch(error => {
-            console.warn('Erro ao carregar municípios:', error)
-          })
-        }
-      }
-    }
-  }
-
-  // Auto-preenchimento por CEP
-  const handleCepDataLoaded = (cepData: CepData) => {
-    if (!cepData) {
-      console.warn('Dados do CEP não recebidos')
-      return
-    }
-
-    // Preenche dados do endereço
-    form.setValue("logradouro", cepData.logradouro || "")
-    form.setValue("bairro", cepData.bairro || "")
-
-    // Se tem UF, busca estado e município
-    if (cepData.uf) {
-      const estado = estados.find(e => e.uf === cepData.uf)
-      if (estado) {
-        form.setValue("estadoId", estado.id)
-
-        // Se tem localidade, carrega municípios e seleciona
-        if (cepData.localidade) {
-          loadMunicipios(estado.id).then(() => {
-            // Busca o município após carregar a lista
-            AuxiliarService.getMunicipiosByEstado(estado.id).then(municipiosData => {
-              const municipio = municipiosData.find(m =>
-                m.nome.toLowerCase() === cepData.localidade?.toLowerCase()
-              )
-              if (municipio) {
-                form.setValue("municipioId", municipio.id)
-              }
-            }).catch(error => {
-              console.warn('Erro ao buscar municípios:', error)
-            })
-          }).catch(error => {
-            console.warn('Erro ao carregar municípios:', error)
-          })
-        }
-      }
-    }
-  }
-
-  const loadCliente = async () => {
-    if (!clienteId) return
-
-    try {
-      setLoading(true)
-      const cliente = await ClienteService.getById(clienteId)
-      form.reset({
-        tipo: cliente.tipo,
-        documento: cliente.documento,
-        nome: cliente.nome,
-        nomeFantasia: cliente.nomeFantasia || "",
-        inscricaoEstadual: cliente.inscricaoEstadual || "",
-        inscricaoMunicipal: cliente.inscricaoMunicipal || "",
-        logradouro: cliente.logradouro,
-        numero: cliente.numero,
-        complemento: cliente.complemento || "",
-        bairro: cliente.bairro,
-        cep: cliente.cep,
-        municipioId: cliente.municipioId,
-        estadoId: cliente.estadoId,
-        telefone: cliente.telefone || "",
-        celular: cliente.celular || "",
-        email: cliente.email || "",
-        indicadorIE: cliente.indicadorIE || 9,
-        ativo: cliente.ativo,
-      })
-    } catch (error) {
-      console.error("Erro ao carregar cliente:", error)
-      toast.error("Erro ao carregar dados do cliente")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const onSubmit = async (values: ClienteFormValues) => {
-    try {
-      setLoading(true)
-
-      // Limpa campos opcionais vazios (converte string vazia para undefined)
-      const cleanedValues = {
-        ...values,
-        nomeFantasia: values.nomeFantasia?.trim() || undefined,
-        inscricaoEstadual: values.inscricaoEstadual?.trim() || undefined,
-        inscricaoMunicipal: values.inscricaoMunicipal?.trim() || undefined,
-        complemento: values.complemento?.trim() || undefined,
-        telefone: values.telefone?.trim() || undefined,
-        celular: values.celular?.trim() || undefined,
-        email: values.email?.trim() || undefined,
-      }
-
-      console.log("Valores limpos:", cleanedValues)
-
-      if (clienteId) {
-        await ClienteService.update(clienteId, cleanedValues)
-        toast.success("Cliente atualizado com sucesso!")
-      } else {
-        await ClienteService.create(cleanedValues)
-        toast.success("Cliente criado com sucesso!")
-      }
-
-      onSuccess?.()
-      onOpenChange(false)
-    } catch (error: any) {
-      console.error("Erro ao salvar cliente:", error)
-      console.error("Valores que causaram erro:", values)
-      toast.error(error.message || "Erro ao salvar cliente")
-    } finally {
-      setLoading(false)
-    }
+  const onSubmit = async (values: any) => {
+    await handleSubmit(values)
+    onOpenChange(false)
   }
 
   return (

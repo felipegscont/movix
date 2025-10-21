@@ -7,6 +7,15 @@ import { ClientesSectionCards } from "@/components/cadastros/clientes/clientes-s
 import { ClientesDataTable } from "@/components/cadastros/clientes/clientes-data-table"
 import { SidebarInset } from "@/components/ui/sidebar"
 
+/**
+ * Página principal de gerenciamento de clientes
+ *
+ * Funcionalidades:
+ * - Exibição de estatísticas de clientes em cards
+ * - Listagem de clientes com filtros e paginação
+ * - Criação, edição e exclusão de clientes
+ * - Busca e filtros avançados
+ */
 export default function ClientesPage() {
   return (
     <SidebarLayout>

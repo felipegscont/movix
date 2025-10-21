@@ -1,50 +1,16 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import { IconTrendingUp, IconUsers, IconUserCheck, IconUserPlus } from "@tabler/icons-react"
-
 import {
   Card,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-
-interface ClienteStats {
-  totalClientes: number
-  clientesAtivos: number
-  clientesNovos: number
-  crescimentoMes: number
-}
+import { useClientes } from "@/hooks/clientes/use-clientes"
 
 export function ClientesSectionCards() {
-  const [stats, setStats] = useState<ClienteStats>({
-    totalClientes: 0,
-    clientesAtivos: 0,
-    clientesNovos: 0,
-    crescimentoMes: 0,
-  })
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    loadStats()
-  }, [])
-
-  const loadStats = async () => {
-    try {
-      // Simular dados por enquanto - depois integrar com API real
-      setStats({
-        totalClientes: 1234,
-        clientesAtivos: 1180,
-        clientesNovos: 45,
-        crescimentoMes: 8.5,
-      })
-    } catch (error) {
-      console.error('Erro ao carregar estatísticas:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const { stats, statsLoading: loading } = useClientes()
 
   const formatPercentage = (value: number) => {
     return `${value > 0 ? '+' : ''}${value.toFixed(1)}%`

@@ -65,13 +65,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { ClienteService } from "@/lib/services/cliente.service"
 import { ClienteFormDialog } from "./cliente-form-dialog"
 import { DataTableFilter } from "@/components/data-table-filter"
 import { useDataTableFilters } from "@/components/data-table-filter"
 import { createColumnConfigHelper } from "@/components/data-table-filter/core/filters"
 import type { Locale } from "@/components/data-table-filter/lib/i18n"
 import { Cliente } from "@/lib/services/cliente.service"
+import { useClientes } from "@/hooks/clientes/use-clientes"
 
 // Configuração dos filtros do Bazza UI
 const dtf = createColumnConfigHelper<Cliente>()
@@ -124,8 +124,7 @@ const filterColumnsConfig = [
 
 export function ClientesDataTable() {
   const router = useRouter()
-  const [data, setData] = useState<Cliente[]>([])
-  const [loading, setLoading] = useState(true)
+  const { clientes, loading, deleteCliente, refreshData } = useClientes()
   const [rowSelection, setRowSelection] = useState({})
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -144,15 +143,15 @@ export function ClientesDataTable() {
     actions: bazzaActions,
   } = useDataTableFilters({
     strategy: "client",
-    data,
+    data: clientes,
     columnsConfig: filterColumnsConfig,
   })
 
   // Aplicar filtros do Bazza UI aos dados
   const filteredData = React.useMemo(() => {
-    if (bazzaFilters.length === 0) return data
+    if (bazzaFilters.length === 0) return clientes
 
-    return data.filter((row) => {
+    return clientes.filter((row) => {
       return bazzaFilters.every((filter) => {
         const column = bazzaColumns.find((col) => col.id === filter.columnId)
         if (!column) return true
@@ -202,7 +201,7 @@ export function ClientesDataTable() {
         return true
       })
     })
-  }, [data, bazzaFilters, bazzaColumns])
+  }, [clientes, bazzaFilters, bazzaColumns])
 
   const columns: ColumnDef<Cliente>[] = [
     {
@@ -399,22 +398,7 @@ export function ClientesDataTable() {
     getFacetedUniqueValues: getFacetedUniqueValues(),
   })
 
-  useEffect(() => {
-    loadData()
-  }, [])
 
-  const loadData = async () => {
-    try {
-      setLoading(true)
-      const response = await ClienteService.getAll()
-      setData(response.data)
-    } catch (error) {
-      console.error("Erro ao carregar clientes:", error)
-      toast.error("Erro ao carregar clientes")
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const handleEdit = (id: string) => {
     setSelectedClienteId(id)
@@ -425,17 +409,14 @@ export function ClientesDataTable() {
     if (!confirm("Tem certeza que deseja excluir este cliente?")) return
 
     try {
-      await ClienteService.delete(id)
-      toast.success("Cliente excluído com sucesso!")
-      loadData()
+      await deleteCliente(id)
     } catch (error) {
-      console.error("Erro ao excluir cliente:", error)
-      toast.error("Erro ao excluir cliente")
+      // Error handling is done in the hook
     }
   }
 
   const handleSuccess = () => {
-    loadData()
+    refreshData()
   }
 
   if (loading) {

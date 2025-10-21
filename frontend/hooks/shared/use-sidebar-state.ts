@@ -40,4 +40,3 @@ export function useSidebarState(defaultOpen: boolean = true) {
 
   return [open, setOpen] as const
 }
-
