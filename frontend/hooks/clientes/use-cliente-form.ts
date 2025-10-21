@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { toast } from "sonner"
 import { ClienteService } from "@/lib/services/cliente.service"
+import { AuxiliarService } from "@/lib/services/auxiliar.service"
 import { useAuxiliar } from "@/hooks/shared/use-auxiliar"
 import { useExternalApis } from "@/hooks/shared/use-external-apis"
 import type { CnpjData, CepData } from "@/lib/services/external-api.service"
@@ -157,7 +158,8 @@ export function useClienteForm({ clienteId, onSuccess }: UseClienteFormProps): U
     }
   }, [clienteId, form])
 
-  const handleCnpjDataLoaded = useCallback((cnpjData: CnpjData) => {
+  const handleCnpjDataLoaded = useCallback(async (cnpjData: CnpjData) => {
+    // Preenche dados básicos
     form.setValue("nome", cnpjData.razaoSocial)
     if (cnpjData.nomeFantasia) {
       form.setValue("nomeFantasia", cnpjData.nomeFantasia)
@@ -183,18 +185,62 @@ export function useClienteForm({ clienteId, onSuccess }: UseClienteFormProps): U
     if (cnpjData.telefone) {
       form.setValue("telefone", cnpjData.telefone)
     }
-  }, [form])
 
-  const handleCepDataLoaded = useCallback((cepData: CepData) => {
+    // Busca e seleciona estado pela UF
+    if (cnpjData.uf && estados.length > 0) {
+      const estado = estados.find(e => e.uf === cnpjData.uf)
+      if (estado) {
+        form.setValue("estadoId", estado.id)
+
+        // Se tem município, carrega municípios e seleciona
+        if (cnpjData.municipio) {
+          try {
+            await loadMunicipios(estado.id)
+            const municipiosData = await AuxiliarService.getMunicipiosByEstado(estado.id)
+            const municipio = municipiosData.find(m =>
+              m.nome.toLowerCase().includes(cnpjData.municipio?.toLowerCase() || '') ||
+              cnpjData.municipio?.toLowerCase().includes(m.nome.toLowerCase() || '')
+            )
+            if (municipio) {
+              form.setValue("municipioId", municipio.id)
+            }
+          } catch (error) {
+            console.warn('Erro ao carregar municípios para CNPJ:', error)
+          }
+        }
+      }
+    }
+  }, [form, estados, loadMunicipios])
+
+  const handleCepDataLoaded = useCallback(async (cepData: CepData) => {
     form.setValue("logradouro", cepData.logradouro)
     form.setValue("bairro", cepData.bairro)
-    
-    // Find and set estado
-    const estado = estados.find(e => e.uf === cepData.uf)
-    if (estado) {
-      form.setValue("estadoId", estado.id)
+
+    // Busca e seleciona estado pela UF
+    if (cepData.uf && estados.length > 0) {
+      const estado = estados.find(e => e.uf === cepData.uf)
+      if (estado) {
+        form.setValue("estadoId", estado.id)
+
+        // Se tem localidade, carrega municípios e seleciona
+        if (cepData.localidade) {
+          try {
+            await loadMunicipios(estado.id)
+            const municipiosData = await AuxiliarService.getMunicipiosByEstado(estado.id)
+            const municipio = municipiosData.find(m =>
+              m.nome.toLowerCase().includes(cepData.localidade?.toLowerCase() || '') ||
+              cepData.localidade?.toLowerCase().includes(m.nome.toLowerCase() || '')
+            )
+            if (municipio) {
+              form.setValue("municipioId", municipio.id)
+            }
+          } catch (error) {
+            console.warn('Erro ao carregar municípios para CEP:', error)
+          }
+        }
+      }
     }
-  }, [form, estados])
+  }, [form, estados, loadMunicipios])
 
   const handleDocumentoChange = useCallback(async (value: string) => {
     const numbers = value.replace(/\D/g, '')
@@ -209,7 +255,7 @@ export function useClienteForm({ clienteId, onSuccess }: UseClienteFormProps): U
       if (numbers.length === 14 && !loadingCnpj) {
         const cnpjData = await consultarCnpj(numbers)
         if (cnpjData) {
-          handleCnpjDataLoaded(cnpjData)
+          await handleCnpjDataLoaded(cnpjData)
         }
       }
     }
@@ -225,7 +271,7 @@ export function useClienteForm({ clienteId, onSuccess }: UseClienteFormProps): U
 
     const cepData = await consultarCep(cep)
     if (cepData) {
-      handleCepDataLoaded(cepData)
+      await handleCepDataLoaded(cepData)
     }
   }, [form, consultarCep, handleCepDataLoaded])
 
