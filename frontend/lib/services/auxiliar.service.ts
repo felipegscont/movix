@@ -126,20 +126,32 @@ export class AuxiliarService {
   }
 
   static async getCESTs(): Promise<CEST[]> {
-    const response = await fetch(`${API_BASE_URL}/cests`);
-    if (!response.ok) {
-      throw new Error('Erro ao buscar CESTs');
+    try {
+      const response = await fetch(`${API_BASE_URL}/cests`);
+      if (!response.ok) {
+        console.warn('Endpoint /cests não encontrado, retornando lista vazia');
+        return [];
+      }
+      const data = await response.json();
+      return data.data || [];
+    } catch (error) {
+      console.warn('Erro ao buscar CESTs, retornando lista vazia:', error);
+      return [];
     }
-    const data = await response.json();
-    return data.data;
   }
 
   static async getCSOSNs(): Promise<CSOSN[]> {
-    const response = await fetch(`${API_BASE_URL}/csosns`);
-    if (!response.ok) {
-      throw new Error('Erro ao buscar CSOSNs');
+    try {
+      const response = await fetch(`${API_BASE_URL}/csosns`);
+      if (!response.ok) {
+        console.warn('Endpoint /csosns não encontrado, retornando lista vazia');
+        return [];
+      }
+      const data = await response.json();
+      return data.data || [];
+    } catch (error) {
+      console.warn('Erro ao buscar CSOSNs, retornando lista vazia:', error);
+      return [];
     }
-    const data = await response.json();
-    return data.data;
   }
 }
