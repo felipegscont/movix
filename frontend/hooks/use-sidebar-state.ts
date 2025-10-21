@@ -11,47 +11,55 @@ let isGlobalInitialized = false
 /**
  * Hook para gerenciar o estado persistente do sidebar
  * Mantém estado consistente durante navegação com next/link
+ * Evita erro de hidratação usando o mesmo valor inicial no servidor e cliente
  */
 export function useSidebarState(defaultOpen: boolean = true) {
-  // Inicializa com estado global se já foi carregado, senão usa o valor do localStorage ou padrão
-  const [open, setOpen] = useState<boolean>(() => {
-    if (typeof window === "undefined") {
-      return defaultOpen
-    }
+  // SEMPRE inicia com defaultOpen para evitar erro de hidratação
+  // O valor do localStorage será carregado após a montagem
+  const [open, setOpen] = useState<boolean>(defaultOpen)
+  const [mounted, setMounted] = useState(false)
+
+  // Carrega o valor do localStorage após a montagem (apenas no cliente)
+  useEffect(() => {
+    setMounted(true)
 
     // Se já temos estado global, usa ele
     if (globalSidebarState !== null) {
-      return globalSidebarState
+      setOpen(globalSidebarState)
+      return
     }
 
     // Senão, tenta carregar do localStorage
     try {
       const stored = localStorage.getItem(SIDEBAR_STORAGE_KEY)
-      const initialValue = stored !== null ? stored === "true" : defaultOpen
-      globalSidebarState = initialValue
+      if (stored !== null) {
+        const storedValue = stored === "true"
+        setOpen(storedValue)
+        globalSidebarState = storedValue
+      } else {
+        globalSidebarState = defaultOpen
+      }
       isGlobalInitialized = true
-      return initialValue
     } catch (error) {
       console.error("Erro ao ler estado do sidebar:", error)
       globalSidebarState = defaultOpen
       isGlobalInitialized = true
-      return defaultOpen
     }
-  })
+  }, [defaultOpen])
 
-  // Sincroniza com estado global quando muda
+  // Sincroniza com estado global e localStorage quando muda
   useEffect(() => {
+    if (!mounted) return
+
     globalSidebarState = open
 
     // Salva no localStorage
-    if (typeof window !== "undefined" && isGlobalInitialized) {
-      try {
-        localStorage.setItem(SIDEBAR_STORAGE_KEY, String(open))
-      } catch (error) {
-        console.error("Erro ao salvar estado do sidebar:", error)
-      }
+    try {
+      localStorage.setItem(SIDEBAR_STORAGE_KEY, String(open))
+    } catch (error) {
+      console.error("Erro ao salvar estado do sidebar:", error)
     }
-  }, [open])
+  }, [open, mounted])
 
   return [open, setOpen] as const
 }

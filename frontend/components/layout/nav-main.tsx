@@ -53,7 +53,13 @@ export function NavMain({
         </SidebarMenu>
         <SidebarMenu>
           {items.map((item) => {
-            const isActive = pathname === item.url || pathname.startsWith(item.url + "/")
+            // Para itens com subitens, verifica se algum subitem está ativo
+            const hasActiveSubItem = item.items?.some(subItem =>
+              pathname === subItem.url || pathname.startsWith(subItem.url + "/")
+            )
+
+            // Item está ativo se a URL principal corresponde OU se algum subitem está ativo
+            const isActive = pathname === item.url || pathname.startsWith(item.url + "/") || hasActiveSubItem
 
             // Item com subitens (collapsible)
             if (item.items && item.items.length > 0) {
@@ -75,7 +81,7 @@ export function NavMain({
                     <CollapsibleContent>
                       <SidebarMenuSub>
                         {item.items.map((subItem) => {
-                          const isSubActive = pathname === subItem.url
+                          const isSubActive = pathname === subItem.url || pathname.startsWith(subItem.url + "/")
                           return (
                             <SidebarMenuSubItem key={subItem.title}>
                               <SidebarMenuSubButton

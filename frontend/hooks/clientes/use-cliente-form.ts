@@ -85,7 +85,7 @@ interface UseClienteFormReturn {
   loadingMunicipios: boolean
 
   // Actions
-  handleSubmit: (data: any) => Promise<void>
+  handleSubmit: (data: any) => Promise<boolean>
   handleDocumentoChange: (value: string) => Promise<void>
   handleCepSearch: () => Promise<void>
   loadCliente: () => Promise<void>
@@ -100,10 +100,23 @@ interface UseClienteFormReturn {
   formatCnpj: (value: string) => string
   formatCep: (value: string) => string
   formatPhone: (value: string) => string
+
+  // Alert dialog
+  alertDialog: {
+    open: boolean
+    title: string
+    description: string
+    onClose: () => void
+  }
 }
 
 export function useClienteForm({ clienteId, onSuccess }: UseClienteFormProps): UseClienteFormReturn {
   const [loading, setLoading] = useState(false)
+  const [alertDialog, setAlertDialog] = useState({
+    open: false,
+    title: "",
+    description: ""
+  })
 
   // Use shared hooks
   const {
@@ -317,7 +330,7 @@ export function useClienteForm({ clienteId, onSuccess }: UseClienteFormProps): U
     }
   }, [form, consultarCep, handleCepDataLoaded])
 
-  const handleSubmit = useCallback(async (data: ClienteFormValues) => {
+  const handleSubmit = useCallback(async (data: ClienteFormValues): Promise<boolean> => {
     try {
       setLoading(true)
 
@@ -338,8 +351,6 @@ export function useClienteForm({ clienteId, onSuccess }: UseClienteFormProps): U
         cep: data.cep?.replace(/\D/g, '') || '',
       }
 
-      console.log("Dados limpos para envio:", cleanedData)
-
       if (clienteId) {
         await ClienteService.update(clienteId, cleanedData)
         toast.success("Cliente atualizado com sucesso!")
@@ -349,9 +360,31 @@ export function useClienteForm({ clienteId, onSuccess }: UseClienteFormProps): U
       }
 
       onSuccess?.()
-    } catch (error) {
-      console.error("Erro ao salvar cliente:", error)
-      toast.error("Erro ao salvar cliente")
+      return true // Sucesso
+    } catch (error: any) {
+      // Trata erros específicos com alert dialog
+      const errorMessage = error.message || "Erro desconhecido"
+
+      if (errorMessage.includes("Documento já cadastrado")) {
+        setAlertDialog({
+          open: true,
+          title: "Documento Duplicado",
+          description: `O ${data.tipo === 'FISICA' ? 'CPF' : 'CNPJ'} informado já está cadastrado no sistema. Verifique o documento ou consulte se o cliente já existe.`
+        })
+      } else if (errorMessage.includes("Email já cadastrado")) {
+        setAlertDialog({
+          open: true,
+          title: "Email Duplicado",
+          description: "O email informado já está cadastrado no sistema. Verifique o email ou use outro endereço."
+        })
+      } else {
+        setAlertDialog({
+          open: true,
+          title: "Erro ao Salvar Cliente",
+          description: `Ocorreu um erro ao salvar o cliente: ${errorMessage}`
+        })
+      }
+      return false // Falha
     } finally {
       setLoading(false)
     }
@@ -360,6 +393,10 @@ export function useClienteForm({ clienteId, onSuccess }: UseClienteFormProps): U
   const resetForm = useCallback(() => {
     form.reset()
   }, [form])
+
+  const closeAlertDialog = useCallback(() => {
+    setAlertDialog(prev => ({ ...prev, open: false }))
+  }, [])
 
   return {
     form,
@@ -380,5 +417,10 @@ export function useClienteForm({ clienteId, onSuccess }: UseClienteFormProps): U
     formatCnpj,
     formatCep,
     formatPhone,
+    // Alert dialog
+    alertDialog: {
+      ...alertDialog,
+      onClose: closeAlertDialog
+    },
   }
 }

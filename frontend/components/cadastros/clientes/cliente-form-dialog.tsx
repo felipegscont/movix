@@ -11,6 +11,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import {
   Form,
   FormControl,
   FormDescription,
@@ -68,6 +77,7 @@ export function ClienteFormDialog({
     formatCnpj,
     formatCep,
     formatPhone,
+    alertDialog,
   } = useClienteForm({ clienteId, onSuccess })
 
   const watchEstadoId = form.watch("estadoId")
@@ -87,12 +97,17 @@ export function ClienteFormDialog({
 
 
   const onSubmit = async (values: any) => {
-    await handleSubmit(values)
-    onOpenChange(false)
+    const success = await handleSubmit(values)
+    // Só fecha o dialog se o submit foi bem-sucedido
+    if (success) {
+      onOpenChange(false)
+    }
+    // Se falhou, o dialog permanece aberto e o AlertDialog é exibido
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[90vw] w-[90vw] max-h-[90vh] h-[90vh] sm:max-w-[90vw] flex flex-col p-0">
         <DialogHeader className="px-6 py-4 border-b">
           <DialogTitle className="text-xl font-semibold">
@@ -660,5 +675,26 @@ export function ClienteFormDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    {/* Alert Dialog para erros - modal={false} permite interação com Dialog pai */}
+    <AlertDialog open={alertDialog.open} onOpenChange={alertDialog.onClose} modal={false}>
+      <AlertDialogContent className="z-[60]">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center gap-2">
+            <span className="text-lg">⚠️</span>
+            {alertDialog.title}
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-base">
+            {alertDialog.description}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogAction>
+            Entendi
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   )
 }
