@@ -630,62 +630,32 @@ export function ClienteFormDialog({
           </Form>
         </div>
 
-        <DialogFooter className="px-6 py-4 border-t bg-muted/30">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full gap-4">
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center text-sm text-muted-foreground">
-                <Badge variant={clienteId ? "secondary" : "default"} className="mr-2">
-                  {clienteId ? "Edição" : "Novo"}
-                </Badge>
-                {clienteId ? "Editando cliente existente" : "Criando novo cliente"}
-              </div>
-              {form.formState.errors && Object.keys(form.formState.errors).length > 0 && (
-                <div className="flex items-center text-sm text-destructive">
-                  <Badge variant="destructive" className="mr-2">
-                    {Object.keys(form.formState.errors).length}
-                  </Badge>
-                  {Object.keys(form.formState.errors).length === 1
-                    ? "erro encontrado"
-                    : "erros encontrados"}
+        <DialogFooter className="px-6 py-4 border-t">
+          <div className="flex gap-3 w-full sm:w-auto sm:ml-auto">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={loading}
+              className="flex-1 sm:flex-none"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              disabled={loading}
+              onClick={form.handleSubmit(onSubmit)}
+              className="flex-1 sm:flex-none"
+            >
+              {loading ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Salvando...
                 </div>
+              ) : (
+                clienteId ? "Atualizar" : "Criar Cliente"
               )}
-              {form.formState.isDirty && !loading && (
-                <div className="flex items-center text-sm text-amber-600">
-                  <Badge variant="outline" className="mr-2 border-amber-600 text-amber-600">
-                    !
-                  </Badge>
-                  Há alterações não salvas
-                </div>
-              )}
-            </div>
-            <div className="flex gap-3 w-full sm:w-auto">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                disabled={loading}
-                className="flex-1 sm:flex-none min-w-[100px]"
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                disabled={loading}
-                onClick={form.handleSubmit(onSubmit)}
-                className="flex-1 sm:flex-none min-w-[140px]"
-              >
-                {loading ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Salvando...
-                  </div>
-                ) : (
-                  <>
-                    {clienteId ? "💾 Atualizar" : "✨ Criar Cliente"}
-                  </>
-                )}
-              </Button>
-            </div>
+            </Button>
           </div>
         </DialogFooter>
       </DialogContent>
