@@ -37,11 +37,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { FornecedorService } from "@/lib/services/fornecedor.service"
 import { AuxiliarService, type Estado, type Municipio } from "@/lib/services/auxiliar.service"
-import { DocumentoInput } from "@/components/shared/documento-input"
-import { CepInput } from "@/components/shared/cep-input"
-import { type CnpjData, type CepData } from "@/lib/services/external-api.service"
+import { ExternalApiService, type CnpjData, type CepData } from "@/lib/services/external-api.service"
 import { toast } from "sonner"
-import { User, MapPin, Phone, FileText, Settings } from "lucide-react"
+import { User, MapPin, Phone, FileText, Settings, Search } from "lucide-react"
 
 const fornecedorFormSchema = z.object({
   tipo: z.enum(["FISICA", "JURIDICA"]).default("JURIDICA"),
@@ -84,6 +82,8 @@ export function FornecedorFormDialog({
   const [loading, setLoading] = useState(false)
   const [estados, setEstados] = useState<Estado[]>([])
   const [municipios, setMunicipios] = useState<Municipio[]>([])
+  const [loadingCnpj, setLoadingCnpj] = useState(false)
+  const [loadingCep, setLoadingCep] = useState(false)
 
   const form = useForm({
     resolver: zodResolver(fornecedorFormSchema),
@@ -148,6 +148,59 @@ export function FornecedorFormDialog({
       setMunicipios(data)
     } catch (error) {
       console.error("Erro ao carregar municípios:", error)
+    }
+  }
+
+  // Consulta automática de CNPJ quando o documento tem 14 dígitos
+  const handleDocumentoChange = async (value: string) => {
+    const numbers = value.replace(/\D/g, '')
+
+    // Detecta automaticamente o tipo baseado no documento
+    if (numbers.length <= 11) {
+      form.setValue('tipo', 'FISICA')
+    } else if (numbers.length <= 14) {
+      form.setValue('tipo', 'JURIDICA')
+
+      // Se tem exatamente 14 dígitos, consulta o CNPJ automaticamente
+      if (numbers.length === 14 && !loadingCnpj) {
+        setLoadingCnpj(true)
+        try {
+          const cnpjData = await ExternalApiService.consultarCnpj(numbers)
+          if (cnpjData) {
+            handleCnpjDataLoaded(cnpjData)
+            toast.success("Dados do CNPJ carregados automaticamente!")
+          }
+        } catch (error) {
+          console.warn("Erro ao consultar CNPJ:", error)
+          // Não mostra erro para o usuário, apenas não preenche automaticamente
+        } finally {
+          setLoadingCnpj(false)
+        }
+      }
+    }
+  }
+
+  // Busca manual de CEP
+  const handleCepSearch = async () => {
+    const cep = form.getValues("cep")?.replace(/\D/g, '')
+
+    if (!cep || cep.length !== 8) {
+      toast.error("Digite um CEP válido com 8 dígitos")
+      return
+    }
+
+    setLoadingCep(true)
+    try {
+      const cepData = await ExternalApiService.consultarCep(cep)
+      if (cepData) {
+        handleCepDataLoaded(cepData)
+        toast.success("Endereço encontrado!")
+      }
+    } catch (error) {
+      console.error("Erro ao consultar CEP:", error)
+      toast.error("Erro ao consultar CEP. Verifique se o CEP está correto.")
+    } finally {
+      setLoadingCep(false)
     }
   }
 
@@ -358,25 +411,26 @@ export function FornecedorFormDialog({
                           <FormItem>
                             <FormLabel>CPF/CNPJ *</FormLabel>
                             <FormControl>
-                              <DocumentoInput
-                                value={field.value}
-                                onChange={(value) => {
-                                  field.onChange(value)
-                                  // Detecta automaticamente o tipo baseado no documento
-                                  const numbers = value.replace(/\D/g, '')
-                                  if (numbers.length <= 11) {
-                                    form.setValue('tipo', 'FISICA')
-                                  } else if (numbers.length <= 14) {
-                                    form.setValue('tipo', 'JURIDICA')
-                                  }
-                                }}
-                                onDataLoaded={handleCnpjDataLoaded}
-                                tipo="AUTO" // Detecção automática
-                                autoFill={true} // Auto-preenchimento para CNPJ
-                              />
+                              <div className="relative">
+                                <Input
+                                  {...field}
+                                  placeholder="000.000.000-00 ou 00.000.000/0000-00"
+                                  onChange={(e) => {
+                                    field.onChange(e.target.value)
+                                    handleDocumentoChange(e.target.value)
+                                  }}
+                                />
+                                {loadingCnpj && (
+                                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                                  </div>
+                                )}
+                              </div>
                             </FormControl>
                             <FormDescription>
-                              Digite o CPF ou CNPJ. Para CNPJ, os dados serão preenchidos automaticamente.
+                              {form.watch("documento")?.replace(/\D/g, '').length > 11
+                                ? "CNPJ será consultado automaticamente ao completar 14 dígitos"
+                                : "Digite o CPF ou CNPJ do fornecedor"}
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
@@ -467,11 +521,26 @@ export function FornecedorFormDialog({
                           <FormItem>
                             <FormLabel>CEP *</FormLabel>
                             <FormControl>
-                              <CepInput
-                                value={field.value}
-                                onChange={field.onChange}
-                                onDataLoaded={handleCepDataLoaded}
-                              />
+                              <div className="flex gap-2">
+                                <Input
+                                  {...field}
+                                  placeholder="00000-000"
+                                  maxLength={9}
+                                />
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="icon"
+                                  onClick={handleCepSearch}
+                                  disabled={loadingCep}
+                                >
+                                  {loadingCep ? (
+                                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                  ) : (
+                                    <Search className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              </div>
                             </FormControl>
                             <FormDescription>
                               Digite o CEP e clique na lupa para buscar o endereço
