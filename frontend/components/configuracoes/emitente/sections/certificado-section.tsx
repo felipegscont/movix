@@ -14,10 +14,14 @@ interface CertificadoSectionProps {
 
 export function CertificadoSection({
   certificado,
+  certificadoInfoFromDb,
   onFileChange,
   onPasswordChange,
   onPasswordBlur,
 }: CertificadoSectionProps) {
+  // Usar informações do banco se disponível, senão usar do estado local
+  const certificadoInfo = certificado.info || certificadoInfoFromDb
+
   return (
     <Card className="border-2 border-dashed">
       <CardHeader className="pb-3">
@@ -96,31 +100,31 @@ export function CertificadoSection({
           </div>
         </div>
 
-        {/* Informações do Certificado Validado */}
-        {certificado.info && certificado.valid && (
+        {/* Informações do Certificado Validado ou do Banco */}
+        {certificadoInfo && (certificado.valid || certificadoInfoFromDb) && (
           <div className={`rounded-lg border-2 p-3 ${
-            certificado.info.expired 
-              ? "border-red-500 bg-red-50" 
-              : certificado.info.nearExpiration 
-              ? "border-yellow-500 bg-yellow-50" 
+            certificadoInfo.expired
+              ? "border-red-500 bg-red-50"
+              : certificadoInfo.nearExpiration
+              ? "border-yellow-500 bg-yellow-50"
               : "border-green-500 bg-green-50"
           }`}>
             <div className="flex items-center gap-2 mb-2">
-              {certificado.info.expired ? (
+              {certificadoInfo.expired ? (
                 <IconAlertCircle className="h-4 w-4 text-red-600" />
               ) : (
                 <IconCheck className="h-4 w-4 text-green-600" />
               )}
               <span className={`text-sm font-semibold ${
-                certificado.info.expired 
-                  ? "text-red-900" 
-                  : certificado.info.nearExpiration 
-                  ? "text-yellow-900" 
+                certificadoInfo.expired
+                  ? "text-red-900"
+                  : certificadoInfo.nearExpiration
+                  ? "text-yellow-900"
                   : "text-green-900"
               }`}>
-                {certificado.info.expired ? "Certificado Expirado" : "Certificado Validado"}
+                {certificadoInfo.expired ? "Certificado Expirado" : certificadoInfoFromDb ? "Certificado Ativo" : "Certificado Validado"}
               </span>
-              {certificado.info.nearExpiration && !certificado.info.expired && (
+              {certificadoInfo.nearExpiration && !certificadoInfo.expired && (
                 <span className="text-[10px] bg-yellow-600 text-white px-1.5 py-0.5 rounded font-medium">
                   Próximo do vencimento
                 </span>
