@@ -63,19 +63,30 @@ const produtoFormSchema = z.object({
   estoqueAtual: z.number().min(0, "Estoque deve ser positivo").optional(),
   estoqueMinimo: z.number().min(0, "Estoque deve ser positivo").optional(),
   estoqueMaximo: z.number().min(0, "Estoque deve ser positivo").optional(),
-  origem: z.number().min(0).max(8),
-  cstIcms: z.string().min(1, "CST ICMS é obrigatório"),
-  aliquotaIcms: z.number().min(0).max(100).optional(),
-  reducaoBaseIcms: z.number().min(0).max(100).optional(),
-  cstIpi: z.string().optional(),
-  aliquotaIpi: z.number().min(0).max(100).optional(),
-  cstPis: z.string().optional(),
-  aliquotaPis: z.number().min(0).max(100).optional(),
-  cstCofins: z.string().optional(),
-  aliquotaCofins: z.number().min(0).max(100).optional(),
+  origem: z.string().min(1, "Origem é obrigatória"),
+  // ICMS
+  icmsCstId: z.string().optional(),
+  icmsCsosnId: z.string().optional(),
+  icmsAliquota: z.number().min(0).max(100).optional(),
+  icmsReducao: z.number().min(0).max(100).optional(),
+  // PIS
+  pisCstId: z.string().optional(),
+  pisAliquota: z.number().min(0).max(100).optional(),
+  // COFINS
+  cofinsCstId: z.string().optional(),
+  cofinsAliquota: z.number().min(0).max(100).optional(),
+  // IPI
+  ipiCstId: z.string().optional(),
+  ipiAliquota: z.number().min(0).max(100).optional(),
   fornecedorId: z.string().optional(),
   observacoes: z.string().optional(),
   ativo: z.boolean().default(true),
+}).refine((data) => {
+  // Validar que pelo menos um entre icmsCstId ou icmsCsosnId deve estar preenchido
+  return data.icmsCstId || data.icmsCsosnId
+}, {
+  message: "Selecione CST ou CSOSN para ICMS",
+  path: ["icmsCstId"],
 })
 
 type ProdutoFormValues = z.infer<typeof produtoFormSchema>
@@ -97,10 +108,16 @@ export function ProdutoFormDialog({
   const [ncms, setNcms] = useState<NCM[]>([])
   const [cests, setCests] = useState<CEST[]>([])
   const [fornecedores, setFornecedores] = useState<FornecedorSelect[]>([])
+  const [cstsICMS, setCstsICMS] = useState<any[]>([])
+  const [cstsPIS, setCstsPIS] = useState<any[]>([])
+  const [cstsCOFINS, setCstsCOFINS] = useState<any[]>([])
+  const [cstsIPI, setCstsIPI] = useState<any[]>([])
+  const [csosns, setCsosns] = useState<any[]>([])
+  const [emitente, setEmitente] = useState<any>(null)
 
   const form = useForm({
     resolver: zodResolver(produtoFormSchema),
-    mode: "onBlur", // Valida apenas quando o campo perde o foco
+    mode: "onBlur",
     defaultValues: {
       codigo: "",
       codigoBarras: "",
@@ -116,16 +133,17 @@ export function ProdutoFormDialog({
       estoqueAtual: 0,
       estoqueMinimo: 0,
       estoqueMaximo: 0,
-      origem: 0,
-      cstIcms: "00",
-      aliquotaIcms: 0,
-      reducaoBaseIcms: 0,
-      cstIpi: "",
-      aliquotaIpi: 0,
-      cstPis: "",
-      aliquotaPis: 0,
-      cstCofins: "",
-      aliquotaCofins: 0,
+      origem: "0",
+      icmsCstId: "",
+      icmsCsosnId: "",
+      icmsAliquota: 18,
+      icmsReducao: 0,
+      pisCstId: "",
+      pisAliquota: 1.65,
+      cofinsCstId: "",
+      cofinsAliquota: 7.6,
+      ipiCstId: "",
+      ipiAliquota: 0,
       fornecedorId: "",
       observacoes: "",
       ativo: true,
@@ -146,16 +164,51 @@ export function ProdutoFormDialog({
 
   const loadAuxiliares = async () => {
     try {
-      const [ncmsData, cestsData, fornecedoresData] = await Promise.all([
+      const { EmitenteService } = await import("@/lib/services/emitente.service")
+
+      const [ncmsData, cestsData, fornecedoresData, emitenteData, cstsICMSData, cstsPISData, cstsCOFINSData, cstsIPIData, csosnsData] = await Promise.all([
         AuxiliarService.getNCMs(),
         AuxiliarService.getCESTs(),
         FornecedorService.getForSelect(),
+        EmitenteService.getEmitenteAtivo(),
+        AuxiliarService.getCSTs('ICMS'),
+        AuxiliarService.getCSTs('PIS'),
+        AuxiliarService.getCSTs('COFINS'),
+        AuxiliarService.getCSTs('IPI'),
+        AuxiliarService.getCSOSNs(),
       ])
+
       setNcms(ncmsData)
       setCests(cestsData)
       setFornecedores(fornecedoresData)
+      setEmitente(emitenteData)
+      setCstsICMS(cstsICMSData)
+      setCstsPIS(cstsPISData)
+      setCstsCOFINS(cstsCOFINSData)
+      setCstsIPI(cstsIPIData)
+      setCsosns(csosnsData)
+
+      // Pré-selecionar CSTs padrão
+      if (!produtoId) {
+        const cstPISPadrao = cstsPISData.find((c: any) => c.codigo === '01')
+        const cstCOFINSPadrao = cstsCOFINSData.find((c: any) => c.codigo === '01')
+
+        if (cstPISPadrao) form.setValue('pisCstId', cstPISPadrao.id)
+        if (cstCOFINSPadrao) form.setValue('cofinsCstId', cstCOFINSPadrao.id)
+
+        // Se Simples Nacional, pré-selecionar CSOSN 102
+        if (emitenteData?.regimeTributario === 1) {
+          const csosnPadrao = csosnsData.find((c: any) => c.codigo === '102')
+          if (csosnPadrao) form.setValue('icmsCsosnId', csosnPadrao.id)
+        } else {
+          // Senão, pré-selecionar CST 00
+          const cstICMSPadrao = cstsICMSData.find((c: any) => c.codigo === '00')
+          if (cstICMSPadrao) form.setValue('icmsCstId', cstICMSPadrao.id)
+        }
+      }
     } catch (error) {
       console.error("Erro ao carregar dados auxiliares:", error)
+      toast.error("Erro ao carregar dados auxiliares")
     }
   }
 
@@ -181,15 +234,16 @@ export function ProdutoFormDialog({
         estoqueMinimo: produto.estoqueMinimo || 0,
         estoqueMaximo: produto.estoqueMaximo || 0,
         origem: produto.origem,
-        cstIcms: produto.cstIcms,
-        aliquotaIcms: produto.aliquotaIcms || 0,
-        reducaoBaseIcms: produto.reducaoBaseIcms || 0,
-        cstIpi: produto.cstIpi || "",
-        aliquotaIpi: produto.aliquotaIpi || 0,
-        cstPis: produto.cstPis || "",
-        aliquotaPis: produto.aliquotaPis || 0,
-        cstCofins: produto.cstCofins || "",
-        aliquotaCofins: produto.aliquotaCofins || 0,
+        icmsCstId: produto.icmsCstId || "",
+        icmsCsosnId: produto.icmsCsosnId || "",
+        icmsAliquota: produto.icmsAliquota || 0,
+        icmsReducao: produto.icmsReducao || 0,
+        pisCstId: produto.pisCstId || "",
+        pisAliquota: produto.pisAliquota || 0,
+        cofinsCstId: produto.cofinsCstId || "",
+        cofinsAliquota: produto.cofinsAliquota || 0,
+        ipiCstId: produto.ipiCstId || "",
+        ipiAliquota: produto.ipiAliquota || 0,
         fornecedorId: produto.fornecedorId || "",
         observacoes: produto.observacoes || "",
         ativo: produto.ativo,
@@ -584,14 +638,15 @@ export function ProdutoFormDialog({
                         Configurações fiscais do produto
                       </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    <CardContent className="space-y-6">
+                      {/* Origem */}
                       <FormField
                         control={form.control}
                         name="origem"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Origem da Mercadoria *</FormLabel>
-                            <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
+                            <Select onValueChange={field.onChange} value={field.value}>
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Selecione a origem" />
@@ -604,64 +659,287 @@ export function ProdutoFormDialog({
                                 <SelectItem value="3">3 - Nacional com mais de 40% de conteúdo estrangeiro</SelectItem>
                               </SelectContent>
                             </Select>
-                            <FormDescription>
-                              Origem da mercadoria para fins fiscais
-                            </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField
-                          control={form.control}
-                          name="cstIcms"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>CST ICMS *</FormLabel>
-                              <Select onValueChange={field.onChange} value={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Selecione o CST ICMS" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="00">00 - Tributada integralmente</SelectItem>
-                                  <SelectItem value="10">10 - Tributada e com cobrança do ICMS por substituição tributária</SelectItem>
-                                  <SelectItem value="20">20 - Com redução de base de cálculo</SelectItem>
-                                  <SelectItem value="30">30 - Isenta ou não tributada e com cobrança do ICMS por substituição tributária</SelectItem>
-                                  <SelectItem value="40">40 - Isenta</SelectItem>
-                                  <SelectItem value="41">41 - Não tributada</SelectItem>
-                                  <SelectItem value="50">50 - Suspensão</SelectItem>
-                                  <SelectItem value="51">51 - Diferimento</SelectItem>
-                                  <SelectItem value="60">60 - ICMS cobrado anteriormente por substituição tributária</SelectItem>
-                                  <SelectItem value="70">70 - Com redução de base de cálculo e cobrança do ICMS por substituição tributária</SelectItem>
-                                  <SelectItem value="90">90 - Outras</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                      <Separator />
 
-                <FormField
-                  control={form.control}
-                  name="aliquotaIcms"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Alíquota ICMS (%)</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number" 
-                          step="0.01"
-                          {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                      {/* ICMS */}
+                      <div className="space-y-4">
+                        <h4 className="font-medium">ICMS</h4>
+
+                        {emitente?.regimeTributario === 1 ? (
+                          // Simples Nacional - Mostrar CSOSN
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField
+                              control={form.control}
+                              name="icmsCsosnId"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>CSOSN *</FormLabel>
+                                  <Select onValueChange={field.onChange} value={field.value}>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Selecione o CSOSN" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      {csosns.map((csosn) => (
+                                        <SelectItem key={csosn.id} value={csosn.id}>
+                                          {csosn.codigo} - {csosn.descricao}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name="icmsAliquota"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Alíquota ICMS (%)</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="number"
+                                      step="0.01"
+                                      {...field}
+                                      onChange={(e) => field.onChange(Number(e.target.value))}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        ) : (
+                          // Regime Normal - Mostrar CST
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <FormField
+                              control={form.control}
+                              name="icmsCstId"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>CST ICMS *</FormLabel>
+                                  <Select onValueChange={field.onChange} value={field.value}>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Selecione o CST" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      {cstsICMS.map((cst) => (
+                                        <SelectItem key={cst.id} value={cst.id}>
+                                          {cst.codigo} - {cst.descricao}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name="icmsAliquota"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Alíquota ICMS (%)</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="number"
+                                      step="0.01"
+                                      {...field}
+                                      onChange={(e) => field.onChange(Number(e.target.value))}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name="icmsReducao"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Redução Base (%)</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="number"
+                                      step="0.01"
+                                      {...field}
+                                      onChange={(e) => field.onChange(Number(e.target.value))}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      <Separator />
+
+                      {/* PIS */}
+                      <div className="space-y-4">
+                        <h4 className="font-medium">PIS</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="pisCstId"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>CST PIS</FormLabel>
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Selecione o CST" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {cstsPIS.map((cst) => (
+                                      <SelectItem key={cst.id} value={cst.id}>
+                                        {cst.codigo} - {cst.descricao}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name="pisAliquota"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Alíquota PIS (%)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    {...field}
+                                    onChange={(e) => field.onChange(Number(e.target.value))}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      {/* COFINS */}
+                      <div className="space-y-4">
+                        <h4 className="font-medium">COFINS</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="cofinsCstId"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>CST COFINS</FormLabel>
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Selecione o CST" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {cstsCOFINS.map((cst) => (
+                                      <SelectItem key={cst.id} value={cst.id}>
+                                        {cst.codigo} - {cst.descricao}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name="cofinsAliquota"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Alíquota COFINS (%)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    {...field}
+                                    onChange={(e) => field.onChange(Number(e.target.value))}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      {/* IPI */}
+                      <div className="space-y-4">
+                        <h4 className="font-medium">IPI</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="ipiCstId"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>CST IPI</FormLabel>
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Selecione o CST" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {cstsIPI.map((cst) => (
+                                      <SelectItem key={cst.id} value={cst.id}>
+                                        {cst.codigo} - {cst.descricao}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name="ipiAliquota"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Alíquota IPI (%)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    {...field}
+                                    onChange={(e) => field.onChange(Number(e.target.value))}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
                       </div>
                     </CardContent>
                   </Card>

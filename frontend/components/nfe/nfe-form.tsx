@@ -44,24 +44,16 @@ interface NfeItemForm {
   valorUnitario: number
   valorDesconto: number
   valorTotal: number
-
-  // Tributação
-  origem: string // 0=Nacional, 1=Estrangeira
-
-  // ICMS
-  icmsCstId?: string // Para regime normal
-  icmsCsosnId?: string // Para Simples Nacional
+  origem: string
+  icmsCstId?: string
+  icmsCsosnId?: string
   icmsBaseCalculo?: number
   icmsAliquota?: number
   icmsValor?: number
-
-  // PIS
   pisCstId?: string
   pisBaseCalculo?: number
   pisAliquota?: number
   pisValor?: number
-
-  // COFINS
   cofinsCstId?: string
   cofinsBaseCalculo?: number
   cofinsAliquota?: number
@@ -75,18 +67,14 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
   // Listas
   const [clientes, setClientes] = useState<any[]>([])
   const [produtos, setProdutos] = useState<any[]>([])
-  const [ncms, setNcms] = useState<any[]>([])
-  const [cfops, setCfops] = useState<any[]>([])
-  const [cstsICMS, setCstsICMS] = useState<any[]>([])
-  const [cstsPIS, setCstsPIS] = useState<any[]>([])
-  const [cstsCOFINS, setCstsCOFINS] = useState<any[]>([])
-  const [csosns, setCsosns] = useState<any[]>([])
+  const [naturezasOperacao, setNaturezasOperacao] = useState<any[]>([])
 
   // Emitente ativo (fixo do sistema)
   const [emitente, setEmitente] = useState<any>(null)
 
   // Dados básicos
   const [clienteId, setClienteId] = useState("")
+  const [naturezaOperacaoId, setNaturezaOperacaoId] = useState("")
   const [naturezaOperacao, setNaturezaOperacao] = useState("Venda de mercadoria")
   const [serie, setSerie] = useState(1)
   const [tipoOperacao, setTipoOperacao] = useState(1) // 1=Saída
@@ -102,20 +90,6 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
   const [quantidade, setQuantidade] = useState(1)
   const [valorUnitarioItem, setValorUnitarioItem] = useState(0)
   const [descontoItem, setDescontoItem] = useState(0)
-  const [cfopItem, setCfopItem] = useState("")
-
-  // Impostos do item
-  const [origemItem, setOrigemItem] = useState("0")
-  const [icmsCstIdItem, setIcmsCstIdItem] = useState("")
-  const [icmsCsosnIdItem, setIcmsCsosnIdItem] = useState("")
-  const [icmsAliquotaItem, setIcmsAliquotaItem] = useState(0)
-  const [pisCstIdItem, setPisCstIdItem] = useState("")
-  const [pisAliquotaItem, setPisAliquotaItem] = useState(0)
-  const [cofinsCstIdItem, setCofinsCstIdItem] = useState("")
-  const [cofinsAliquotaItem, setCofinsAliquotaItem] = useState(0)
-
-  // Controle de seção de impostos expandida
-  const [impostosItemOpen, setImpostosItemOpen] = useState(false)
   
   // Totalizadores
   const [valorFrete, setValorFrete] = useState(0)
@@ -158,17 +132,14 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
     try {
       setLoadingData(true)
 
+      const { NaturezaOperacaoService } = await import("@/lib/services/natureza-operacao.service")
+
       // Carregar dados em paralelo com tratamento de erro individual
       const results = await Promise.allSettled([
-        EmitenteService.getEmitenteAtivo(), // Buscar emitente ativo
+        EmitenteService.getEmitenteAtivo(),
         ClienteService.getAll({ page: 1, limit: 1000 }),
         ProdutoService.getAll({ page: 1, limit: 1000 }),
-        AuxiliarService.getNcms(),
-        AuxiliarService.getCfops(),
-        AuxiliarService.getCSTs('ICMS'),
-        AuxiliarService.getCSTs('PIS'),
-        AuxiliarService.getCSTs('COFINS'),
-        AuxiliarService.getCSOSNs(),
+        NaturezaOperacaoService.getAtivas(),
       ])
 
       // Processar emitente ativo
@@ -198,67 +169,18 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
         toast.error("Erro ao carregar produtos")
       }
 
-      // Processar NCMs
+      // Processar naturezas de operação
       if (results[3].status === 'fulfilled') {
-        setNcms(results[3].value || [])
-      } else {
-        console.error("Erro ao carregar NCMs:", results[3].reason)
-        toast.error("Erro ao carregar NCMs")
-      }
+        const naturezas = results[3].value || []
+        setNaturezasOperacao(naturezas)
 
-      // Processar CFOPs
-      if (results[4].status === 'fulfilled') {
-        setCfops(results[4].value || [])
-        const cfopSaida = results[4].value?.find((c: any) => c.tipo === 'SAIDA')
-        if (cfopSaida) {
-          setCfopItem(cfopSaida.id)
+        // Pré-selecionar primeira natureza
+        if (naturezas.length > 0) {
+          handleNaturezaChange(naturezas[0].id, naturezas)
         }
       } else {
-        console.error("Erro ao carregar CFOPs:", results[4].reason)
-        toast.error("Erro ao carregar CFOPs")
-      }
-
-      // Processar CSTs ICMS
-      if (results[5].status === 'fulfilled') {
-        setCstsICMS(results[5].value || [])
-      } else {
-        console.error("Erro ao carregar CSTs ICMS:", results[5].reason)
-      }
-
-      // Processar CSTs PIS
-      if (results[6].status === 'fulfilled') {
-        setCstsPIS(results[6].value || [])
-        // Pré-selecionar CST 01 (mais comum)
-        const cstPadrao = results[6].value?.find((c: any) => c.codigo === '01')
-        if (cstPadrao) {
-          setPisCstIdItem(cstPadrao.id)
-        }
-      } else {
-        console.error("Erro ao carregar CSTs PIS:", results[6].reason)
-      }
-
-      // Processar CSTs COFINS
-      if (results[7].status === 'fulfilled') {
-        setCstsCOFINS(results[7].value || [])
-        // Pré-selecionar CST 01 (mais comum)
-        const cstPadrao = results[7].value?.find((c: any) => c.codigo === '01')
-        if (cstPadrao) {
-          setCofinsCstIdItem(cstPadrao.id)
-        }
-      } else {
-        console.error("Erro ao carregar CSTs COFINS:", results[7].reason)
-      }
-
-      // Processar CSOSNs
-      if (results[8].status === 'fulfilled') {
-        setCsosns(results[8].value || [])
-        // Pré-selecionar CSOSN 102 (mais comum para Simples Nacional)
-        const csosnPadrao = results[8].value?.find((c: any) => c.codigo === '102')
-        if (csosnPadrao) {
-          setIcmsCsosnIdItem(csosnPadrao.id)
-        }
-      } else {
-        console.error("Erro ao carregar CSOSNs:", results[8].reason)
+        console.error("Erro ao carregar naturezas de operação:", results[3].reason)
+        toast.error("Erro ao carregar naturezas de operação")
       }
     } catch (error) {
       console.error("Erro geral ao carregar dados:", error)
@@ -322,75 +244,72 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
       return
     }
 
-    if (!cfopItem) {
-      toast.error("Selecione um CFOP")
-      return
-    }
-
-    // Validar impostos baseado no regime tributário
-    const isSimples = emitente?.regimeTributario === 1
-
-    if (isSimples && !icmsCsosnIdItem) {
-      toast.error("Selecione o CSOSN para ICMS")
-      return
-    }
-
-    if (!isSimples && !icmsCstIdItem) {
-      toast.error("Selecione o CST para ICMS")
-      return
-    }
-
-    if (!pisCstIdItem) {
-      toast.error("Selecione o CST para PIS")
-      return
-    }
-
-    if (!cofinsCstIdItem) {
-      toast.error("Selecione o CST para COFINS")
-      return
-    }
-
     const produto = produtos.find(p => p.id === produtoSelecionado)
     if (!produto) return
 
+    // Validar se produto tem impostos configurados
+    if (!produto.icmsCstId && !produto.icmsCsosnId) {
+      toast.error("Produto sem impostos configurados. Configure os impostos no cadastro do produto.")
+      return
+    }
+
     const valorTotalItem = (quantidade * valorUnitarioItem) - descontoItem
 
-    // Calcular impostos
+    // Calcular impostos baseado nos dados do produto
     const icmsBase = valorTotalItem
-    const icmsValor = icmsBase * (icmsAliquotaItem / 100)
+    const icmsValor = icmsBase * ((produto.icmsAliquota || 0) / 100)
 
     const pisBase = valorTotalItem
-    const pisValor = pisBase * (pisAliquotaItem / 100)
+    const pisValor = pisBase * ((produto.pisAliquota || 0) / 100)
 
     const cofinsBase = valorTotalItem
-    const cofinsValor = cofinsBase * (cofinsAliquotaItem / 100)
+    const cofinsValor = cofinsBase * ((produto.cofinsAliquota || 0) / 100)
+
+    // Determinar CFOP baseado no cliente e natureza de operação
+    const cliente = clientes.find(c => c.id === clienteId)
+    const natureza = naturezasOperacao.find(n => n.id === naturezaOperacaoId)
+
+    let cfopId = ""
+    if (natureza && cliente) {
+      // Verificar se cliente é do mesmo estado do emitente
+      const mesmoEstado = cliente.estadoId === emitente?.estadoId
+
+      if (mesmoEstado && natureza.cfopDentroEstadoId) {
+        cfopId = natureza.cfopDentroEstadoId
+      } else if (!mesmoEstado && natureza.cfopForaEstadoId) {
+        cfopId = natureza.cfopForaEstadoId
+      }
+    }
+
+    if (!cfopId) {
+      toast.error("CFOP não configurado para esta natureza de operação")
+      return
+    }
 
     const novoItem: NfeItemForm = {
       produtoId: produto.id,
       codigo: produto.codigo,
       descricao: produto.descricao,
       ncmId: produto.ncmId,
-      cfopId: cfopItem,
+      cfopId: cfopId,
       unidadeComercial: produto.unidade,
       quantidadeComercial: quantidade,
       valorUnitario: valorUnitarioItem,
       valorDesconto: descontoItem,
       valorTotal: valorTotalItem,
-
-      // Impostos
-      origem: origemItem,
-      icmsCstId: isSimples ? undefined : icmsCstIdItem,
-      icmsCsosnId: isSimples ? icmsCsosnIdItem : undefined,
+      origem: produto.origem,
+      icmsCstId: produto.icmsCstId,
+      icmsCsosnId: produto.icmsCsosnId,
       icmsBaseCalculo: icmsBase,
-      icmsAliquota: icmsAliquotaItem,
+      icmsAliquota: produto.icmsAliquota || 0,
       icmsValor: icmsValor,
-      pisCstId: pisCstIdItem,
+      pisCstId: produto.pisCstId,
       pisBaseCalculo: pisBase,
-      pisAliquota: pisAliquotaItem,
+      pisAliquota: produto.pisAliquota || 0,
       pisValor: pisValor,
-      cofinsCstId: cofinsCstIdItem,
+      cofinsCstId: produto.cofinsCstId,
       cofinsBaseCalculo: cofinsBase,
-      cofinsAliquota: cofinsAliquotaItem,
+      cofinsAliquota: produto.cofinsAliquota || 0,
       cofinsValor: cofinsValor,
     }
 
@@ -401,7 +320,6 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
     setQuantidade(1)
     setValorUnitarioItem(0)
     setDescontoItem(0)
-    setImpostosItemOpen(false)
 
     toast.success("Item adicionado")
   }
@@ -416,17 +334,23 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
     const produto = produtos.find(p => p.id === produtoId)
     if (produto) {
       setValorUnitarioItem(produto.valorUnitario)
-      setOrigemItem(produto.origem || "0")
+    }
+  }
 
-      // Pré-preencher alíquotas padrão se não estiverem definidas
-      if (icmsAliquotaItem === 0) {
-        setIcmsAliquotaItem(18) // Alíquota padrão ICMS
-      }
-      if (pisAliquotaItem === 0) {
-        setPisAliquotaItem(1.65) // Alíquota padrão PIS
-      }
-      if (cofinsAliquotaItem === 0) {
-        setCofinsAliquotaItem(7.6) // Alíquota padrão COFINS
+  const handleNaturezaChange = (naturezaId: string, naturezasList?: any[]) => {
+    setNaturezaOperacaoId(naturezaId)
+    const lista = naturezasList || naturezasOperacao
+    const natureza = lista.find(n => n.id === naturezaId)
+
+    if (natureza) {
+      setNaturezaOperacao(natureza.descricao)
+      setTipoOperacao(natureza.tipoOperacao)
+      setConsumidorFinal(natureza.consumidorFinal)
+      setPresencaComprador(natureza.presencaComprador)
+
+      // Preencher informações adicionais padrão
+      if (natureza.informacoesAdicionaisPadrao) {
+        setInformacoesAdicionais(natureza.informacoesAdicionaisPadrao)
       }
     }
   }
@@ -607,13 +531,24 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
                 </div>
                 
                 <div>
-                  <Label htmlFor="naturezaOperacao">Natureza da Operação *</Label>
-                  <Input
-                    id="naturezaOperacao"
-                    value={naturezaOperacao}
-                    onChange={(e) => setNaturezaOperacao(e.target.value)}
-                    placeholder="Ex: Venda de mercadoria"
-                  />
+                  <Label htmlFor="naturezaOperacaoId">Natureza da Operação *</Label>
+                  <Select value={naturezaOperacaoId} onValueChange={handleNaturezaChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a natureza da operação" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {naturezasOperacao.map((natureza) => (
+                        <SelectItem key={natureza.id} value={natureza.id}>
+                          {natureza.codigo} - {natureza.descricao}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {naturezaOperacao && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {naturezaOperacao}
+                    </p>
+                  )}
                 </div>
                 
                 <div>

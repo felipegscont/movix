@@ -76,21 +76,21 @@ const data = {
     {
       title: "Cadastros",
       icon: IconDatabase,
-      url: "/clientes",
+      url: "/cadastros/clientes",
       items: [
         {
           title: "Clientes",
-          url: "/clientes",
+          url: "/cadastros/clientes",
           icon: IconUsers,
         },
         {
           title: "Fornecedores",
-          url: "/fornecedores",
+          url: "/cadastros/fornecedores",
           icon: IconBuilding,
         },
         {
           title: "Produtos",
-          url: "/produtos",
+          url: "/cadastros/produtos",
           icon: IconPackage,
         },
       ],
@@ -102,8 +102,18 @@ const data = {
     },
     {
       title: "Configurações",
-      url: "/configuracoes/emitente",
       icon: IconSettings,
+      url: "/configuracoes/emitente",
+      items: [
+        {
+          title: "Emitente",
+          url: "/configuracoes/emitente",
+        },
+        {
+          title: "Naturezas de Operação",
+          url: "/configuracoes/naturezas-operacao",
+        },
+      ],
     },
   ],
   navSecondary: [

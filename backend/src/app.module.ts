@@ -11,6 +11,7 @@ import { ProdutoModule } from './modules/produto/produto.module';
 import { NfeModule } from './modules/nfe/nfe.module';
 import { AuxiliaresModule } from './modules/auxiliares/auxiliares.module';
 import { ExternalApisModule } from './modules/external-apis/external-apis.module';
+import { NaturezaOperacaoModule } from './modules/natureza-operacao/natureza-operacao.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -28,6 +29,7 @@ import configuration from './config/configuration';
     NfeModule,
     AuxiliaresModule,
     ExternalApisModule,
+    NaturezaOperacaoModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -16,16 +16,21 @@ export interface Produto {
   estoqueAtual: number;
   estoqueMinimo?: number;
   estoqueMaximo?: number;
-  origem: number;
-  cstIcms: string;
-  aliquotaIcms?: number;
-  reducaoBaseIcms?: number;
-  cstIpi?: string;
-  aliquotaIpi?: number;
-  cstPis?: string;
-  aliquotaPis?: number;
-  cstCofins?: string;
-  aliquotaCofins?: number;
+  origem: string;
+  // Impostos ICMS
+  icmsCstId?: string;
+  icmsCsosnId?: string;
+  icmsAliquota?: number;
+  icmsReducao?: number;
+  // Impostos PIS
+  pisCstId?: string;
+  pisAliquota?: number;
+  // Impostos COFINS
+  cofinsCstId?: string;
+  cofinsAliquota?: number;
+  // Impostos IPI
+  ipiCstId?: string;
+  ipiAliquota?: number;
   fornecedorId?: string;
   observacoes?: string;
   ativo: boolean;
@@ -46,6 +51,31 @@ export interface Produto {
     nome: string;
     documento: string;
   };
+  icmsCst?: {
+    id: string;
+    codigo: string;
+    descricao: string;
+  };
+  icmsCsosn?: {
+    id: string;
+    codigo: string;
+    descricao: string;
+  };
+  pisCst?: {
+    id: string;
+    codigo: string;
+    descricao: string;
+  };
+  cofinsCst?: {
+    id: string;
+    codigo: string;
+    descricao: string;
+  };
+  ipiCst?: {
+    id: string;
+    codigo: string;
+    descricao: string;
+  };
 }
 
 export interface CreateProdutoData {
@@ -63,16 +93,21 @@ export interface CreateProdutoData {
   estoqueAtual?: number;
   estoqueMinimo?: number;
   estoqueMaximo?: number;
-  origem: number;
-  cstIcms: string;
-  aliquotaIcms?: number;
-  reducaoBaseIcms?: number;
-  cstIpi?: string;
-  aliquotaIpi?: number;
-  cstPis?: string;
-  aliquotaPis?: number;
-  cstCofins?: string;
-  aliquotaCofins?: number;
+  origem: string;
+  // Impostos ICMS
+  icmsCstId?: string;
+  icmsCsosnId?: string;
+  icmsAliquota?: number;
+  icmsReducao?: number;
+  // Impostos PIS
+  pisCstId?: string;
+  pisAliquota?: number;
+  // Impostos COFINS
+  cofinsCstId?: string;
+  cofinsAliquota?: number;
+  // Impostos IPI
+  ipiCstId?: string;
+  ipiAliquota?: number;
   fornecedorId?: string;
   observacoes?: string;
   ativo?: boolean;
