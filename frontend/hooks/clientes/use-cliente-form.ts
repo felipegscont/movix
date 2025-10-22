@@ -177,7 +177,7 @@ export function useClienteForm({ clienteId, onSuccess }: UseClienteFormProps): U
       telefone: "",
       celular: "",
       email: "",
-      indicadorIE: 9,
+      indicadorIE: 1,
       ativo: true,
     },
   })
@@ -204,15 +204,14 @@ export function useClienteForm({ clienteId, onSuccess }: UseClienteFormProps): U
       return
     }
 
-    // Pessoa Jurídica: verificar se tem IE
+    // Pessoa Jurídica: ajustar baseado na IE
     if (watchTipo === "JURIDICA") {
       if (watchInscricaoEstadual && watchInscricaoEstadual.trim() !== "") {
         // Tem IE: Contribuinte ICMS (1)
         form.setValue("indicadorIE", 1)
-      } else {
-        // Não tem IE: Não Contribuinte (9)
-        form.setValue("indicadorIE", 9)
       }
+      // Se não tem IE, mantém o valor atual (não força para 9)
+      // Isso permite que o usuário escolha entre 1, 2 ou 9
     }
   }, [watchTipo, watchInscricaoEstadual, form])
 

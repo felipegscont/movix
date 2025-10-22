@@ -9,10 +9,12 @@ import {
   ValidationPipe,
   HttpCode,
   HttpStatus,
+  UsePipes,
 } from '@nestjs/common';
 import { EmitenteService } from './emitente.service';
 import { CreateEmitenteDto } from './dto/create-emitente.dto';
 import { UpdateEmitenteDto } from './dto/update-emitente.dto';
+import { EmptyStringToUndefinedPipe } from '../../common/pipes/empty-string-to-undefined.pipe';
 
 @Controller('emitentes')
 export class EmitenteController {
@@ -20,7 +22,8 @@ export class EmitenteController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body(ValidationPipe) createEmitenteDto: CreateEmitenteDto) {
+  @UsePipes(EmptyStringToUndefinedPipe, ValidationPipe)
+  create(@Body() createEmitenteDto: CreateEmitenteDto) {
     return this.emitenteService.create(createEmitenteDto);
   }
 
@@ -45,9 +48,10 @@ export class EmitenteController {
   }
 
   @Patch(':id')
+  @UsePipes(EmptyStringToUndefinedPipe, ValidationPipe)
   update(
     @Param('id') id: string,
-    @Body(ValidationPipe) updateEmitenteDto: UpdateEmitenteDto,
+    @Body() updateEmitenteDto: UpdateEmitenteDto,
   ) {
     return this.emitenteService.update(id, updateEmitenteDto);
   }

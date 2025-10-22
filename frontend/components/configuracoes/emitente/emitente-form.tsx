@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -25,7 +25,14 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Switch } from "@/components/ui/switch"
-import { IconLoader2, IconDeviceFloppy, IconAlertCircle, IconSearch } from "@tabler/icons-react"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+import { Badge } from "@/components/ui/badge"
+import { IconLoader2, IconDeviceFloppy, IconAlertCircle, IconSearch, IconUpload, IconFileTypePdf, IconCheck, IconBuilding, IconMapPin, IconPhone, IconFileText, IconCertificate } from "@tabler/icons-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { toast } from "sonner"
 import { EmitenteService } from "@/lib/services/emitente.service"
@@ -68,6 +75,14 @@ export function EmitenteForm() {
   const [loadingEstados, setLoadingEstados] = useState(false)
   const [loadingMunicipios, setLoadingMunicipios] = useState(false)
   const [loadingCnpj, setLoadingCnpj] = useState(false)
+  const [certificadoFile, setCertificadoFile] = useState<File | null>(null)
+  const [uploadingCertificado, setUploadingCertificado] = useState(false)
+  const [certificadoUploaded, setCertificadoUploaded] = useState(false)
+  const [certificadoPassword, setCertificadoPassword] = useState("")
+  const [certificadoInfo, setCertificadoInfo] = useState<any>(null)
+  const [accordionValue, setAccordionValue] = useState<string[]>(["basicos"])
+  const [validatingCertificado, setValidatingCertificado] = useState(false)
+  const [certificadoValid, setCertificadoValid] = useState<boolean | null>(null)
 
   const form = useForm<EmitenteFormData>({
     resolver: zodResolver(emitenteSchema),
@@ -114,17 +129,21 @@ export function EmitenteForm() {
       
       // Carregar estados
       await loadEstados()
-      
+
       // Tentar carregar emitente ativo
-      try {
-        const emitente = await EmitenteService.getEmitenteAtivo()
+      const emitente = await EmitenteService.getEmitenteAtivo()
+
+      if (emitente) {
         setEmitenteId(emitente.id)
-        
+
+        // Ao editar, abre todas as seções
+        setAccordionValue(["basicos", "endereco", "contato", "fiscal", "nfe"])
+
         // Carregar municípios do estado antes de setar o formulário
         if (emitente.estadoId) {
           await loadMunicipios(emitente.estadoId)
         }
-        
+
         // Preencher formulário
         form.reset({
           cnpj: emitente.cnpj,
@@ -149,7 +168,7 @@ export function EmitenteForm() {
           proximoNumeroNfe: emitente.proximoNumeroNfe,
           ativo: emitente.ativo,
         })
-      } catch (error) {
+      } else {
         // Emitente não existe ainda, mantém valores padrão
         console.log("Nenhum emitente cadastrado ainda")
       }
@@ -189,15 +208,40 @@ export function EmitenteForm() {
 
   const onSubmit = async (data: EmitenteFormData) => {
     try {
+      // Validar certificado antes de salvar, se houver
+      if (certificadoFile && certificadoPassword) {
+        if (certificadoValid === null) {
+          toast.error("Aguarde a validação do certificado antes de salvar")
+          return
+        }
+        if (certificadoValid === false) {
+          toast.error("Certificado inválido. Corrija o certificado antes de salvar.")
+          return
+        }
+        if (certificadoInfo?.expired) {
+          toast.error("Certificado expirado. Não é possível salvar com certificado vencido.")
+          return
+        }
+      }
+
       setLoading(true)
+
+      let savedEmitenteId = emitenteId
 
       if (emitenteId) {
         await EmitenteService.update(emitenteId, data)
         toast.success("Emitente atualizado com sucesso!")
       } else {
         const emitente = await EmitenteService.create(data)
+        savedEmitenteId = emitente.id
         setEmitenteId(emitente.id)
         toast.success("Emitente cadastrado com sucesso!")
+      }
+
+      // Se há certificado selecionado e validado, fazer upload automaticamente
+      if (certificadoFile && certificadoPassword && savedEmitenteId && certificadoValid) {
+        toast.info("Enviando certificado digital...")
+        await uploadCertificadoInternal(savedEmitenteId)
       }
     } catch (error: any) {
       toast.error(error.message || "Erro ao salvar emitente")
@@ -295,6 +339,172 @@ export function EmitenteForm() {
     }
   }
 
+  const handleCertificadoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      // Validar extensão
+      const allowedExtensions = ['.pfx', '.p12']
+      const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase()
+
+      if (!allowedExtensions.includes(fileExtension)) {
+        toast.error("Apenas arquivos .pfx ou .p12 são permitidos")
+        return
+      }
+
+      // Validar tamanho (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("O arquivo deve ter no máximo 5MB")
+        return
+      }
+
+      setCertificadoFile(file)
+      setCertificadoUploaded(false)
+      setCertificadoValid(null)
+      setCertificadoInfo(null)
+
+      // Se já tem senha, validar automaticamente
+      if (certificadoPassword) {
+        validateCertificado(file, certificadoPassword)
+      }
+    }
+  }
+
+  const validateCertificado = async (file: File, password: string) => {
+    if (!file || !password) return
+
+    try {
+      setValidatingCertificado(true)
+      setCertificadoValid(null)
+
+      const formData = new FormData()
+      formData.append('certificado', file)
+      formData.append('password', password)
+
+      // Criar um emitente temporário apenas para validar o certificado
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/emitentes/validate-certificate`, {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Erro ao validar certificado')
+      }
+
+      const result = await response.json()
+
+      setCertificadoValid(true)
+      setCertificadoInfo(result.data.certificateInfo)
+
+      // Mensagem de sucesso com informações do certificado
+      if (result.data.certificateInfo.nearExpiration) {
+        toast.warning(
+          `Certificado válido! Atenção: vence em ${result.data.certificateInfo.daysUntilExpiration} dias`,
+          { duration: 5000 }
+        )
+      } else if (result.data.certificateInfo.expired) {
+        toast.error("Certificado expirado! Não é possível usar este certificado.")
+        setCertificadoValid(false)
+      } else {
+        toast.success("Certificado validado com sucesso!")
+      }
+    } catch (error: any) {
+      console.error("Erro ao validar certificado:", error)
+      setCertificadoValid(false)
+      toast.error(error.message || "Erro ao validar certificado. Verifique o arquivo e a senha.")
+    } finally {
+      setValidatingCertificado(false)
+    }
+  }
+
+  // Ref para armazenar o timeout
+  const validationTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
+
+  const handlePasswordChange = (password: string) => {
+    setCertificadoPassword(password)
+
+    // Limpar timeout anterior
+    if (validationTimeoutRef.current) {
+      clearTimeout(validationTimeoutRef.current)
+    }
+
+    // Se já tem arquivo, validar automaticamente após digitar a senha
+    if (certificadoFile && password.length >= 4) {
+      // Debounce de 1000ms para não validar a cada tecla
+      validationTimeoutRef.current = setTimeout(() => {
+        validateCertificado(certificadoFile, password)
+      }, 1000)
+    } else {
+      // Resetar validação se senha for muito curta
+      setCertificadoValid(null)
+      setCertificadoInfo(null)
+    }
+  }
+
+  const uploadCertificadoInternal = async (targetEmitenteId: string) => {
+    if (!certificadoFile) {
+      throw new Error("Nenhum certificado selecionado")
+    }
+
+    if (!certificadoPassword) {
+      throw new Error("Senha do certificado não informada")
+    }
+
+    setUploadingCertificado(true)
+
+    try {
+      const formData = new FormData()
+      formData.append('certificado', certificadoFile)
+      formData.append('password', certificadoPassword)
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/emitentes/${targetEmitenteId}/certificado`, {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Erro ao fazer upload do certificado')
+      }
+
+      const result = await response.json()
+
+      setCertificadoUploaded(true)
+      setCertificadoInfo(result.data.certificateInfo)
+
+      // Mensagem de sucesso com informações do certificado
+      if (result.data.certificateInfo.nearExpiration) {
+        toast.warning(
+          `Certificado enviado! Atenção: vence em ${result.data.certificateInfo.daysUntilExpiration} dias`,
+          { duration: 5000 }
+        )
+      } else {
+        toast.success("Certificado enviado e validado com sucesso!")
+      }
+    } finally {
+      setUploadingCertificado(false)
+    }
+  }
+
+  const uploadCertificado = async () => {
+    if (!certificadoFile || !emitenteId) {
+      toast.error("Selecione um certificado e salve o emitente primeiro")
+      return
+    }
+
+    if (!certificadoPassword) {
+      toast.error("Digite a senha do certificado")
+      return
+    }
+
+    try {
+      await uploadCertificadoInternal(emitenteId)
+    } catch (error: any) {
+      console.error("Erro ao fazer upload:", error)
+      toast.error(error.message || "Erro ao enviar certificado")
+    }
+  }
+
 
 
   if (loadingData) {
@@ -322,22 +532,31 @@ export function EmitenteForm() {
           </Alert>
         )}
 
-        <Tabs defaultValue="dados" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="dados">Dados Básicos</TabsTrigger>
-            <TabsTrigger value="endereco">Endereço</TabsTrigger>
-            <TabsTrigger value="contato">Contato</TabsTrigger>
-            <TabsTrigger value="nfe">Configurações NFe</TabsTrigger>
-          </TabsList>
-
-          {/* Aba Dados Básicos */}
-          <TabsContent value="dados" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Dados da Empresa</CardTitle>
-                <CardDescription>Informações básicas do emitente</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
+        {/* Accordion para todas as seções */}
+        <Accordion
+          type="multiple"
+          value={accordionValue}
+          onValueChange={setAccordionValue}
+          className="w-full space-y-4"
+        >
+          {/* Accordion: Dados Básicos */}
+          <AccordionItem value="basicos" className="border rounded-lg">
+            <AccordionTrigger className="px-6 py-4 hover:no-underline">
+              <div className="flex items-center justify-between w-full pr-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
+                    <IconBuilding className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="text-left">
+                    <h3 className="text-base font-semibold">Dados da Empresa</h3>
+                    <p className="text-sm text-muted-foreground">Informações básicas do emitente</p>
+                  </div>
+                </div>
+                <Badge variant="secondary" className="ml-auto mr-2">Obrigatório</Badge>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-6 pb-6">
+              <div className="space-y-4 pt-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -504,18 +723,28 @@ export function EmitenteForm() {
                     )}
                   />
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
 
-          {/* Aba Endereço */}
-          <TabsContent value="endereco" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Endereço</CardTitle>
-                <CardDescription>Localização da empresa</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
+          {/* Accordion: Endereço */}
+          <AccordionItem value="endereco" className="border rounded-lg">
+            <AccordionTrigger className="px-6 py-4 hover:no-underline">
+              <div className="flex items-center justify-between w-full pr-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
+                    <IconMapPin className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="text-left">
+                    <h3 className="text-base font-semibold">Endereço</h3>
+                    <p className="text-sm text-muted-foreground">Localização da empresa</p>
+                  </div>
+                </div>
+                <Badge variant="secondary" className="ml-auto mr-2">Obrigatório</Badge>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-6 pb-6">
+              <div className="space-y-4 pt-4">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <FormField
                     control={form.control}
@@ -634,15 +863,33 @@ export function EmitenteForm() {
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Selecione o estado primeiro" />
+                              <SelectValue
+                                placeholder={
+                                  loadingMunicipios
+                                    ? "Carregando municípios..."
+                                    : !watchEstadoId
+                                    ? "Selecione o estado primeiro"
+                                    : "Selecione o município"
+                                }
+                              />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {municipios.map((municipio) => (
-                              <SelectItem key={municipio.id} value={municipio.id}>
-                                {municipio.nome}
-                              </SelectItem>
-                            ))}
+                            {loadingMunicipios ? (
+                              <div className="p-2 text-center text-sm text-muted-foreground">
+                                Carregando municípios...
+                              </div>
+                            ) : municipios.length === 0 ? (
+                              <div className="p-2 text-center text-sm text-muted-foreground">
+                                Nenhum município encontrado
+                              </div>
+                            ) : (
+                              municipios.map((municipio) => (
+                                <SelectItem key={municipio.id} value={municipio.id}>
+                                  {municipio.nome}
+                                </SelectItem>
+                              ))
+                            )}
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -650,18 +897,28 @@ export function EmitenteForm() {
                     )}
                   />
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
 
-          {/* Aba Contato */}
-          <TabsContent value="contato" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Informações de Contato</CardTitle>
-                <CardDescription>Dados para contato (opcionais)</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
+          {/* Accordion: Contato */}
+          <AccordionItem value="contato" className="border rounded-lg">
+            <AccordionTrigger className="px-6 py-4 hover:no-underline">
+              <div className="flex items-center justify-between w-full pr-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
+                    <IconPhone className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="text-left">
+                    <h3 className="text-base font-semibold">Informações de Contato</h3>
+                    <p className="text-sm text-muted-foreground">Dados para contato (opcionais)</p>
+                  </div>
+                </div>
+                <Badge variant="outline" className="ml-auto mr-2">Opcional</Badge>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-6 pb-6">
+              <div className="space-y-4 pt-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -705,18 +962,28 @@ export function EmitenteForm() {
                     )}
                   />
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
 
-          {/* Aba Configurações NFe */}
-          <TabsContent value="nfe" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Configurações de NFe</CardTitle>
-                <CardDescription>Parâmetros para emissão de Notas Fiscais</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
+          {/* Accordion: Configurações NFe */}
+          <AccordionItem value="nfe" className="border rounded-lg">
+            <AccordionTrigger className="px-6 py-4 hover:no-underline">
+              <div className="flex items-center justify-between w-full pr-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
+                    <IconCertificate className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="text-left">
+                    <h3 className="text-base font-semibold">Configurações de NFe</h3>
+                    <p className="text-sm text-muted-foreground">Parâmetros para emissão de Notas Fiscais</p>
+                  </div>
+                </div>
+                <Badge variant="secondary" className="ml-auto mr-2">Obrigatório</Badge>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-6 pb-6">
+              <div className="space-y-4 pt-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <FormField
                     control={form.control}
@@ -792,22 +1059,201 @@ export function EmitenteForm() {
                   />
                 </div>
 
-                <Alert>
-                  <IconAlertCircle className="h-4 w-4" />
-                  <AlertTitle>Certificado Digital</AlertTitle>
-                  <AlertDescription>
-                    O upload e configuração do certificado digital será implementado em breve.
-                    Por enquanto, configure apenas os dados básicos.
-                  </AlertDescription>
-                </Alert>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                {/* Upload de Certificado Digital */}
+                <Card className="border-2 border-dashed">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <IconFileTypePdf className="h-4 w-4" />
+                      Certificado Digital A1
+                    </CardTitle>
+                    <CardDescription className="text-xs">
+                      Arquivo .pfx ou .p12 para assinar NFes
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="space-y-3">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-medium text-muted-foreground">Arquivo do Certificado</label>
+                        <div className="flex gap-2">
+                          <Input
+                            type="file"
+                            accept=".pfx,.p12"
+                            onChange={handleCertificadoChange}
+                            disabled={uploadingCertificado || validatingCertificado}
+                            className="cursor-pointer text-sm h-9"
+                          />
+                          {validatingCertificado && (
+                            <div className="flex items-center justify-center px-2 bg-blue-100 text-blue-700 rounded-md">
+                              <IconLoader2 className="h-3.5 w-3.5 animate-spin" />
+                            </div>
+                          )}
+                          {certificadoValid === true && (
+                            <div className="flex items-center justify-center px-2 bg-green-100 text-green-700 rounded-md">
+                              <IconCheck className="h-3.5 w-3.5" />
+                            </div>
+                          )}
+                          {certificadoValid === false && (
+                            <div className="flex items-center justify-center px-2 bg-red-100 text-red-700 rounded-md">
+                              <IconAlertCircle className="h-3.5 w-3.5" />
+                            </div>
+                          )}
+                        </div>
+                        {certificadoFile && (
+                          <p className="text-xs text-muted-foreground">
+                            {certificadoFile.name} ({(certificadoFile.size / 1024).toFixed(1)} KB)
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-medium text-muted-foreground">Senha do Certificado</label>
+                        <div className="relative">
+                          <Input
+                            type="password"
+                            placeholder="Digite a senha"
+                            value={certificadoPassword}
+                            onChange={(e) => handlePasswordChange(e.target.value)}
+                            onBlur={() => {
+                              // Validar imediatamente ao sair do campo
+                              if (certificadoFile && certificadoPassword.length >= 4) {
+                                // Limpar timeout pendente
+                                if (validationTimeoutRef.current) {
+                                  clearTimeout(validationTimeoutRef.current)
+                                }
+                                validateCertificado(certificadoFile, certificadoPassword)
+                              }
+                            }}
+                            disabled={uploadingCertificado || validatingCertificado}
+                            className="h-9 text-sm"
+                          />
+                          {validatingCertificado && (
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                              <IconLoader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {validatingCertificado
+                            ? "Validando..."
+                            : certificadoValid === true
+                            ? "✓ Validado"
+                            : certificadoValid === false
+                            ? "✗ Inválido"
+                            : "Digite a senha para validar"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {emitenteId && (
+                      <Button
+                        type="button"
+                        onClick={uploadCertificado}
+                        disabled={!certificadoFile || !certificadoPassword || uploadingCertificado}
+                        className="w-full"
+                      >
+                        {uploadingCertificado && <IconLoader2 className="h-4 w-4 mr-2 animate-spin" />}
+                        {!uploadingCertificado && <IconUpload className="h-4 w-4 mr-2" />}
+                        {uploadingCertificado ? "Enviando..." : "Enviar Certificado"}
+                      </Button>
+                    )}
+
+                    {/* Informações do Certificado Validado */}
+                    {certificadoInfo && certificadoValid && (
+                      <div className={`rounded-lg border-2 p-3 ${
+                        certificadoInfo.expired
+                          ? "border-red-500 bg-red-50"
+                          : certificadoInfo.nearExpiration
+                          ? "border-yellow-500 bg-yellow-50"
+                          : "border-green-500 bg-green-50"
+                      }`}>
+                        <div className="flex items-center gap-2 mb-2">
+                          {certificadoInfo.expired ? (
+                            <IconAlertCircle className="h-4 w-4 text-red-600" />
+                          ) : (
+                            <IconCheck className="h-4 w-4 text-green-600" />
+                          )}
+                          <span className={`text-sm font-semibold ${
+                            certificadoInfo.expired
+                              ? "text-red-900"
+                              : certificadoInfo.nearExpiration
+                              ? "text-yellow-900"
+                              : "text-green-900"
+                          }`}>
+                            {certificadoInfo.expired ? "Certificado Expirado" : "Certificado Validado"}
+                          </span>
+                          {certificadoInfo.nearExpiration && !certificadoInfo.expired && (
+                            <span className="text-[10px] bg-yellow-600 text-white px-1.5 py-0.5 rounded font-medium">
+                              Próximo do vencimento
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-xs">
+                          {certificadoInfo.cnpjFormatado && (
+                            <div className="flex flex-col">
+                              <span className="text-[10px] font-medium text-gray-600 uppercase">CNPJ</span>
+                              <span className="font-semibold text-gray-900">{certificadoInfo.cnpjFormatado}</span>
+                            </div>
+                          )}
+                          <div className="flex flex-col">
+                            <span className="text-[10px] font-medium text-gray-600 uppercase">Validade</span>
+                            <span className="font-semibold text-gray-900">
+                              {new Date(certificadoInfo.validFrom).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })} - {new Date(certificadoInfo.validTo).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })}
+                            </span>
+                          </div>
+                          {certificadoInfo.titular && (
+                            <div className="flex flex-col col-span-2">
+                              <span className="text-[10px] font-medium text-gray-600 uppercase">Titular</span>
+                              <span className="font-semibold text-gray-900 text-xs">{certificadoInfo.titular}</span>
+                            </div>
+                          )}
+                          <div className="flex flex-col">
+                            <span className="text-[10px] font-medium text-gray-600 uppercase">Vencimento</span>
+                            <span className={`font-bold text-sm ${
+                              certificadoInfo.expired
+                                ? "text-red-700"
+                                : certificadoInfo.daysUntilExpiration <= 30
+                                ? "text-yellow-700"
+                                : "text-green-700"
+                            }`}>
+                              {certificadoInfo.expired ? "Expirado" : `${certificadoInfo.daysUntilExpiration} dias`}
+                            </span>
+                          </div>
+                          {certificadoInfo.issuer && (
+                            <div className="flex flex-col">
+                              <span className="text-[10px] font-medium text-gray-600 uppercase">Autoridade Certificadora</span>
+                              <span className="font-semibold text-gray-900 truncate" title={certificadoInfo.issuer}>{certificadoInfo.issuer}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {!certificadoValid && (
+                      <Alert className="py-2">
+                        <IconAlertCircle className="h-3.5 w-3.5" />
+                        <AlertTitle className="text-xs">Requisitos</AlertTitle>
+                        <AlertDescription>
+                          <ul className="list-disc list-inside space-y-0.5 text-[11px]">
+                            <li>Formato .pfx ou .p12 (máx. 5MB)</li>
+                            <li>Certificado A1 dentro da validade</li>
+                          </ul>
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
 
         {/* Botões de Ação */}
         <div className="flex justify-end gap-2">
-          <Button type="submit" disabled={loading}>
+          <Button
+            type="submit"
+            disabled={loading}
+          >
             {loading && <IconLoader2 className="h-4 w-4 mr-2 animate-spin" />}
             {!loading && <IconDeviceFloppy className="h-4 w-4 mr-2" />}
             {loading ? "Salvando..." : emitenteId ? "Atualizar Configurações" : "Salvar Configurações"}

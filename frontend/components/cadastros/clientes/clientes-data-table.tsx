@@ -49,6 +49,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Label } from "@/components/ui/label"
 import {
   Select,
@@ -135,6 +145,9 @@ export function ClientesDataTable() {
   })
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedClienteId, setSelectedClienteId] = useState<string | undefined>()
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [clienteToDelete, setClienteToDelete] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   // Filtros do Bazza UI
   const {
@@ -405,13 +418,23 @@ export function ClientesDataTable() {
     setDialogOpen(true)
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Tem certeza que deseja excluir este cliente?")) return
+  const handleDelete = (id: string) => {
+    setClienteToDelete(id)
+    setDeleteDialogOpen(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!clienteToDelete) return
 
     try {
-      await deleteCliente(id)
+      setDeleting(true)
+      await deleteCliente(clienteToDelete)
+      setDeleteDialogOpen(false)
+      setClienteToDelete(null)
     } catch (error) {
       // Error handling is done in the hook
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -626,6 +649,39 @@ export function ClientesDataTable() {
         clienteId={selectedClienteId}
         onSuccess={handleSuccess}
       />
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir este cliente? Esta ação não pode ser desfeita.
+              {clienteToDelete && (
+                <span className="block mt-2 text-sm font-medium text-foreground">
+                  O cliente será removido permanentemente do sistema.
+                </span>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? (
+                <>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
+                  Excluindo...
+                </>
+              ) : (
+                "Excluir"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

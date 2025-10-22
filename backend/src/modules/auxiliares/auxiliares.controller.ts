@@ -56,14 +56,15 @@ export class AuxiliaresController {
         // Verifica se há municípios para este estado
         const count = await this.prisma.municipio.count({ where: { estadoId } });
 
-        // Se não houver municípios, popula via API IBGE
-        if (count === 0) {
+        // Se não houver municípios OU tiver poucos (menos de 10), popula via API IBGE
+        // Isso garante que todos os municípios sejam carregados, não apenas alguns
+        if (count < 10) {
           const estado = await this.prisma.estado.findUnique({
             where: { id: estadoId },
           });
 
           if (estado) {
-            this.logger.log(`Nenhum município encontrado para ${estado.uf}, populando via API IBGE...`);
+            this.logger.log(`Apenas ${count} município(s) encontrado(s) para ${estado.uf}, populando todos via API IBGE...`);
             await this.ibgeCacheService.getMunicipiosByEstado(estado.uf);
           }
         }

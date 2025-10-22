@@ -22,7 +22,6 @@ export class CreateEmitenteDto {
 
   @IsOptional()
   @IsString()
-  @Length(1, 20)
   inscricaoMunicipal?: string;
 
   @IsOptional()
@@ -43,7 +42,6 @@ export class CreateEmitenteDto {
 
   @IsOptional()
   @IsString()
-  @Length(1, 100)
   complemento?: string;
 
   @IsString()
@@ -63,11 +61,10 @@ export class CreateEmitenteDto {
 
   @IsOptional()
   @IsString()
-  @Length(1, 20)
   telefone?: string;
 
   @IsOptional()
-  @IsEmail()
+  @IsString()
   email?: string;
 
   @IsOptional()

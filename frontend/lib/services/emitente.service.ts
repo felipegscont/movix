@@ -79,9 +79,13 @@ export class EmitenteService {
     return data.data || data;
   }
 
-  static async getEmitenteAtivo(): Promise<Emitente> {
+  static async getEmitenteAtivo(): Promise<Emitente | null> {
     const response = await fetch(`${API_BASE_URL}/emitentes/ativo/principal`);
     if (!response.ok) {
+      // Se for 404, retorna null (emitente não existe ainda)
+      if (response.status === 404) {
+        return null;
+      }
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.message || 'Erro ao buscar emitente ativo');
     }

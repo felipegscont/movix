@@ -184,8 +184,47 @@ model Emitente {
   municipio             Municipio @relation(fields: [municipioId], references: [id])
   estado                Estado @relation(fields: [estadoId], references: [id])
   nfes                  Nfe[]
+  certificados          CertificadoDigital[]
 
   @@map("emitentes")
+}
+
+// Certificado Digital
+model CertificadoDigital {
+  id                    String @id @default(cuid())
+  emitenteId            String
+
+  // Informações do arquivo
+  arquivoPath           String @db.VarChar(500)
+  arquivoNome           String @db.VarChar(255)
+  arquivoTamanho        Int // em bytes
+  senha                 String @db.VarChar(100) // Criptografada
+
+  // Informações do certificado
+  cnpjCertificado       String? @db.VarChar(14)
+  razaoSocialCertificado String? @db.VarChar(200)
+  titular               String? @db.VarChar(200)
+  emissor               String? @db.VarChar(200)
+  numeroSerie           String? @db.VarChar(100)
+
+  // Validade
+  validoDe              DateTime
+  validoAte             DateTime
+  diasParaVencimento    Int
+  expirado              Boolean @default(false)
+  proximoVencimento     Boolean @default(false) // Menos de 30 dias
+
+  // Status
+  ativo                 Boolean @default(true)
+  dataUpload            DateTime @default(now())
+  ultimaValidacao       DateTime @default(now())
+
+  // Relacionamento
+  emitente              Emitente @relation(fields: [emitenteId], references: [id], onDelete: Cascade)
+
+  @@map("certificados_digitais")
+  @@index([emitenteId])
+  @@index([validoAte])
 }
 
 // Clientes

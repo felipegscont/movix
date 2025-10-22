@@ -177,4 +177,70 @@ export class EmitenteService {
 
     return emitente;
   }
+
+  async updateCertificadoPath(id: string, certificadoPath: string) {
+    const emitente = await this.prisma.emitente.findUnique({
+      where: { id },
+    });
+
+    if (!emitente) {
+      throw new NotFoundException('Emitente não encontrado');
+    }
+
+    return this.prisma.emitente.update({
+      where: { id },
+      data: { certificadoPath },
+      include: {
+        municipio: {
+          include: { estado: true },
+        },
+        estado: true,
+      },
+    });
+  }
+
+  async saveCertificadoInfo(
+    emitenteId: string,
+    certificadoData: {
+      arquivoPath: string;
+      arquivoNome: string;
+      arquivoTamanho: number;
+      senha: string;
+      cnpjCertificado?: string;
+      razaoSocialCertificado?: string;
+      titular?: string;
+      emissor?: string;
+      numeroSerie?: string;
+      validoDe: Date;
+      validoAte: Date;
+      diasParaVencimento: number;
+      expirado: boolean;
+      proximoVencimento: boolean;
+    },
+  ) {
+    // Desativar certificados anteriores
+    await this.prisma.certificadoDigital.updateMany({
+      where: { emitenteId, ativo: true },
+      data: { ativo: false },
+    });
+
+    // Criar novo registro de certificado
+    return this.prisma.certificadoDigital.create({
+      data: {
+        emitenteId,
+        ...certificadoData,
+      },
+    });
+  }
+
+  async getCertificadoAtivo(emitenteId: string) {
+    return this.prisma.certificadoDigital.findFirst({
+      where: {
+        emitenteId,
+        ativo: true,
+        expirado: false,
+      },
+      orderBy: { dataUpload: 'desc' },
+    });
+  }
 }

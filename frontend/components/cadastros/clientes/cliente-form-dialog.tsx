@@ -37,8 +37,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Accordion,
   AccordionContent,
@@ -47,7 +45,7 @@ import {
 } from "@/components/ui/accordion"
 import { Badge } from "@/components/ui/badge"
 import { useClienteForm } from "@/hooks/clientes/use-cliente-form"
-import { User, MapPin, Phone, FileText, Search, ChevronDown } from "lucide-react"
+import { User, MapPin, Phone, FileText, Search } from "lucide-react"
 
 
 
@@ -87,17 +85,18 @@ export function ClienteFormDialog({
 
   const watchEstadoId = form.watch("estadoId")
   const watchDocumento = form.watch("documento")
-  const [accordionValue, setAccordionValue] = useState<string[]>([])
+  const [accordionValue, setAccordionValue] = useState<string[]>(["basicos"])
 
+  // Gerencia abertura inicial do accordion baseado no modo (criar/editar)
   useEffect(() => {
     if (open && clienteId) {
       loadCliente()
       // Ao editar, abre todas as seções
-      setAccordionValue(["endereco", "contato", "fiscal"])
+      setAccordionValue(["basicos", "endereco", "contato"])
     } else if (open) {
       resetForm()
-      // Ao criar novo, fecha todas
-      setAccordionValue([])
+      // Ao criar novo, abre apenas "basicos"
+      setAccordionValue(["basicos"])
     }
   }, [open, clienteId, loadCliente, resetForm])
 
@@ -105,18 +104,14 @@ export function ClienteFormDialog({
   useEffect(() => {
     if (watchDocumento && watchDocumento.replace(/\D/g, '').length >= 11 && !clienteId) {
       // Só abre se não estiver já aberto
-      if (!accordionValue.includes("endereco")) {
-        setAccordionValue(prev => [...prev, "endereco"])
-      }
+      setAccordionValue(prev => {
+        if (!prev.includes("endereco")) {
+          return [...prev, "endereco"]
+        }
+        return prev
+      })
     }
-  }, [watchDocumento, clienteId, accordionValue])
-
-  // Sempre mantém "basicos" aberto
-  useEffect(() => {
-    if (!accordionValue.includes("basicos")) {
-      setAccordionValue(prev => ["basicos", ...prev])
-    }
-  }, [accordionValue])
+  }, [watchDocumento, clienteId])
 
 
 
@@ -164,7 +159,7 @@ export function ClienteFormDialog({
                 onValueChange={setAccordionValue}
                 className="w-full space-y-4"
               >
-                {/* Accordion: Dados Básicos - Sempre aberto */}
+                {/* Accordion: Dados Básicos */}
                 <AccordionItem value="basicos" className="border rounded-lg">
                   <AccordionTrigger className="px-6 py-4 hover:no-underline">
                     <div className="flex items-center justify-between w-full pr-4">
@@ -278,6 +273,119 @@ export function ClienteFormDialog({
                           </FormItem>
                         )}
                       />
+
+                      {/* Dados Fiscais - Apenas para PJ */}
+                      {form.watch("documento")?.replace(/\D/g, '').length > 11 && (
+                        <>
+                          <div className="pt-4 border-t">
+                            <h4 className="text-sm font-semibold mb-4 flex items-center gap-2">
+                              <FileText className="h-4 w-4" />
+                              Dados Fiscais
+                            </h4>
+
+                            <div className="space-y-4">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <FormField
+                                  control={form.control}
+                                  name="inscricaoEstadual"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Inscrição Estadual</FormLabel>
+                                      <FormControl>
+                                        <Input placeholder="000.000.000.000" {...field} />
+                                      </FormControl>
+                                      <FormDescription>
+                                        Inscrição estadual da empresa (se aplicável)
+                                      </FormDescription>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+
+                                <FormField
+                                  control={form.control}
+                                  name="inscricaoMunicipal"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Inscrição Municipal</FormLabel>
+                                      <FormControl>
+                                        <Input placeholder="000000000" {...field} />
+                                      </FormControl>
+                                      <FormDescription>
+                                        Inscrição municipal da empresa (se aplicável)
+                                      </FormDescription>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+
+                              {/* Inscrição SUFRAMA - Apenas para estados da Amazônia Ocidental */}
+                              {(() => {
+                                const estadoId = form.watch("estadoId")
+                                const estado = estados.find(e => e.id === estadoId)
+                                const estadosSuframa = ["AM", "AC", "RO", "RR", "AP"]
+                                const mostrarSuframa = estado && estadosSuframa.includes(estado.uf)
+
+                                return mostrarSuframa ? (
+                                  <FormField
+                                    control={form.control}
+                                    name="inscricaoSuframa"
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        <FormLabel>Inscrição SUFRAMA</FormLabel>
+                                        <FormControl>
+                                          <Input placeholder="000000000" maxLength={15} {...field} />
+                                        </FormControl>
+                                        <FormDescription>
+                                          {estado.uf === "AP"
+                                            ? "Apenas para clientes de Macapá e Santana (Zona Franca)"
+                                            : "Zona Franca de Manaus e Amazônia Ocidental"}
+                                        </FormDescription>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                ) : null
+                              })()}
+
+                              <FormField
+                                control={form.control}
+                                name="indicadorIE"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Indicador de Inscrição Estadual</FormLabel>
+                                    <Select
+                                      onValueChange={(value) => field.onChange(Number(value))}
+                                      value={field.value?.toString()}
+                                      disabled={form.watch("tipo") === "FISICA"}
+                                    >
+                                      <FormControl>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Selecione o indicador" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        <SelectItem value="1">1 - Contribuinte ICMS</SelectItem>
+                                        <SelectItem value="2">2 - Contribuinte isento</SelectItem>
+                                        <SelectItem value="9">9 - Não Contribuinte</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                    <FormDescription>
+                                      {form.watch("tipo") === "FISICA"
+                                        ? "Pessoa física é sempre Não Contribuinte (preenchido automaticamente)"
+                                        : form.watch("inscricaoEstadual")?.trim()
+                                        ? "Contribuinte ICMS (tem Inscrição Estadual)"
+                                        : "Não Contribuinte (sem Inscrição Estadual)"}
+                                    </FormDescription>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </AccordionContent>
                 </AccordionItem>
@@ -583,137 +691,7 @@ export function ClienteFormDialog({
                   </AccordionContent>
                 </AccordionItem>
 
-                {/* Accordion: Dados Fiscais */}
-                <AccordionItem value="fiscal" className="border rounded-lg">
-                  <AccordionTrigger className="px-6 py-4 hover:no-underline">
-                    <div className="flex items-center justify-between w-full pr-4">
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
-                          <FileText className="h-5 w-5 text-primary" />
-                        </div>
-                        <div className="text-left">
-                          <h3 className="text-base font-semibold">Dados Fiscais</h3>
-                          <p className="text-sm text-muted-foreground">
-                            {form.watch("documento")?.replace(/\D/g, '').length > 11
-                              ? "Informações fiscais e tributárias"
-                              : "Apenas para pessoas jurídicas (CNPJ)"}
-                          </p>
-                        </div>
-                      </div>
-                      <Badge
-                        variant={form.watch("documento")?.replace(/\D/g, '').length > 11 ? "secondary" : "outline"}
-                        className="ml-auto mr-2"
-                      >
-                        {form.watch("documento")?.replace(/\D/g, '').length > 11 ? "Obrigatório" : "N/A"}
-                      </Badge>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="px-6 pb-6">
-                    <div className="space-y-4 pt-4">
-                      {form.watch("documento")?.replace(/\D/g, '').length > 11 && (
-                        <>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <FormField
-                              control={form.control}
-                              name="inscricaoEstadual"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Inscrição Estadual</FormLabel>
-                                  <FormControl>
-                                    <Input placeholder="000.000.000.000" {...field} />
-                                  </FormControl>
-                                  <FormDescription>
-                                    Inscrição estadual da empresa (se aplicável)
-                                  </FormDescription>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
 
-                            <FormField
-                              control={form.control}
-                              name="inscricaoMunicipal"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Inscrição Municipal</FormLabel>
-                                  <FormControl>
-                                    <Input placeholder="000000000" {...field} />
-                                  </FormControl>
-                                  <FormDescription>
-                                    Inscrição municipal da empresa (se aplicável)
-                                  </FormDescription>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-
-                          <FormField
-                            control={form.control}
-                            name="inscricaoSuframa"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Inscrição SUFRAMA</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="000000000" maxLength={15} {...field} />
-                                </FormControl>
-                                <FormDescription>
-                                  Apenas para clientes da Zona Franca de Manaus (opcional)
-                                </FormDescription>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={form.control}
-                            name="indicadorIE"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Indicador de Inscrição Estadual</FormLabel>
-                                <Select
-                                  onValueChange={(value) => field.onChange(Number(value))}
-                                  value={field.value?.toString()}
-                                  disabled={form.watch("tipo") === "FISICA"}
-                                >
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Selecione o indicador" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    <SelectItem value="1">1 - Contribuinte ICMS</SelectItem>
-                                    <SelectItem value="2">2 - Contribuinte isento</SelectItem>
-                                    <SelectItem value="9">9 - Não Contribuinte</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                <FormDescription>
-                                  {form.watch("tipo") === "FISICA"
-                                    ? "Pessoa física é sempre Não Contribuinte (preenchido automaticamente)"
-                                    : form.watch("inscricaoEstadual")?.trim()
-                                    ? "Contribuinte ICMS (tem Inscrição Estadual)"
-                                    : "Não Contribuinte (sem Inscrição Estadual)"}
-                                </FormDescription>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </>
-                      )}
-
-                      {form.watch("documento")?.replace(/\D/g, '').length <= 11 && (
-                        <div className="flex items-center justify-center p-8 text-center">
-                          <div className="space-y-2">
-                            <FileText className="h-12 w-12 mx-auto text-muted-foreground" />
-                            <p className="text-sm text-muted-foreground">
-                              Dados fiscais são aplicáveis apenas para pessoas jurídicas (CNPJ)
-                            </p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
               </Accordion>
             </form>
           </Form>
