@@ -1,12 +1,9 @@
 import { PrismaClient } from '@prisma/client';
+import { seedFiscalTables } from './seeds/fiscal';
 
 const prisma = new PrismaClient();
 
-async function main() {
-  console.log('🌱 Iniciando seed do banco de dados...');
-
-  // Estados brasileiros
-  console.log('📍 Criando estados...');
+async function seedEstados() {
   const estados = [
     { codigo: '12', uf: 'AC', nome: 'Acre', regiao: 'Norte' },
     { codigo: '27', uf: 'AL', nome: 'Alagoas', regiao: 'Nordeste' },
@@ -44,9 +41,9 @@ async function main() {
       create: estado,
     });
   }
+}
 
-  // Alguns municípios importantes
-  console.log('🏙️ Criando municípios...');
+async function seedMunicipios() {
   const estadoSP = await prisma.estado.findUnique({ where: { uf: 'SP' } });
   const estadoRJ = await prisma.estado.findUnique({ where: { uf: 'RJ' } });
   const estadoMG = await prisma.estado.findUnique({ where: { uf: 'MG' } });
@@ -73,9 +70,9 @@ async function main() {
       create: municipio,
     });
   }
+}
 
-  // NCMs básicos
-  console.log('📦 Criando NCMs...');
+async function seedNCMs() {
   const ncms = [
     { codigo: '44152000', descricao: 'Paletes, coleiras e outras plataformas para carga, de madeira', unidade: 'UN' },
     { codigo: '87164000', descricao: 'Reboques e semi-reboques, para qualquer veículo; outros veículos não autopropulsados', unidade: 'UN' },
@@ -90,94 +87,9 @@ async function main() {
       create: ncm,
     });
   }
+}
 
-  // CFOPs básicos
-  console.log('🔢 Criando CFOPs...');
-  const cfops = [
-    { codigo: '5101', descricao: 'Venda de produção do estabelecimento', aplicacao: 'Dentro do estado', tipo: 'Saída' },
-    { codigo: '5102', descricao: 'Venda de mercadoria adquirida ou recebida de terceiros', aplicacao: 'Dentro do estado', tipo: 'Saída' },
-    { codigo: '6101', descricao: 'Venda de produção do estabelecimento', aplicacao: 'Fora do estado', tipo: 'Saída' },
-    { codigo: '6102', descricao: 'Venda de mercadoria adquirida ou recebida de terceiros', aplicacao: 'Fora do estado', tipo: 'Saída' },
-    { codigo: '1101', descricao: 'Compra para industrialização ou produção rural', aplicacao: 'Dentro do estado', tipo: 'Entrada' },
-    { codigo: '1102', descricao: 'Compra para comercialização', aplicacao: 'Dentro do estado', tipo: 'Entrada' },
-  ];
-
-  for (const cfop of cfops) {
-    await prisma.cFOP.upsert({
-      where: { codigo: cfop.codigo },
-      update: {},
-      create: cfop,
-    });
-  }
-
-  // CSOSNs do Simples Nacional
-  console.log('🏛️ Criando CSOSNs...');
-  const csosns = [
-    { codigo: '101', descricao: 'Tributada pelo Simples Nacional com permissão de crédito' },
-    { codigo: '102', descricao: 'Tributada pelo Simples Nacional sem permissão de crédito' },
-    { codigo: '103', descricao: 'Isenção do ICMS no Simples Nacional para faixa de receita bruta' },
-    { codigo: '201', descricao: 'Tributada pelo Simples Nacional com permissão de crédito e com cobrança do ICMS por substituição tributária' },
-    { codigo: '202', descricao: 'Tributada pelo Simples Nacional sem permissão de crédito e com cobrança do ICMS por substituição tributária' },
-    { codigo: '203', descricao: 'Isenção do ICMS no Simples Nacional para faixa de receita bruta e com cobrança do ICMS por substituição tributária' },
-    { codigo: '300', descricao: 'Imune' },
-    { codigo: '400', descricao: 'Não tributada pelo Simples Nacional' },
-    { codigo: '500', descricao: 'ICMS cobrado anteriormente por substituição tributária (substituído) ou por antecipação' },
-    { codigo: '900', descricao: 'Outros' },
-  ];
-
-  for (const csosn of csosns) {
-    await prisma.cSOSN.upsert({
-      where: { codigo: csosn.codigo },
-      update: {},
-      create: csosn,
-    });
-  }
-
-  // CSTs básicos
-  console.log('📊 Criando CSTs...');
-  // Limpar CSTs existentes
-  await prisma.cST.deleteMany({});
-
-  const csts = [
-    // ICMS
-    { codigo: '00', descricao: 'Tributada integralmente', tipo: 'ICMS' },
-    { codigo: '10', descricao: 'Tributada e com cobrança do ICMS por substituição tributária', tipo: 'ICMS' },
-    { codigo: '20', descricao: 'Com redução de base de cálculo', tipo: 'ICMS' },
-    { codigo: '30', descricao: 'Isenta ou não tributada e com cobrança do ICMS por substituição tributária', tipo: 'ICMS' },
-    { codigo: '40', descricao: 'Isenta', tipo: 'ICMS' },
-    { codigo: '41', descricao: 'Não tributada', tipo: 'ICMS' },
-    { codigo: '50', descricao: 'Suspensão', tipo: 'ICMS' },
-    { codigo: '51', descricao: 'Diferimento', tipo: 'ICMS' },
-    { codigo: '60', descricao: 'ICMS cobrado anteriormente por substituição tributária', tipo: 'ICMS' },
-    { codigo: '70', descricao: 'Com redução de base de cálculo e cobrança do ICMS por substituição tributária', tipo: 'ICMS' },
-    { codigo: '90', descricao: 'Outras', tipo: 'ICMS' },
-    
-    // PIS
-    { codigo: '01', descricao: 'Operação Tributável (base de cálculo = valor da operação alíquota normal)', tipo: 'PIS' },
-    { codigo: '02', descricao: 'Operação Tributável (base de cálculo = valor da operação alíquota diferenciada)', tipo: 'PIS' },
-    { codigo: '49', descricao: 'Outras Operações de Saída', tipo: 'PIS' },
-    
-    // COFINS
-    { codigo: '01', descricao: 'Operação Tributável (base de cálculo = valor da operação alíquota normal)', tipo: 'COFINS' },
-    { codigo: '02', descricao: 'Operação Tributável (base de cálculo = valor da operação alíquota diferenciada)', tipo: 'COFINS' },
-    { codigo: '49', descricao: 'Outras Operações de Saída', tipo: 'COFINS' },
-    
-    // IPI
-    { codigo: '00', descricao: 'Entrada com recuperação de crédito', tipo: 'IPI' },
-    { codigo: '49', descricao: 'Outras entradas', tipo: 'IPI' },
-    { codigo: '50', descricao: 'Saída tributada', tipo: 'IPI' },
-    { codigo: '99', descricao: 'Outras saídas', tipo: 'IPI' },
-  ];
-
-  await prisma.cST.createMany({
-    data: csts,
-    skipDuplicates: true,
-  });
-
-  // Naturezas de Operação
-  console.log('📋 Criando Naturezas de Operação...');
-
-  // Buscar CFOPs para relacionar
+async function seedNaturezas() {
   const cfop5102 = await prisma.cFOP.findUnique({ where: { codigo: '5102' } });
   const cfop6102 = await prisma.cFOP.findUnique({ where: { codigo: '6102' } });
   const cfop5101 = await prisma.cFOP.findUnique({ where: { codigo: '5101' } });
@@ -189,20 +101,20 @@ async function main() {
       descricao: 'Venda de mercadoria',
       cfopDentroEstadoId: cfop5102?.id,
       cfopForaEstadoId: cfop6102?.id,
-      tipoOperacao: 1, // Saída
-      finalidade: 1, // Normal
-      consumidorFinal: 1, // Sim
-      presencaComprador: 1, // Presencial
+      tipoOperacao: 1,
+      finalidade: 1,
+      consumidorFinal: 1,
+      presencaComprador: 1,
     },
     {
       codigo: 'VENDA_PROD',
       descricao: 'Venda de produção do estabelecimento',
       cfopDentroEstadoId: cfop5101?.id,
       cfopForaEstadoId: cfop6101?.id,
-      tipoOperacao: 1, // Saída
-      finalidade: 1, // Normal
-      consumidorFinal: 1, // Sim
-      presencaComprador: 1, // Presencial
+      tipoOperacao: 1,
+      finalidade: 1,
+      consumidorFinal: 1,
+      presencaComprador: 1,
     },
   ];
 
@@ -213,8 +125,27 @@ async function main() {
       create: natureza,
     });
   }
+}
 
-  console.log('✅ Seed concluído com sucesso!');
+async function main() {
+  console.log('🌱 Seed iniciado');
+
+  console.log('📍 Estados');
+  await seedEstados();
+
+  console.log('🏙️ Municípios');
+  await seedMunicipios();
+
+  console.log('📦 NCMs');
+  await seedNCMs();
+
+  console.log('🔢 Tabelas Fiscais (CFOP, CST, CSOSN)');
+  await seedFiscalTables(prisma);
+
+  console.log('📋 Naturezas de Operação');
+  await seedNaturezas();
+
+  console.log('✅ Seed concluído');
 }
 
 main()
