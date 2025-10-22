@@ -174,6 +174,46 @@ async function main() {
     skipDuplicates: true,
   });
 
+  // Naturezas de Operação
+  console.log('📋 Criando Naturezas de Operação...');
+
+  // Buscar CFOPs para relacionar
+  const cfop5102 = await prisma.cFOP.findUnique({ where: { codigo: '5102' } });
+  const cfop6102 = await prisma.cFOP.findUnique({ where: { codigo: '6102' } });
+  const cfop5101 = await prisma.cFOP.findUnique({ where: { codigo: '5101' } });
+  const cfop6101 = await prisma.cFOP.findUnique({ where: { codigo: '6101' } });
+
+  const naturezas = [
+    {
+      codigo: 'VENDA',
+      descricao: 'Venda de mercadoria',
+      cfopDentroEstadoId: cfop5102?.id,
+      cfopForaEstadoId: cfop6102?.id,
+      tipoOperacao: 1, // Saída
+      finalidade: 1, // Normal
+      consumidorFinal: 1, // Sim
+      presencaComprador: 1, // Presencial
+    },
+    {
+      codigo: 'VENDA_PROD',
+      descricao: 'Venda de produção do estabelecimento',
+      cfopDentroEstadoId: cfop5101?.id,
+      cfopForaEstadoId: cfop6101?.id,
+      tipoOperacao: 1, // Saída
+      finalidade: 1, // Normal
+      consumidorFinal: 1, // Sim
+      presencaComprador: 1, // Presencial
+    },
+  ];
+
+  for (const natureza of naturezas) {
+    await prisma.naturezaOperacao.upsert({
+      where: { codigo: natureza.codigo },
+      update: {},
+      create: natureza,
+    });
+  }
+
   console.log('✅ Seed concluído com sucesso!');
 }
 

@@ -54,6 +54,11 @@ export class ProdutoService {
         ncm: true,
         cest: true,
         fornecedor: true,
+        icmsCst: true,
+        icmsCsosn: true,
+        pisCst: true,
+        cofinsCst: true,
+        ipiCst: true,
       },
     });
   }
@@ -87,6 +92,11 @@ export class ProdutoService {
               documento: true,
             },
           },
+          icmsCst: true,
+          icmsCsosn: true,
+          pisCst: true,
+          cofinsCst: true,
+          ipiCst: true,
         },
         orderBy: { descricao: 'asc' },
         skip,
@@ -113,6 +123,11 @@ export class ProdutoService {
         ncm: true,
         cest: true,
         fornecedor: true,
+        icmsCst: true,
+        icmsCsosn: true,
+        pisCst: true,
+        cofinsCst: true,
+        ipiCst: true,
         nfeItens: {
           select: {
             id: true,

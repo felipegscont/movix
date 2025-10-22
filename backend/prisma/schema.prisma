@@ -83,7 +83,10 @@ model CFOP {
   updatedAt   DateTime @updatedAt
 
   // Relacionamentos
-  nfeItens    NfeItem[]
+  nfeItens              NfeItem[]
+  naturezasDentroEstado NaturezaOperacao[] @relation("NaturezaCFOPDentro")
+  naturezasForaEstado   NaturezaOperacao[] @relation("NaturezaCFOPFora")
+  naturezasExterior     NaturezaOperacao[] @relation("NaturezaCFOPExterior")
 
   @@map("cfop")
 }
@@ -116,6 +119,7 @@ model CSOSN {
 
   // Relacionamentos
   nfeItensICMS NfeItemICMS[]
+  produtos     Produto[]
 
   @@map("csosn")
 }
@@ -135,6 +139,12 @@ model CST {
   nfeItensIPI   NfeItemIPI[]
   nfeItensPIS   NfeItemPIS[]
   nfeItensCOFINS NfeItemCOFINS[]
+
+  // Relacionamentos com Produtos
+  produtosICMS   Produto[] @relation("ProdutoICMSCST")
+  produtosPIS    Produto[] @relation("ProdutoPISCST")
+  produtosCOFINS Produto[] @relation("ProdutoCOFINSCST")
+  produtosIPI    Produto[] @relation("ProdutoIPICST")
 
   @@unique([codigo, tipo])
   @@map("cst")
@@ -338,6 +348,24 @@ model Produto {
   // Tributação
   origem                String @db.VarChar(1) // 0=Nacional, 1=Estrangeira, etc
 
+  // Impostos - ICMS
+  icmsCstId             String? // Para regime normal
+  icmsCsosnId           String? // Para Simples Nacional
+  icmsAliquota          Decimal @default(0) @db.Decimal(5,2)
+  icmsReducao           Decimal? @db.Decimal(5,2) // Redução de base de cálculo
+
+  // Impostos - PIS
+  pisCstId              String?
+  pisAliquota           Decimal @default(0) @db.Decimal(5,4)
+
+  // Impostos - COFINS
+  cofinsCstId           String?
+  cofinsAliquota        Decimal @default(0) @db.Decimal(5,4)
+
+  // Impostos - IPI
+  ipiCstId              String?
+  ipiAliquota           Decimal? @db.Decimal(5,2)
+
   // Fornecedor
   fornecedorId          String?
 
@@ -351,7 +379,46 @@ model Produto {
   fornecedor            Fornecedor? @relation(fields: [fornecedorId], references: [id])
   nfeItens              NfeItem[]
 
+  // Relacionamentos de impostos
+  icmsCst               CST? @relation("ProdutoICMSCST", fields: [icmsCstId], references: [id])
+  icmsCsosn             CSOSN? @relation(fields: [icmsCsosnId], references: [id])
+  pisCst                CST? @relation("ProdutoPISCST", fields: [pisCstId], references: [id])
+  cofinsCst             CST? @relation("ProdutoCOFINSCST", fields: [cofinsCstId], references: [id])
+  ipiCst                CST? @relation("ProdutoIPICST", fields: [ipiCstId], references: [id])
+
   @@map("produtos")
+}
+
+// Natureza de Operação (Configuração)
+model NaturezaOperacao {
+  id                    String @id @default(cuid())
+  codigo                String @unique @db.VarChar(10) // Ex: VENDA, DEVOL, etc
+  descricao             String @db.VarChar(200) // Ex: Venda de mercadoria
+
+  // CFOP Padrão
+  cfopDentroEstadoId    String? // CFOP para operações dentro do estado
+  cfopForaEstadoId      String? // CFOP para operações fora do estado
+  cfopExteriorId        String? // CFOP para operações com exterior
+
+  // Configurações da NFe
+  tipoOperacao          Int @default(1) // 0=Entrada, 1=Saída
+  finalidade            Int @default(1) // 1=Normal, 2=Complementar, 3=Ajuste, 4=Devolução
+  consumidorFinal       Int @default(1) // 0=Não, 1=Sim
+  presencaComprador     Int @default(1) // 0=Não se aplica, 1=Presencial, etc
+
+  // Informações Adicionais Padrão
+  informacoesAdicionaisPadrao String? @db.Text
+
+  ativo                 Boolean @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  // Relacionamentos
+  cfopDentroEstado      CFOP? @relation("NaturezaCFOPDentro", fields: [cfopDentroEstadoId], references: [id])
+  cfopForaEstado        CFOP? @relation("NaturezaCFOPFora", fields: [cfopForaEstadoId], references: [id])
+  cfopExterior          CFOP? @relation("NaturezaCFOPExterior", fields: [cfopExteriorId], references: [id])
+
+  @@map("naturezas_operacao")
 }
 
 // ================================

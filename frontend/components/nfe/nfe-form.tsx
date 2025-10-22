@@ -44,6 +44,28 @@ interface NfeItemForm {
   valorUnitario: number
   valorDesconto: number
   valorTotal: number
+
+  // Tributação
+  origem: string // 0=Nacional, 1=Estrangeira
+
+  // ICMS
+  icmsCstId?: string // Para regime normal
+  icmsCsosnId?: string // Para Simples Nacional
+  icmsBaseCalculo?: number
+  icmsAliquota?: number
+  icmsValor?: number
+
+  // PIS
+  pisCstId?: string
+  pisBaseCalculo?: number
+  pisAliquota?: number
+  pisValor?: number
+
+  // COFINS
+  cofinsCstId?: string
+  cofinsBaseCalculo?: number
+  cofinsAliquota?: number
+  cofinsValor?: number
 }
 
 export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
@@ -55,6 +77,10 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
   const [produtos, setProdutos] = useState<any[]>([])
   const [ncms, setNcms] = useState<any[]>([])
   const [cfops, setCfops] = useState<any[]>([])
+  const [cstsICMS, setCstsICMS] = useState<any[]>([])
+  const [cstsPIS, setCstsPIS] = useState<any[]>([])
+  const [cstsCOFINS, setCstsCOFINS] = useState<any[]>([])
+  const [csosns, setCsosns] = useState<any[]>([])
 
   // Emitente ativo (fixo do sistema)
   const [emitente, setEmitente] = useState<any>(null)
@@ -77,6 +103,19 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
   const [valorUnitarioItem, setValorUnitarioItem] = useState(0)
   const [descontoItem, setDescontoItem] = useState(0)
   const [cfopItem, setCfopItem] = useState("")
+
+  // Impostos do item
+  const [origemItem, setOrigemItem] = useState("0")
+  const [icmsCstIdItem, setIcmsCstIdItem] = useState("")
+  const [icmsCsosnIdItem, setIcmsCsosnIdItem] = useState("")
+  const [icmsAliquotaItem, setIcmsAliquotaItem] = useState(0)
+  const [pisCstIdItem, setPisCstIdItem] = useState("")
+  const [pisAliquotaItem, setPisAliquotaItem] = useState(0)
+  const [cofinsCstIdItem, setCofinsCstIdItem] = useState("")
+  const [cofinsAliquotaItem, setCofinsAliquotaItem] = useState(0)
+
+  // Controle de seção de impostos expandida
+  const [impostosItemOpen, setImpostosItemOpen] = useState(false)
   
   // Totalizadores
   const [valorFrete, setValorFrete] = useState(0)
@@ -126,6 +165,10 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
         ProdutoService.getAll({ page: 1, limit: 1000 }),
         AuxiliarService.getNcms(),
         AuxiliarService.getCfops(),
+        AuxiliarService.getCSTs('ICMS'),
+        AuxiliarService.getCSTs('PIS'),
+        AuxiliarService.getCSTs('COFINS'),
+        AuxiliarService.getCSOSNs(),
       ])
 
       // Processar emitente ativo
@@ -173,6 +216,49 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
       } else {
         console.error("Erro ao carregar CFOPs:", results[4].reason)
         toast.error("Erro ao carregar CFOPs")
+      }
+
+      // Processar CSTs ICMS
+      if (results[5].status === 'fulfilled') {
+        setCstsICMS(results[5].value || [])
+      } else {
+        console.error("Erro ao carregar CSTs ICMS:", results[5].reason)
+      }
+
+      // Processar CSTs PIS
+      if (results[6].status === 'fulfilled') {
+        setCstsPIS(results[6].value || [])
+        // Pré-selecionar CST 01 (mais comum)
+        const cstPadrao = results[6].value?.find((c: any) => c.codigo === '01')
+        if (cstPadrao) {
+          setPisCstIdItem(cstPadrao.id)
+        }
+      } else {
+        console.error("Erro ao carregar CSTs PIS:", results[6].reason)
+      }
+
+      // Processar CSTs COFINS
+      if (results[7].status === 'fulfilled') {
+        setCstsCOFINS(results[7].value || [])
+        // Pré-selecionar CST 01 (mais comum)
+        const cstPadrao = results[7].value?.find((c: any) => c.codigo === '01')
+        if (cstPadrao) {
+          setCofinsCstIdItem(cstPadrao.id)
+        }
+      } else {
+        console.error("Erro ao carregar CSTs COFINS:", results[7].reason)
+      }
+
+      // Processar CSOSNs
+      if (results[8].status === 'fulfilled') {
+        setCsosns(results[8].value || [])
+        // Pré-selecionar CSOSN 102 (mais comum para Simples Nacional)
+        const csosnPadrao = results[8].value?.find((c: any) => c.codigo === '102')
+        if (csosnPadrao) {
+          setIcmsCsosnIdItem(csosnPadrao.id)
+        }
+      } else {
+        console.error("Erro ao carregar CSOSNs:", results[8].reason)
       }
     } catch (error) {
       console.error("Erro geral ao carregar dados:", error)
@@ -241,10 +327,43 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
       return
     }
 
+    // Validar impostos baseado no regime tributário
+    const isSimples = emitente?.regimeTributario === 1
+
+    if (isSimples && !icmsCsosnIdItem) {
+      toast.error("Selecione o CSOSN para ICMS")
+      return
+    }
+
+    if (!isSimples && !icmsCstIdItem) {
+      toast.error("Selecione o CST para ICMS")
+      return
+    }
+
+    if (!pisCstIdItem) {
+      toast.error("Selecione o CST para PIS")
+      return
+    }
+
+    if (!cofinsCstIdItem) {
+      toast.error("Selecione o CST para COFINS")
+      return
+    }
+
     const produto = produtos.find(p => p.id === produtoSelecionado)
     if (!produto) return
 
     const valorTotalItem = (quantidade * valorUnitarioItem) - descontoItem
+
+    // Calcular impostos
+    const icmsBase = valorTotalItem
+    const icmsValor = icmsBase * (icmsAliquotaItem / 100)
+
+    const pisBase = valorTotalItem
+    const pisValor = pisBase * (pisAliquotaItem / 100)
+
+    const cofinsBase = valorTotalItem
+    const cofinsValor = cofinsBase * (cofinsAliquotaItem / 100)
 
     const novoItem: NfeItemForm = {
       produtoId: produto.id,
@@ -257,16 +376,33 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
       valorUnitario: valorUnitarioItem,
       valorDesconto: descontoItem,
       valorTotal: valorTotalItem,
+
+      // Impostos
+      origem: origemItem,
+      icmsCstId: isSimples ? undefined : icmsCstIdItem,
+      icmsCsosnId: isSimples ? icmsCsosnIdItem : undefined,
+      icmsBaseCalculo: icmsBase,
+      icmsAliquota: icmsAliquotaItem,
+      icmsValor: icmsValor,
+      pisCstId: pisCstIdItem,
+      pisBaseCalculo: pisBase,
+      pisAliquota: pisAliquotaItem,
+      pisValor: pisValor,
+      cofinsCstId: cofinsCstIdItem,
+      cofinsBaseCalculo: cofinsBase,
+      cofinsAliquota: cofinsAliquotaItem,
+      cofinsValor: cofinsValor,
     }
 
     setItens([...itens, novoItem])
-    
+
     // Limpar campos
     setProdutoSelecionado("")
     setQuantidade(1)
     setValorUnitarioItem(0)
     setDescontoItem(0)
-    
+    setImpostosItemOpen(false)
+
     toast.success("Item adicionado")
   }
 
@@ -280,6 +416,18 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
     const produto = produtos.find(p => p.id === produtoId)
     if (produto) {
       setValorUnitarioItem(produto.valorUnitario)
+      setOrigemItem(produto.origem || "0")
+
+      // Pré-preencher alíquotas padrão se não estiverem definidas
+      if (icmsAliquotaItem === 0) {
+        setIcmsAliquotaItem(18) // Alíquota padrão ICMS
+      }
+      if (pisAliquotaItem === 0) {
+        setPisAliquotaItem(1.65) // Alíquota padrão PIS
+      }
+      if (cofinsAliquotaItem === 0) {
+        setCofinsAliquotaItem(7.6) // Alíquota padrão COFINS
+      }
     }
   }
 
@@ -334,7 +482,35 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
         valorII,
         valorOutrasDespesas,
         informacoesAdicionais,
-        itens: [], // TODO: Mapear itens quando backend estiver pronto
+        itens: itens.map(item => ({
+          produtoId: item.produtoId,
+          codigo: item.codigo,
+          descricao: item.descricao,
+          ncmId: item.ncmId,
+          cfopId: item.cfopId,
+          unidadeComercial: item.unidadeComercial,
+          quantidadeComercial: item.quantidadeComercial,
+          valorUnitario: item.valorUnitario,
+          valorDesconto: item.valorDesconto,
+          valorTotal: item.valorTotal,
+          origem: item.origem,
+          // Impostos ICMS
+          icmsCstId: item.icmsCstId,
+          icmsCsosnId: item.icmsCsosnId,
+          icmsBaseCalculo: item.icmsBaseCalculo,
+          icmsAliquota: item.icmsAliquota,
+          icmsValor: item.icmsValor,
+          // Impostos PIS
+          pisCstId: item.pisCstId,
+          pisBaseCalculo: item.pisBaseCalculo,
+          pisAliquota: item.pisAliquota,
+          pisValor: item.pisValor,
+          // Impostos COFINS
+          cofinsCstId: item.cofinsCstId,
+          cofinsBaseCalculo: item.cofinsBaseCalculo,
+          cofinsAliquota: item.cofinsAliquota,
+          cofinsValor: item.cofinsValor,
+        })),
         duplicatas: duplicatas.length > 0 ? duplicatas : undefined,
       }
 
