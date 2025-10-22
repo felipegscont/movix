@@ -21,6 +21,10 @@ const clienteFormSchema = z.object({
   nomeFantasia: z.string().optional().or(z.literal("")),
   inscricaoEstadual: z.string().optional().or(z.literal("")),
   inscricaoMunicipal: z.string().optional().or(z.literal("")),
+  inscricaoSuframa: z.string()
+    .optional()
+    .or(z.literal(""))
+    .refine((val) => !val || /^\d+$/.test(val), "Inscrição SUFRAMA deve conter apenas números"),
   logradouro: z.string().min(1, "Logradouro é obrigatório"),
   numero: z.string().min(1, "Número é obrigatório"),
   complemento: z.string().optional().or(z.literal("")),
@@ -35,6 +39,23 @@ const clienteFormSchema = z.object({
   email: z.string().email("Email inválido").optional().or(z.literal("")),
   indicadorIE: z.number().optional(),
   ativo: z.boolean().default(true),
+}).refine((data) => {
+  // Validação: Pessoa Física deve ser sempre Não Contribuinte (9)
+  if (data.tipo === "FISICA" && data.indicadorIE !== undefined && data.indicadorIE !== 9) {
+    return false
+  }
+  // Validação: Se indicadorIE = 1 (Contribuinte), DEVE ter IE
+  if (data.indicadorIE === 1 && (!data.inscricaoEstadual || data.inscricaoEstadual.trim() === "")) {
+    return false
+  }
+  // Validação: Se indicadorIE = 2 ou 9, NÃO deve ter IE
+  if ((data.indicadorIE === 2 || data.indicadorIE === 9) && data.inscricaoEstadual && data.inscricaoEstadual.trim() !== "") {
+    return false
+  }
+  return true
+}, {
+  message: "Inconsistência entre Inscrição Estadual e Indicador de IE",
+  path: ["indicadorIE"]
 })
 
 export type ClienteFormValues = z.infer<typeof clienteFormSchema>
@@ -145,6 +166,7 @@ export function useClienteForm({ clienteId, onSuccess }: UseClienteFormProps): U
       nomeFantasia: "",
       inscricaoEstadual: "",
       inscricaoMunicipal: "",
+      inscricaoSuframa: "",
       logradouro: "",
       numero: "",
       complemento: "",
@@ -161,6 +183,8 @@ export function useClienteForm({ clienteId, onSuccess }: UseClienteFormProps): U
   })
 
   const watchEstadoId = form.watch("estadoId")
+  const watchTipo = form.watch("tipo")
+  const watchInscricaoEstadual = form.watch("inscricaoEstadual")
 
   // Load municipalities when state changes
   useEffect(() => {
@@ -171,6 +195,26 @@ export function useClienteForm({ clienteId, onSuccess }: UseClienteFormProps): U
       clearMunicipios()
     }
   }, [watchEstadoId, form, loadMunicipios, clearMunicipios])
+
+  // Auto-preencher indicadorIE baseado no tipo e IE
+  useEffect(() => {
+    // Pessoa Física: sempre Não Contribuinte (9)
+    if (watchTipo === "FISICA") {
+      form.setValue("indicadorIE", 9)
+      return
+    }
+
+    // Pessoa Jurídica: verificar se tem IE
+    if (watchTipo === "JURIDICA") {
+      if (watchInscricaoEstadual && watchInscricaoEstadual.trim() !== "") {
+        // Tem IE: Contribuinte ICMS (1)
+        form.setValue("indicadorIE", 1)
+      } else {
+        // Não tem IE: Não Contribuinte (9)
+        form.setValue("indicadorIE", 9)
+      }
+    }
+  }, [watchTipo, watchInscricaoEstadual, form])
 
 
 
@@ -189,6 +233,7 @@ export function useClienteForm({ clienteId, onSuccess }: UseClienteFormProps): U
         nomeFantasia: cliente.nomeFantasia || "",
         inscricaoEstadual: cliente.inscricaoEstadual || "",
         inscricaoMunicipal: cliente.inscricaoMunicipal || "",
+        inscricaoSuframa: cliente.inscricaoSuframa || "",
         logradouro: cliente.logradouro,
         numero: cliente.numero,
         complemento: cliente.complemento || "",
@@ -371,6 +416,7 @@ export function useClienteForm({ clienteId, onSuccess }: UseClienteFormProps): U
         nomeFantasia: data.nomeFantasia?.trim() || undefined,
         inscricaoEstadual: data.inscricaoEstadual?.trim() || undefined,
         inscricaoMunicipal: data.inscricaoMunicipal?.trim() || undefined,
+        inscricaoSuframa: data.inscricaoSuframa?.trim() || undefined,
         complemento: data.complemento?.trim() || undefined,
         telefone: data.telefone?.trim() || undefined,
         celular: data.celular?.trim() || undefined,

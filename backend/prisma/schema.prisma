@@ -197,6 +197,7 @@ model Cliente {
   nomeFantasia          String? @db.VarChar(200)
   inscricaoEstadual     String? @db.VarChar(20)
   inscricaoMunicipal    String? @db.VarChar(20)
+  inscricaoSuframa      String? @db.VarChar(15) // Inscrição SUFRAMA (Zona Franca de Manaus)
 
   // Endereço
   logradouro            String @db.VarChar(200)

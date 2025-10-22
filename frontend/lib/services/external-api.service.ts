@@ -23,7 +23,10 @@ export interface CnpjData {
   // Contato
   telefone?: string;
   email?: string;
-  
+
+  // Atividades
+  cnae?: string;
+
   // Inscrições Estaduais
   inscricoesEstaduais?: Array<{
     numero: string;

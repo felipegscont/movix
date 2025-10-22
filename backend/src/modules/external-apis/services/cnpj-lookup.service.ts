@@ -36,8 +36,9 @@ export interface CnpjData {
   telefone2?: string;
   fax?: string;
   email?: string;
-  
+
   // Atividades
+  cnae?: string; // Código CNAE principal (para facilitar uso direto)
   atividadePrincipal?: {
     codigo: string;
     descricao: string;
@@ -267,6 +268,7 @@ export class CnpjLookupService extends BaseExternalApiService {
       email: estabelecimento.email,
       
       // Atividades
+      cnae: estabelecimento.atividade_principal?.id,
       atividadePrincipal: estabelecimento.atividade_principal ? {
         codigo: estabelecimento.atividade_principal.id,
         descricao: estabelecimento.atividade_principal.descricao,
@@ -338,6 +340,7 @@ export class CnpjLookupService extends BaseExternalApiService {
       email: data.email,
       
       // Atividades
+      cnae: data.cnae_fiscal?.toString(),
       atividadePrincipal: {
         codigo: data.cnae_fiscal?.toString(),
         descricao: data.cnae_fiscal_descricao,
@@ -405,6 +408,7 @@ export class CnpjLookupService extends BaseExternalApiService {
       email: data.email,
       
       // Atividades
+      cnae: data.atividade_principal?.[0]?.code,
       atividadePrincipal: data.atividade_principal?.[0] ? {
         codigo: data.atividade_principal[0].code,
         descricao: data.atividade_principal[0].text,

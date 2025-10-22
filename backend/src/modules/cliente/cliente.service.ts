@@ -34,8 +34,14 @@ export class ClienteService {
     // Validar documento (CPF ou CNPJ)
     this.validateDocumento(createClienteDto.documento, createClienteDto.tipo);
 
+    // Aplicar valores padrão inteligentes para indicadorIE
+    const indicadorIE = this.determineIndicadorIE(createClienteDto);
+
     return this.prisma.cliente.create({
-      data: createClienteDto,
+      data: {
+        ...createClienteDto,
+        indicadorIE,
+      },
       include: {
         municipio: {
           include: { estado: true },
@@ -174,9 +180,19 @@ export class ClienteService {
       }
     }
 
+    // Aplicar valores padrão inteligentes para indicadorIE se necessário
+    const mergedData = {
+      ...cliente,
+      ...updateClienteDto,
+    };
+    const indicadorIE = this.determineIndicadorIE(mergedData as any);
+
     return this.prisma.cliente.update({
       where: { id },
-      data: updateClienteDto,
+      data: {
+        ...updateClienteDto,
+        indicadorIE,
+      },
       include: {
         municipio: {
           include: { estado: true },
@@ -220,6 +236,33 @@ export class ClienteService {
       }
       // Aqui poderia adicionar validação de CNPJ
     }
+  }
+
+  /**
+   * Determina o indicadorIE baseado no tipo de pessoa e presença de IE
+   * Regras:
+   * - Pessoa Física: sempre 9 (Não contribuinte)
+   * - Pessoa Jurídica com IE: 1 (Contribuinte ICMS)
+   * - Pessoa Jurídica sem IE: 9 (Não contribuinte)
+   */
+  private determineIndicadorIE(dto: CreateClienteDto): number {
+    // Se já foi informado, usar o valor informado (já validado pelo DTO)
+    if (dto.indicadorIE !== undefined && dto.indicadorIE !== null) {
+      return dto.indicadorIE;
+    }
+
+    // Pessoa Física: sempre Não contribuinte
+    if (dto.tipo === 'FISICA') {
+      return 9;
+    }
+
+    // Pessoa Jurídica: verificar se tem IE
+    if (dto.inscricaoEstadual && dto.inscricaoEstadual.trim() !== '') {
+      return 1; // Contribuinte ICMS
+    }
+
+    // Pessoa Jurídica sem IE: Não contribuinte
+    return 9;
   }
 
   async getClientesForSelect() {

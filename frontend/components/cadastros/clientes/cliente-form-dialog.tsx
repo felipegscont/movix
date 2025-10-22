@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -39,10 +39,15 @@ import {
 } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
 import { Badge } from "@/components/ui/badge"
 import { useClienteForm } from "@/hooks/clientes/use-cliente-form"
-import { User, MapPin, Phone, FileText, Search } from "lucide-react"
+import { User, MapPin, Phone, FileText, Search, ChevronDown } from "lucide-react"
 
 
 
@@ -81,14 +86,37 @@ export function ClienteFormDialog({
   } = useClienteForm({ clienteId, onSuccess })
 
   const watchEstadoId = form.watch("estadoId")
+  const watchDocumento = form.watch("documento")
+  const [accordionValue, setAccordionValue] = useState<string[]>([])
 
   useEffect(() => {
     if (open && clienteId) {
       loadCliente()
+      // Ao editar, abre todas as seções
+      setAccordionValue(["endereco", "contato", "fiscal"])
     } else if (open) {
       resetForm()
+      // Ao criar novo, fecha todas
+      setAccordionValue([])
     }
   }, [open, clienteId, loadCliente, resetForm])
+
+  // Abre automaticamente a seção de endereço quando o documento for preenchido
+  useEffect(() => {
+    if (watchDocumento && watchDocumento.replace(/\D/g, '').length >= 11 && !clienteId) {
+      // Só abre se não estiver já aberto
+      if (!accordionValue.includes("endereco")) {
+        setAccordionValue(prev => [...prev, "endereco"])
+      }
+    }
+  }, [watchDocumento, clienteId, accordionValue])
+
+  // Sempre mantém "basicos" aberto
+  useEffect(() => {
+    if (!accordionValue.includes("basicos")) {
+      setAccordionValue(prev => ["basicos", ...prev])
+    }
+  }, [accordionValue])
 
 
 
@@ -128,21 +156,34 @@ export function ClienteFormDialog({
 
         <div className="flex-1 overflow-y-auto px-6 py-4">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {/* Dados Básicos - Sempre visíveis no topo */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <User className="h-5 w-5" />
-                    Dados Básicos
-                  </CardTitle>
-                  <CardDescription>
-                    Informações principais do cliente
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {/* Documento CPF/CNPJ */}
-                  <FormField
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              {/* Accordion para todas as seções */}
+              <Accordion
+                type="multiple"
+                value={accordionValue}
+                onValueChange={setAccordionValue}
+                className="w-full space-y-4"
+              >
+                {/* Accordion: Dados Básicos - Sempre aberto */}
+                <AccordionItem value="basicos" className="border rounded-lg">
+                  <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                    <div className="flex items-center justify-between w-full pr-4">
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
+                          <User className="h-5 w-5 text-primary" />
+                        </div>
+                        <div className="text-left">
+                          <h3 className="text-base font-semibold">Dados Básicos</h3>
+                          <p className="text-sm text-muted-foreground">Informações principais do cliente</p>
+                        </div>
+                      </div>
+                      <Badge variant="secondary" className="ml-auto mr-2">Obrigatório</Badge>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-6 pb-6">
+                    <div className="space-y-4 pt-4">
+                      {/* Documento CPF/CNPJ */}
+                      <FormField
                     control={form.control}
                     name="documento"
                     render={({ field }) => (
@@ -175,103 +216,89 @@ export function ClienteFormDialog({
                         <FormMessage />
                       </FormItem>
                     )}
-                  />
+                      />
 
-                  {/* Nome */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="nome"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>
-                            {form.watch("documento")?.replace(/\D/g, '').length > 11
-                              ? "Razão Social"
-                              : "Nome"}
-                          </FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                      {/* Nome */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="nome"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                {form.watch("documento")?.replace(/\D/g, '').length > 11
+                                  ? "Razão Social"
+                                  : "Nome"}
+                              </FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                    {form.watch("documento")?.replace(/\D/g, '').length > 11 && (
+                        {form.watch("documento")?.replace(/\D/g, '').length > 11 && (
+                          <FormField
+                            control={form.control}
+                            name="nomeFantasia"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Nome Fantasia</FormLabel>
+                                <FormControl>
+                                  <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        )}
+                      </div>
+
+                      {/* Status Ativo */}
                       <FormField
                         control={form.control}
-                        name="nomeFantasia"
+                        name="ativo"
                         render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Nome Fantasia</FormLabel>
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                              <FormLabel className="text-base">
+                                Cliente Ativo
+                              </FormLabel>
+                              <FormDescription>
+                                Desative para impedir novas transações com este cliente
+                              </FormDescription>
+                            </div>
                             <FormControl>
-                              <Input {...field} />
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
                             </FormControl>
-                            <FormMessage />
                           </FormItem>
                         )}
                       />
-                    )}
-                  </div>
-
-                  {/* Status Ativo */}
-                  <FormField
-                    control={form.control}
-                    name="ativo"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-base">
-                            Cliente Ativo
-                          </FormLabel>
-                          <FormDescription>
-                            Desative para impedir novas transações com este cliente
-                          </FormDescription>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+                {/* Accordion: Endereço */}
+                <AccordionItem value="endereco" className="border rounded-lg">
+                  <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                    <div className="flex items-center justify-between w-full pr-4">
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
+                          <MapPin className="h-5 w-5 text-primary" />
                         </div>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </CardContent>
-              </Card>
-
-              <Separator />
-
-              {/* Tabs para demais informações */}
-              <Tabs defaultValue="endereco" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="endereco" className="gap-2">
-                    <MapPin className="h-4 w-4" />
-                    Endereço
-                  </TabsTrigger>
-                  <TabsTrigger value="contato" className="gap-2">
-                    <Phone className="h-4 w-4" />
-                    Contato
-                  </TabsTrigger>
-                  <TabsTrigger value="fiscal" className="gap-2">
-                    <FileText className="h-4 w-4" />
-                    Dados Fiscais
-                  </TabsTrigger>
-                </TabsList>
-
-                {/* Tab: Endereço */}
-                <TabsContent value="endereco" className="space-y-4 mt-4">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <MapPin className="h-5 w-5" />
-                        Endereço
-                      </CardTitle>
-                      <CardDescription>
-                        Localização do cliente
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
+                        <div className="text-left">
+                          <h3 className="text-base font-semibold">Endereço</h3>
+                          <p className="text-sm text-muted-foreground">Localização do cliente</p>
+                        </div>
+                      </div>
+                      <Badge variant="secondary" className="ml-auto mr-2">Obrigatório</Badge>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-6 pb-6">
+                    <div className="space-y-4 pt-4">
 
                       <FormField
                         control={form.control}
@@ -460,23 +487,28 @@ export function ClienteFormDialog({
                           </FormItem>
                         )}
                       />
-                    </CardContent>
-                  </Card>
-                </TabsContent>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
 
-                {/* Tab: Contato */}
-                <TabsContent value="contato" className="space-y-4 mt-4">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <Phone className="h-5 w-5" />
-                        Informações de Contato
-                      </CardTitle>
-                      <CardDescription>
-                        Telefones e email do cliente
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
+                {/* Accordion: Contato */}
+                <AccordionItem value="contato" className="border rounded-lg">
+                  <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                    <div className="flex items-center justify-between w-full pr-4">
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
+                          <Phone className="h-5 w-5 text-primary" />
+                        </div>
+                        <div className="text-left">
+                          <h3 className="text-base font-semibold">Informações de Contato</h3>
+                          <p className="text-sm text-muted-foreground">Telefones e email do cliente</p>
+                        </div>
+                      </div>
+                      <Badge variant="outline" className="ml-auto mr-2">Opcional</Badge>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-6 pb-6">
+                    <div className="space-y-4 pt-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <FormField
                           control={form.control}
@@ -547,23 +579,37 @@ export function ClienteFormDialog({
                           </FormItem>
                         )}
                       />
-                    </CardContent>
-                  </Card>
-                </TabsContent>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
 
-                {/* Tab: Dados Fiscais */}
-                <TabsContent value="fiscal" className="space-y-4 mt-4">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <FileText className="h-5 w-5" />
-                        Dados Fiscais
-                      </CardTitle>
-                      <CardDescription>
-                        Informações fiscais e tributárias
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
+                {/* Accordion: Dados Fiscais */}
+                <AccordionItem value="fiscal" className="border rounded-lg">
+                  <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                    <div className="flex items-center justify-between w-full pr-4">
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
+                          <FileText className="h-5 w-5 text-primary" />
+                        </div>
+                        <div className="text-left">
+                          <h3 className="text-base font-semibold">Dados Fiscais</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {form.watch("documento")?.replace(/\D/g, '').length > 11
+                              ? "Informações fiscais e tributárias"
+                              : "Apenas para pessoas jurídicas (CNPJ)"}
+                          </p>
+                        </div>
+                      </div>
+                      <Badge
+                        variant={form.watch("documento")?.replace(/\D/g, '').length > 11 ? "secondary" : "outline"}
+                        className="ml-auto mr-2"
+                      >
+                        {form.watch("documento")?.replace(/\D/g, '').length > 11 ? "Obrigatório" : "N/A"}
+                      </Badge>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-6 pb-6">
+                    <div className="space-y-4 pt-4">
                       {form.watch("documento")?.replace(/\D/g, '').length > 11 && (
                         <>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -604,6 +650,23 @@ export function ClienteFormDialog({
 
                           <FormField
                             control={form.control}
+                            name="inscricaoSuframa"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Inscrição SUFRAMA</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="000000000" maxLength={15} {...field} />
+                                </FormControl>
+                                <FormDescription>
+                                  Apenas para clientes da Zona Franca de Manaus (opcional)
+                                </FormDescription>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
                             name="indicadorIE"
                             render={({ field }) => (
                               <FormItem>
@@ -611,6 +674,7 @@ export function ClienteFormDialog({
                                 <Select
                                   onValueChange={(value) => field.onChange(Number(value))}
                                   value={field.value?.toString()}
+                                  disabled={form.watch("tipo") === "FISICA"}
                                 >
                                   <FormControl>
                                     <SelectTrigger>
@@ -624,7 +688,11 @@ export function ClienteFormDialog({
                                   </SelectContent>
                                 </Select>
                                 <FormDescription>
-                                  Indica a situação do cliente em relação ao ICMS
+                                  {form.watch("tipo") === "FISICA"
+                                    ? "Pessoa física é sempre Não Contribuinte (preenchido automaticamente)"
+                                    : form.watch("inscricaoEstadual")?.trim()
+                                    ? "Contribuinte ICMS (tem Inscrição Estadual)"
+                                    : "Não Contribuinte (sem Inscrição Estadual)"}
                                 </FormDescription>
                                 <FormMessage />
                               </FormItem>
@@ -643,10 +711,10 @@ export function ClienteFormDialog({
                           </div>
                         </div>
                       )}
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              </Tabs>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </form>
           </Form>
         </div>

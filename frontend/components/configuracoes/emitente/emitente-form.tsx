@@ -25,20 +25,21 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Switch } from "@/components/ui/switch"
-import { IconLoader2, IconDeviceFloppy, IconAlertCircle } from "@tabler/icons-react"
+import { IconLoader2, IconDeviceFloppy, IconAlertCircle, IconSearch } from "@tabler/icons-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { toast } from "sonner"
 import { EmitenteService } from "@/lib/services/emitente.service"
 import { AuxiliarService } from "@/lib/services/auxiliar.service"
+import { ExternalApiService } from "@/lib/services/external-api.service"
 import { Skeleton } from "@/components/ui/skeleton"
 
 const emitenteSchema = z.object({
   cnpj: z.string().min(14, "CNPJ deve ter 14 dígitos").max(14),
   razaoSocial: z.string().min(3, "Razão social é obrigatória"),
   nomeFantasia: z.string().optional(),
-  inscricaoEstadual: z.string().min(1, "Inscrição estadual é obrigatória"),
+  inscricaoEstadual: z.string().optional(), // Opcional - pode ser preenchido pela API externa
   inscricaoMunicipal: z.string().optional(),
-  cnae: z.string().min(1, "CNAE é obrigatório"),
+  cnae: z.string().optional(), // Opcional - preenchido pela API externa
   regimeTributario: z.number().min(1).max(3),
   logradouro: z.string().min(3, "Logradouro é obrigatório"),
   numero: z.string().min(1, "Número é obrigatório"),
@@ -66,6 +67,7 @@ export function EmitenteForm() {
   const [municipios, setMunicipios] = useState<any[]>([])
   const [loadingEstados, setLoadingEstados] = useState(false)
   const [loadingMunicipios, setLoadingMunicipios] = useState(false)
+  const [loadingCnpj, setLoadingCnpj] = useState(false)
 
   const form = useForm<EmitenteFormData>({
     resolver: zodResolver(emitenteSchema),
@@ -214,6 +216,87 @@ export function EmitenteForm() {
     return numbers.slice(0, 8)
   }
 
+  const handleCnpjChange = async (value: string) => {
+    const numbers = value.replace(/\D/g, "")
+
+    // Se completou 14 dígitos, consulta automaticamente
+    if (numbers.length === 14 && !loadingCnpj) {
+      await consultarCnpj(numbers)
+    }
+  }
+
+  const consultarCnpj = async (cnpj: string) => {
+    try {
+      setLoadingCnpj(true)
+      const data = await ExternalApiService.consultarCnpj(cnpj)
+
+      if (data) {
+        // Preencher dados automaticamente
+        form.setValue("razaoSocial", data.razaoSocial || "")
+        form.setValue("nomeFantasia", data.nomeFantasia || "")
+
+        // CNAE - preencher se disponível
+        if (data.cnae) {
+          form.setValue("cnae", data.cnae)
+        }
+
+        // Inscrição Estadual - preencher se disponível
+        if (data.inscricoesEstaduais && data.inscricoesEstaduais.length > 0) {
+          // Pega a primeira inscrição ativa
+          const inscricaoAtiva = data.inscricoesEstaduais.find(ie => ie.ativo)
+          if (inscricaoAtiva) {
+            form.setValue("inscricaoEstadual", inscricaoAtiva.numero)
+          }
+        }
+
+        // Endereço
+        form.setValue("logradouro", data.logradouro || "")
+        form.setValue("numero", data.numero || "")
+        form.setValue("complemento", data.complemento || "")
+        form.setValue("bairro", data.bairro || "")
+        form.setValue("cep", data.cep?.replace(/\D/g, "") || "")
+
+        // Telefone e email
+        if (data.telefone) {
+          form.setValue("telefone", data.telefone)
+        }
+        if (data.email) {
+          form.setValue("email", data.email)
+        }
+
+        // Buscar estado e município
+        if (data.uf) {
+          const estado = estados.find(e => e.uf === data.uf)
+          if (estado) {
+            form.setValue("estadoId", estado.id)
+
+            // Carregar municípios e selecionar
+            await loadMunicipios(estado.id)
+
+            // Aguardar um pouco para os municípios carregarem
+            setTimeout(() => {
+              const municipio = municipios.find(m =>
+                m.nome.toLowerCase() === data.municipio?.toLowerCase()
+              )
+              if (municipio) {
+                form.setValue("municipioId", municipio.id)
+              }
+            }, 500)
+          }
+        }
+
+        toast.success("Dados do CNPJ carregados com sucesso!")
+      }
+    } catch (error: any) {
+      console.error("Erro ao consultar CNPJ:", error)
+      toast.error("Erro ao consultar CNPJ. Preencha os dados manualmente.")
+    } finally {
+      setLoadingCnpj(false)
+    }
+  }
+
+
+
   if (loadingData) {
     return (
       <div className="space-y-4">
@@ -234,6 +317,7 @@ export function EmitenteForm() {
             <AlertTitle>Primeiro Acesso</AlertTitle>
             <AlertDescription>
               Configure os dados da sua empresa para começar a emitir NFes.
+              Digite o CNPJ da sua empresa no campo abaixo para buscar os dados automaticamente.
             </AlertDescription>
           </Alert>
         )}
@@ -261,14 +345,37 @@ export function EmitenteForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>CNPJ *</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="00000000000000"
-                            maxLength={14}
-                            onChange={(e) => field.onChange(formatCNPJ(e.target.value))}
-                          />
-                        </FormControl>
+                        <div className="flex gap-2">
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="00000000000000"
+                              maxLength={14}
+                              onChange={(e) => {
+                                const formatted = formatCNPJ(e.target.value)
+                                field.onChange(formatted)
+                                handleCnpjChange(formatted)
+                              }}
+                              disabled={loadingCnpj}
+                            />
+                          </FormControl>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={() => consultarCnpj(field.value)}
+                            disabled={loadingCnpj || field.value.length !== 14}
+                          >
+                            {loadingCnpj ? (
+                              <IconLoader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <IconSearch className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+                        <FormDescription>
+                          Digite o CNPJ para buscar dados automaticamente
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -307,10 +414,13 @@ export function EmitenteForm() {
                     name="inscricaoEstadual"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Inscrição Estadual *</FormLabel>
+                        <FormLabel>Inscrição Estadual</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="000000000000" />
+                          <Input {...field} placeholder="000000000000 (opcional)" />
                         </FormControl>
+                        <FormDescription>
+                          Preenchido automaticamente pela consulta de CNPJ quando disponível
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -335,12 +445,12 @@ export function EmitenteForm() {
                     name="cnae"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>CNAE *</FormLabel>
+                        <FormLabel>CNAE</FormLabel>
                         <FormControl>
                           <Input {...field} placeholder="0000000" />
                         </FormControl>
                         <FormDescription>
-                          Código da atividade econômica principal
+                          Código da atividade econômica principal (preenchido automaticamente pela consulta de CNPJ)
                         </FormDescription>
                         <FormMessage />
                       </FormItem>

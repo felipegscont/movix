@@ -8,6 +8,7 @@ export interface Cliente {
   nomeFantasia?: string;
   inscricaoEstadual?: string;
   inscricaoMunicipal?: string;
+  inscricaoSuframa?: string;
   logradouro: string;
   numero: string;
   complemento?: string;
@@ -45,6 +46,7 @@ export interface CreateClienteData {
   nomeFantasia?: string;
   inscricaoEstadual?: string;
   inscricaoMunicipal?: string;
+  inscricaoSuframa?: string;
   logradouro: string;
   numero: string;
   complemento?: string;
