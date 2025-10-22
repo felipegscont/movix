@@ -4,6 +4,24 @@
 
 Simplificar e modularizar o sistema de seeds fiscais seguindo Clean Architecture e princípios Go idiomáticos adaptados ao TypeScript.
 
+## Decisões de Arquitetura
+
+### Separação de Responsabilidades
+
+1. **Seed**: Apenas dados que NÃO têm API externa
+   - CFOP (download automático de fonte oficial)
+   - CST/CSOSN (hardcoded - raramente mudam)
+   - Naturezas de Operação (padrões do sistema)
+
+2. **API com Cache (Lazy Loading)**: Dados dinâmicos
+   - Estados/Municípios (API IBGE + cache local)
+   - Populados automaticamente quando solicitados
+   - Cache persistente no banco
+
+3. **Cadastro Manual**: Dados específicos do negócio
+   - NCM (varia por empresa/produto)
+   - Cadastrado via interface do sistema
+
 ## Mudanças Realizadas
 
 ### Arquivos Removidos
@@ -15,6 +33,14 @@ Simplificar e modularizar o sistema de seeds fiscais seguindo Clean Architecture
 - `seed-fiscal-tables.ts` - Substituído por módulo fiscal
 - `data/csosn.json` - Dados movidos para código
 - `data/cst-icms.json` - Dados movidos para código
+
+### Lógica Removida do Seed
+
+- **Estados**: Removido seed hardcoded (27 estados)
+- **Municípios**: Removido seed hardcoded (6 municípios)
+- **NCMs**: Removido seed de exemplos (4 NCMs)
+
+**Motivo**: Redundância com API IBGE que já popula automaticamente
 
 ### Nova Estrutura
 
@@ -74,14 +100,25 @@ npm run db:setup
 
 ## Dados Populados
 
+### Via Seed (Automático)
 - **CFOP**: ~500 códigos (GitHub Gist)
 - **CST ICMS**: 11 códigos
 - **CST PIS**: 33 códigos
 - **CST COFINS**: 33 códigos
 - **CST IPI**: 14 códigos
 - **CSOSN**: 10 códigos
+- **Naturezas**: 2 padrões
 
-**Total**: ~600 registros fiscais
+**Total Seed**: ~600 registros
+
+### Via API IBGE (Lazy Loading)
+- **Estados**: 27 UFs (populado sob demanda)
+- **Municípios**: ~5570 (populado sob demanda por estado)
+
+**Total API**: ~5600 registros (quando necessário)
+
+### Cadastro Manual
+- **NCM**: Conforme necessidade do negócio
 
 ## Atualização
 
