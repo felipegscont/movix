@@ -6,6 +6,7 @@ import type { CertificadoState } from "../types"
 
 interface CertificadoSectionProps {
   certificado: CertificadoState
+  certificadoInfoFromDb?: any
   onFileChange: (file: File | null) => void
   onPasswordChange: (password: string) => void
   onPasswordBlur: () => void
