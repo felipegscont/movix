@@ -66,4 +66,9 @@ export class EmitenteController {
   getProximoNumeroNfe(@Param('id') id: string) {
     return this.emitenteService.getProximoNumeroNfe(id);
   }
+
+  @Get(':id/certificado')
+  getCertificadoAtivo(@Param('id') id: string) {
+    return this.emitenteService.getCertificadoAtivo(id);
+  }
 }

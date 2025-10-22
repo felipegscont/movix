@@ -159,4 +159,17 @@ export class EmitenteService {
     }
     return response.json();
   }
+
+  static async getCertificadoAtivo(emitenteId: string): Promise<any | null> {
+    const response = await fetch(`${API_BASE_URL}/emitentes/${emitenteId}/certificado`);
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return null; // Certificado não encontrado
+      }
+      throw new Error('Erro ao buscar certificado');
+    }
+
+    return response.json();
+  }
 }

@@ -2,7 +2,7 @@
 
 import { AppSidebar } from "@/components/layout/app-sidebar"
 import { SiteHeader } from "@/components/layout/site-header"
-import { EmitenteForm } from "@/components/configuracoes/emitente/emitente-form"
+import { EmitenteFormRefactored } from "@/components/configuracoes/emitente/emitente-form-refactored"
 import {
   SidebarInset,
   SidebarProvider,
@@ -33,7 +33,7 @@ export default function ConfiguracoesEmitentePage() {
               </div>
 
               {/* Formulário */}
-              <EmitenteForm />
+              <EmitenteFormRefactored />
             </div>
           </div>
         </div>

@@ -1,0 +1,68 @@
+import { UseFormReturn } from "react-hook-form"
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import type { EmitenteFormData } from "../types"
+
+interface ContatoSectionProps {
+  form: UseFormReturn<EmitenteFormData>
+}
+
+export function ContatoSection({ form }: ContatoSectionProps) {
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Telefone */}
+        <FormField
+          control={form.control}
+          name="telefone"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Telefone</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="(00) 00000-0000" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Email */}
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input {...field} type="email" placeholder="contato@empresa.com" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Site */}
+        <FormField
+          control={form.control}
+          name="site"
+          render={({ field }) => (
+            <FormItem className="md:col-span-2">
+              <FormLabel>Site</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="www.empresa.com.br" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+    </div>
+  )
+}
+
