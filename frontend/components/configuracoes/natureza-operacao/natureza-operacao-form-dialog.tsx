@@ -25,6 +25,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
 import {
   Select,
   SelectContent,
@@ -32,7 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { IconDeviceFloppy, IconLoader2 } from "@tabler/icons-react"
+import { IconDeviceFloppy, IconLoader2, IconX } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { NaturezaOperacaoService } from "@/lib/services/natureza-operacao.service"
 import { AuxiliarService } from "@/lib/services/auxiliar.service"
@@ -179,21 +181,35 @@ export function NaturezaOperacaoFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
+      <DialogContent
+        className="max-w-[90vw] w-[90vw] max-h-[90vh] h-[90vh] sm:max-w-[90vw] flex flex-col p-0"
+        onInteractOutside={(e) => {
+          e.preventDefault()
+        }}
+      >
+        <DialogHeader className="px-6 py-4 border-b">
+          <DialogTitle className="text-xl font-semibold">
             {naturezaId ? "Editar Natureza de Operação" : "Nova Natureza de Operação"}
           </DialogTitle>
-          <DialogDescription>
-            Configure uma natureza de operação para facilitar a emissão de notas fiscais
+          <DialogDescription className="text-sm text-muted-foreground">
+            {naturezaId
+              ? "Edite as informações da natureza de operação abaixo"
+              : "Configure uma natureza de operação para facilitar a emissão de notas fiscais"}
           </DialogDescription>
         </DialogHeader>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Dados Básicos */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-medium">Dados Básicos</h3>
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              {/* Dados Básicos */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Dados Básicos</CardTitle>
+                  <CardDescription>
+                    Código e descrição da natureza de operação
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
@@ -248,16 +264,19 @@ export function NaturezaOperacaoFormDialog({
                   </FormItem>
                 )}
               />
-            </div>
+                </CardContent>
+              </Card>
 
-            {/* CFOPs */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-medium">CFOPs Padrão</h3>
-              <FormDescription>
-                Selecione os CFOPs que serão usados automaticamente baseado no destino da operação
-              </FormDescription>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* CFOPs */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">CFOPs Padrão</CardTitle>
+                  <CardDescription>
+                    Selecione os CFOPs que serão usados automaticamente baseado no destino da operação
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <FormField
                   control={form.control}
                   name="cfopDentroEstadoId"
@@ -380,14 +399,20 @@ export function NaturezaOperacaoFormDialog({
                     </FormItem>
                   )}
                 />
-              </div>
-            </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-            {/* Configurações da NFe */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-medium">Configurações da NFe</h3>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Configurações da NFe */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Configurações da NFe</CardTitle>
+                  <CardDescription>
+                    Parâmetros padrão para emissão de notas fiscais
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="tipoOperacao"
@@ -493,60 +518,68 @@ export function NaturezaOperacaoFormDialog({
                     </FormItem>
                   )}
                 />
-              </div>
-            </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-            {/* Informações Adicionais */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-medium">Informações Adicionais</h3>
+              {/* Informações Adicionais */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Informações Adicionais</CardTitle>
+                  <CardDescription>
+                    Texto padrão para o campo de informações adicionais da NFe
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <FormField
+                    control={form.control}
+                    name="informacoesAdicionaisPadrao"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Informações Adicionais Padrão</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            placeholder="Texto que será incluído automaticamente nas notas com esta natureza"
+                            rows={3}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Este texto será adicionado automaticamente ao campo de informações adicionais da NFe
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+            </form>
+          </Form>
+        </div>
 
-              <FormField
-                control={form.control}
-                name="informacoesAdicionaisPadrao"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Informações Adicionais Padrão</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        {...field}
-                        placeholder="Texto que será incluído automaticamente nas notas com esta natureza"
-                        rows={3}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Este texto será adicionado automaticamente ao campo de informações adicionais da NFe
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                disabled={loading}
-              >
-                Cancelar
-              </Button>
-              <Button type="submit" disabled={loading}>
-                {loading ? (
-                  <>
-                    <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Salvando...
-                  </>
-                ) : (
-                  <>
-                    <IconDeviceFloppy className="mr-2 h-4 w-4" />
-                    Salvar
-                  </>
-                )}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+        <DialogFooter className="px-6 py-4 border-t">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={loading}
+          >
+            Cancelar
+          </Button>
+          <Button onClick={form.handleSubmit(onSubmit)} disabled={loading}>
+            {loading ? (
+              <>
+                <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />
+                Salvando...
+              </>
+            ) : (
+              <>
+                <IconDeviceFloppy className="mr-2 h-4 w-4" />
+                Salvar
+              </>
+            )}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )
