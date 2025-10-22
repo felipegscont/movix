@@ -22,6 +22,10 @@ export function CertificadoSection({
   // Usar informações do banco se disponível, senão usar do estado local
   const certificadoInfo = certificado.info || certificadoInfoFromDb
 
+  console.log('CertificadoSection - certificado.info:', certificado.info)
+  console.log('CertificadoSection - certificadoInfoFromDb:', certificadoInfoFromDb)
+  console.log('CertificadoSection - certificadoInfo final:', certificadoInfo)
+
   return (
     <Card className="border-2 border-dashed">
       <CardHeader className="pb-3">

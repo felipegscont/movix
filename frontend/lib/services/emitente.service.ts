@@ -170,6 +170,8 @@ export class EmitenteService {
       throw new Error('Erro ao buscar certificado');
     }
 
-    return response.json();
+    const data = await response.json();
+    console.log('EmitenteService.getCertificadoAtivo - resposta:', data);
+    return data;
   }
 }
