@@ -82,7 +82,6 @@ const produtoFormSchema = z.object({
   ipiCstId: z.string().optional(),
   ipiAliquota: z.number().min(0).max(100).optional(),
   fornecedorId: z.string().optional(),
-  observacoes: z.string().optional(),
   ativo: z.boolean().default(true),
 }).refine((data) => {
   // Validar que pelo menos um entre icmsCstId ou icmsCsosnId deve estar preenchido
@@ -117,32 +116,31 @@ export function ProdutoFormDialog({
     mode: "onBlur",
     defaultValues: {
       codigo: "",
-      codigoBarras: "",
+      codigoBarras: undefined,
       descricao: "",
-      descricaoComplementar: "",
+      descricaoComplementar: undefined,
       ncmId: "",
-      cestId: "",
+      cestId: undefined,
       unidade: "UN",
-      unidadeTributavel: "",
+      unidadeTributavel: undefined,
       valorUnitario: 0,
-      valorCusto: 0,
-      margemLucro: 0,
-      estoqueAtual: 0,
-      estoqueMinimo: 0,
-      estoqueMaximo: 0,
+      valorCusto: undefined,
+      margemLucro: undefined,
+      estoqueAtual: undefined,
+      estoqueMinimo: undefined,
+      estoqueMaximo: undefined,
       origem: "0",
-      icmsCstId: "",
-      icmsCsosnId: "",
-      icmsAliquota: 18,
-      icmsReducao: 0,
-      pisCstId: "",
-      pisAliquota: 1.65,
-      cofinsCstId: "",
-      cofinsAliquota: 7.6,
-      ipiCstId: "",
-      ipiAliquota: 0,
-      fornecedorId: "",
-      observacoes: "",
+      icmsCstId: undefined,
+      icmsCsosnId: undefined,
+      icmsAliquota: undefined,
+      icmsReducao: undefined,
+      pisCstId: undefined,
+      pisAliquota: undefined,
+      cofinsCstId: undefined,
+      cofinsAliquota: undefined,
+      ipiCstId: undefined,
+      ipiAliquota: undefined,
+      fornecedorId: undefined,
       ativo: true,
     },
   })
@@ -238,7 +236,6 @@ export function ProdutoFormDialog({
         ipiCstId: produto.ipiCstId || "",
         ipiAliquota: produto.ipiAliquota || 0,
         fornecedorId: produto.fornecedorId || "",
-        observacoes: produto.observacoes || "",
         ativo: produto.ativo,
       })
     } catch (error) {
@@ -253,11 +250,27 @@ export function ProdutoFormDialog({
     try {
       setLoading(true)
 
+      // Limpar campos vazios (converter "" para undefined)
+      const cleanedValues = Object.entries(values).reduce((acc, [key, value]) => {
+        // Se for string vazia, não incluir no objeto
+        if (value === "") {
+          return acc
+        }
+        // Se for string, incluir
+        if (typeof value === "string") {
+          acc[key] = value
+          return acc
+        }
+        // Para outros tipos (number, boolean), incluir sempre
+        acc[key] = value
+        return acc
+      }, {} as any)
+
       if (produtoId) {
-        await ProdutoService.update(produtoId, values)
+        await ProdutoService.update(produtoId, cleanedValues)
         toast.success("Produto atualizado com sucesso!")
       } else {
-        await ProdutoService.create(values)
+        await ProdutoService.create(cleanedValues)
         toast.success("Produto criado com sucesso!")
       }
 
@@ -1016,7 +1029,7 @@ export function ProdutoFormDialog({
                     <CardHeader>
                       <CardTitle className="text-lg flex items-center gap-2">
                         <Settings className="h-5 w-5" />
-                        Fornecedor e Observações
+                        Fornecedor e Status
                       </CardTitle>
                       <CardDescription>
                         Informações adicionais do produto
@@ -1043,20 +1056,6 @@ export function ProdutoFormDialog({
                         ))}
                       </SelectContent>
                     </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="observacoes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Observações</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} />
-                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

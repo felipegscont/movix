@@ -45,10 +45,15 @@ export function NCMCombobox({
   const [loading, setLoading] = React.useState(false)
   const [search, setSearch] = React.useState("")
 
+  // Debounce para busca server-side
   React.useEffect(() => {
-    if (open) {
+    if (!open) return
+
+    const timer = setTimeout(() => {
       loadNCMs(search)
-    }
+    }, 300) // 300ms de debounce
+
+    return () => clearTimeout(timer)
   }, [open, search])
 
   const loadNCMs = async (searchTerm: string) => {

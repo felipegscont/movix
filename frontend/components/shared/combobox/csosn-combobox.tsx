@@ -3,6 +3,7 @@
 import * as React from "react"
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { searchInFields } from "@/lib/utils/search"
 import { Button } from "@/components/ui/button"
 import {
   Command,
@@ -64,11 +65,26 @@ export function CSOSNCombobox({
   const filteredCSOSNs = React.useMemo(() => {
     if (!search) return csosns
 
+    // Busca robusta por código e descrição
+    let filtered = searchInFields(csosns, search, ['codigo', 'descricao'])
+
+    // Ordenar por relevância
     const searchLower = search.toLowerCase()
-    return csosns.filter(csosn =>
-      csosn.codigo.toLowerCase().includes(searchLower) ||
-      csosn.descricao.toLowerCase().includes(searchLower)
-    )
+    filtered.sort((a, b) => {
+      const aCodigoExact = a.codigo.toLowerCase() === searchLower
+      const bCodigoExact = b.codigo.toLowerCase() === searchLower
+      if (aCodigoExact && !bCodigoExact) return -1
+      if (!aCodigoExact && bCodigoExact) return 1
+
+      const aCodigoStart = a.codigo.toLowerCase().startsWith(searchLower)
+      const bCodigoStart = b.codigo.toLowerCase().startsWith(searchLower)
+      if (aCodigoStart && !bCodigoStart) return -1
+      if (!aCodigoStart && bCodigoStart) return 1
+
+      return a.codigo.localeCompare(b.codigo)
+    })
+
+    return filtered
   }, [csosns, search])
 
   const selectedCSOSN = csosns.find(csosn => csosn.id === value)
