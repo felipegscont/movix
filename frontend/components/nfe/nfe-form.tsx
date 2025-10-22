@@ -90,6 +90,7 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
   const [quantidade, setQuantidade] = useState(1)
   const [valorUnitarioItem, setValorUnitarioItem] = useState(0)
   const [descontoItem, setDescontoItem] = useState(0)
+  const [cfopItem, setCfopItem] = useState("")
   
   // Totalizadores
   const [valorFrete, setValorFrete] = useState(0)
@@ -265,24 +266,28 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
     const cofinsBase = valorTotalItem
     const cofinsValor = cofinsBase * ((produto.cofinsAliquota || 0) / 100)
 
-    // Determinar CFOP baseado no cliente e natureza de operação
-    const cliente = clientes.find(c => c.id === clienteId)
-    const natureza = naturezasOperacao.find(n => n.id === naturezaOperacaoId)
+    // Usar CFOP selecionado manualmente ou determinar automaticamente
+    let cfopId = cfopItem
 
-    let cfopId = ""
-    if (natureza && cliente) {
-      // Verificar se cliente é do mesmo estado do emitente
-      const mesmoEstado = cliente.estadoId === emitente?.estadoId
+    if (!cfopId) {
+      // Determinar CFOP baseado no cliente e natureza de operação
+      const cliente = clientes.find(c => c.id === clienteId)
+      const natureza = naturezasOperacao.find(n => n.id === naturezaOperacaoId)
 
-      if (mesmoEstado && natureza.cfopDentroEstadoId) {
-        cfopId = natureza.cfopDentroEstadoId
-      } else if (!mesmoEstado && natureza.cfopForaEstadoId) {
-        cfopId = natureza.cfopForaEstadoId
+      if (natureza && cliente) {
+        // Verificar se cliente é do mesmo estado do emitente
+        const mesmoEstado = cliente.estadoId === emitente?.estadoId
+
+        if (mesmoEstado && natureza.cfopDentroEstadoId) {
+          cfopId = natureza.cfopDentroEstadoId
+        } else if (!mesmoEstado && natureza.cfopForaEstadoId) {
+          cfopId = natureza.cfopForaEstadoId
+        }
       }
     }
 
     if (!cfopId) {
-      toast.error("CFOP não configurado para esta natureza de operação")
+      toast.error("Selecione um CFOP ou configure a natureza de operação")
       return
     }
 
@@ -320,6 +325,7 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
     setQuantidade(1)
     setValorUnitarioItem(0)
     setDescontoItem(0)
+    setCfopItem("")
 
     toast.success("Item adicionado")
   }

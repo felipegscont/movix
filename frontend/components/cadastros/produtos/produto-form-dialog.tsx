@@ -116,31 +116,31 @@ export function ProdutoFormDialog({
     mode: "onBlur",
     defaultValues: {
       codigo: "",
-      codigoBarras: undefined,
+      codigoBarras: "",
       descricao: "",
-      descricaoComplementar: undefined,
+      descricaoComplementar: "",
       ncmId: "",
-      cestId: undefined,
+      cestId: "",
       unidade: "UN",
-      unidadeTributavel: undefined,
+      unidadeTributavel: "",
       valorUnitario: 0,
-      valorCusto: undefined,
-      margemLucro: undefined,
-      estoqueAtual: undefined,
-      estoqueMinimo: undefined,
-      estoqueMaximo: undefined,
+      valorCusto: 0,
+      margemLucro: 0,
+      estoqueAtual: 0,
+      estoqueMinimo: 0,
+      estoqueMaximo: 0,
       origem: "0",
-      icmsCstId: undefined,
-      icmsCsosnId: undefined,
-      icmsAliquota: undefined,
-      icmsReducao: undefined,
-      pisCstId: undefined,
-      pisAliquota: undefined,
-      cofinsCstId: undefined,
-      cofinsAliquota: undefined,
-      ipiCstId: undefined,
-      ipiAliquota: undefined,
-      fornecedorId: undefined,
+      icmsCstId: "",
+      icmsCsosnId: "",
+      icmsAliquota: 0,
+      icmsReducao: 0,
+      pisCstId: "",
+      pisAliquota: 0,
+      cofinsCstId: "",
+      cofinsAliquota: 0,
+      ipiCstId: "",
+      ipiAliquota: 0,
+      fornecedorId: "",
       ativo: true,
     },
   })
@@ -250,18 +250,25 @@ export function ProdutoFormDialog({
     try {
       setLoading(true)
 
-      // Limpar campos vazios (converter "" para undefined)
+      // Limpar campos vazios (converter "" para undefined para campos opcionais)
       const cleanedValues = Object.entries(values).reduce((acc, [key, value]) => {
-        // Se for string vazia, não incluir no objeto
-        if (value === "") {
-          return acc
-        }
-        // Se for string, incluir
-        if (typeof value === "string") {
+        // Campos obrigatórios que sempre devem ser enviados
+        const requiredFields = ['codigo', 'descricao', 'valorUnitario', 'unidade', 'ncmId', 'origem', 'ativo']
+
+        // Se for campo obrigatório, sempre incluir
+        if (requiredFields.includes(key)) {
           acc[key] = value
           return acc
         }
-        // Para outros tipos (number, boolean), incluir sempre
+
+        // Para campos opcionais:
+        // - String vazia: não incluir (será undefined no backend)
+        // - Número zero: não incluir (será undefined no backend)
+        // - Outros valores: incluir
+        if (value === "" || value === 0) {
+          return acc
+        }
+
         acc[key] = value
         return acc
       }, {} as any)
