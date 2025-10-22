@@ -40,9 +40,9 @@ import { AuxiliarService } from "@/lib/services/auxiliar.service"
 const naturezaOperacaoFormSchema = z.object({
   codigo: z.string().min(1, "Código é obrigatório").max(10, "Código deve ter no máximo 10 caracteres"),
   descricao: z.string().min(1, "Descrição é obrigatória").max(200, "Descrição deve ter no máximo 200 caracteres"),
-  cfopDentroEstadoId: z.string().optional(),
-  cfopForaEstadoId: z.string().optional(),
-  cfopExteriorId: z.string().optional(),
+  cfopDentroEstadoId: z.string().optional().or(z.literal("").transform(() => undefined)),
+  cfopForaEstadoId: z.string().optional().or(z.literal("").transform(() => undefined)),
+  cfopExteriorId: z.string().optional().or(z.literal("").transform(() => undefined)),
   tipoOperacao: z.number().min(0).max(1),
   finalidade: z.number().min(1).max(4),
   consumidorFinal: z.number().min(0).max(1),
@@ -264,25 +264,36 @@ export function NaturezaOperacaoFormDialog({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>CFOP Dentro do Estado</FormLabel>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        disabled={loadingCfops}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="">Nenhum</SelectItem>
-                          {cfopsFiltrados.map((cfop) => (
-                            <SelectItem key={cfop.id} value={cfop.id}>
-                              {cfop.codigo} - {cfop.descricao}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <div className="flex gap-2">
+                        <Select
+                          value={field.value || undefined}
+                          onValueChange={field.onChange}
+                          disabled={loadingCfops}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {cfopsFiltrados.map((cfop) => (
+                              <SelectItem key={cfop.id} value={cfop.id}>
+                                {cfop.codigo} - {cfop.descricao}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {field.value && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={() => field.onChange(undefined)}
+                          >
+                            ×
+                          </Button>
+                        )}
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -294,25 +305,36 @@ export function NaturezaOperacaoFormDialog({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>CFOP Fora do Estado</FormLabel>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        disabled={loadingCfops}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="">Nenhum</SelectItem>
-                          {cfopsFiltrados.map((cfop) => (
-                            <SelectItem key={cfop.id} value={cfop.id}>
-                              {cfop.codigo} - {cfop.descricao}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <div className="flex gap-2">
+                        <Select
+                          value={field.value || undefined}
+                          onValueChange={field.onChange}
+                          disabled={loadingCfops}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {cfopsFiltrados.map((cfop) => (
+                              <SelectItem key={cfop.id} value={cfop.id}>
+                                {cfop.codigo} - {cfop.descricao}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {field.value && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={() => field.onChange(undefined)}
+                          >
+                            ×
+                          </Button>
+                        )}
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -324,25 +346,36 @@ export function NaturezaOperacaoFormDialog({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>CFOP Exterior</FormLabel>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        disabled={loadingCfops}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="">Nenhum</SelectItem>
-                          {cfopsFiltrados.map((cfop) => (
-                            <SelectItem key={cfop.id} value={cfop.id}>
-                              {cfop.codigo} - {cfop.descricao}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <div className="flex gap-2">
+                        <Select
+                          value={field.value || undefined}
+                          onValueChange={field.onChange}
+                          disabled={loadingCfops}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {cfopsFiltrados.map((cfop) => (
+                              <SelectItem key={cfop.id} value={cfop.id}>
+                                {cfop.codigo} - {cfop.descricao}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {field.value && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={() => field.onChange(undefined)}
+                          >
+                            ×
+                          </Button>
+                        )}
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}

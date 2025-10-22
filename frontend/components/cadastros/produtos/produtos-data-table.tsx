@@ -186,7 +186,7 @@ const columns: ColumnDef<Produto>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40">
             <DropdownMenuItem asChild>
-              <Link href={`/produtos/${produto.id}`}>
+              <Link href={`/cadastros/produtos/${produto.id}`}>
                 <IconEye className="mr-2 h-4 w-4" />
                 Visualizar
               </Link>

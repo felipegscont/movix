@@ -1,4 +1,4 @@
-import { api } from './api'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
 
 export interface NaturezaOperacao {
   id: string
@@ -69,38 +69,110 @@ export class NaturezaOperacaoService {
 
   static async getAll(params?: NaturezaOperacaoQueryParams): Promise<NaturezaOperacaoListResponse> {
     const queryParams = new URLSearchParams()
-    
+
     if (params?.page) queryParams.append('page', params.page.toString())
     if (params?.limit) queryParams.append('limit', params.limit.toString())
     if (params?.search) queryParams.append('search', params.search)
 
-    const url = `${this.BASE_PATH}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
-    const response = await api.get(url)
-    return response.data
+    const url = `${API_BASE_URL}${this.BASE_PATH}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+
+    try {
+      const response = await fetch(url)
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || `Erro ao buscar naturezas de operação: ${response.status}`)
+      }
+      return response.json()
+    } catch (error: any) {
+      console.error('Erro ao buscar naturezas de operação:', error)
+      throw error
+    }
   }
 
   static async getAtivas(): Promise<NaturezaOperacao[]> {
-    const response = await api.get(`${this.BASE_PATH}/ativas`)
-    return response.data
+    try {
+      const response = await fetch(`${API_BASE_URL}${this.BASE_PATH}/ativas`)
+      if (!response.ok) {
+        throw new Error('Erro ao buscar naturezas de operação ativas')
+      }
+      return response.json()
+    } catch (error: any) {
+      console.error('Erro ao buscar naturezas de operação ativas:', error)
+      throw error
+    }
   }
 
   static async getById(id: string): Promise<NaturezaOperacao> {
-    const response = await api.get(`${this.BASE_PATH}/${id}`)
-    return response.data
+    try {
+      const response = await fetch(`${API_BASE_URL}${this.BASE_PATH}/${id}`)
+      if (!response.ok) {
+        throw new Error('Erro ao buscar natureza de operação')
+      }
+      return response.json()
+    } catch (error: any) {
+      console.error('Erro ao buscar natureza de operação:', error)
+      throw error
+    }
   }
 
   static async create(data: CreateNaturezaOperacaoData): Promise<NaturezaOperacao> {
-    const response = await api.post(this.BASE_PATH, data)
-    return response.data
+    try {
+      const response = await fetch(`${API_BASE_URL}${this.BASE_PATH}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || 'Erro ao criar natureza de operação')
+      }
+
+      return response.json()
+    } catch (error: any) {
+      console.error('Erro ao criar natureza de operação:', error)
+      throw error
+    }
   }
 
   static async update(id: string, data: UpdateNaturezaOperacaoData): Promise<NaturezaOperacao> {
-    const response = await api.patch(`${this.BASE_PATH}/${id}`, data)
-    return response.data
+    try {
+      const response = await fetch(`${API_BASE_URL}${this.BASE_PATH}/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || 'Erro ao atualizar natureza de operação')
+      }
+
+      return response.json()
+    } catch (error: any) {
+      console.error('Erro ao atualizar natureza de operação:', error)
+      throw error
+    }
   }
 
   static async delete(id: string): Promise<void> {
-    await api.delete(`${this.BASE_PATH}/${id}`)
+    try {
+      const response = await fetch(`${API_BASE_URL}${this.BASE_PATH}/${id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || 'Erro ao excluir natureza de operação')
+      }
+    } catch (error: any) {
+      console.error('Erro ao excluir natureza de operação:', error)
+      throw error
+    }
   }
 }
 

@@ -364,7 +364,7 @@ export function ClientesDataTable() {
             <DropdownMenuContent align="end" className="w-40">
               <DropdownMenuLabel>Ações</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => router.push(`/clientes/${cliente.id}`)}>
+              <DropdownMenuItem onClick={() => router.push(`/cadastros/clientes/${cliente.id}`)}>
                 <IconEye className="mr-2 h-4 w-4" />
                 Visualizar
               </DropdownMenuItem>

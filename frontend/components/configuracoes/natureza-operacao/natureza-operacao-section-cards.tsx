@@ -1,14 +1,31 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { IconFileInvoice, IconArrowUpRight, IconArrowDownRight, IconCheck } from "@tabler/icons-react"
-import { NaturezaOperacao } from "@/lib/services/natureza-operacao.service"
+import { NaturezaOperacao, NaturezaOperacaoService } from "@/lib/services/natureza-operacao.service"
+import { Skeleton } from "@/components/ui/skeleton"
 
-interface NaturezaOperacaoSectionCardsProps {
-  naturezas: NaturezaOperacao[]
-}
+export function NaturezaOperacaoSectionCards() {
+  const [naturezas, setNaturezas] = useState<NaturezaOperacao[]>([])
+  const [loading, setLoading] = useState(true)
 
-export function NaturezaOperacaoSectionCards({ naturezas }: NaturezaOperacaoSectionCardsProps) {
+  useEffect(() => {
+    loadData()
+  }, [])
+
+  const loadData = async () => {
+    try {
+      setLoading(true)
+      const response = await NaturezaOperacaoService.getAll({ page: 1, limit: 1000 })
+      setNaturezas(response.data)
+    } catch (error) {
+      console.error("Erro ao carregar naturezas:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const total = naturezas.length
   const ativas = naturezas.filter(n => n.ativo).length
   const saida = naturezas.filter(n => n.tipoOperacao === 1).length
@@ -49,8 +66,27 @@ export function NaturezaOperacaoSectionCards({ naturezas }: NaturezaOperacaoSect
     },
   ]
 
+  if (loading) {
+    return (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 px-4 lg:px-6">
+        {[1, 2, 3, 4].map((i) => (
+          <Card key={i}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-8 w-8 rounded-lg" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-8 w-16 mb-2" />
+              <Skeleton className="h-3 w-32" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    )
+  }
+
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 px-4 lg:px-6">
       {cards.map((card) => {
         const Icon = card.icon
         return (

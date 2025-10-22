@@ -274,7 +274,7 @@ export function FornecedoresDataTable() {
         return (
           <div className="flex flex-col">
             <button
-              onClick={() => router.push(`/fornecedores/${fornecedorId}`)}
+              onClick={() => router.push(`/cadastros/fornecedores/${fornecedorId}`)}
               className="font-medium text-left hover:text-primary hover:underline transition-colors"
             >
               {nome}
@@ -351,7 +351,7 @@ export function FornecedoresDataTable() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Ações</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => router.push(`/fornecedores/${fornecedor.id}`)}>
+              <DropdownMenuItem onClick={() => router.push(`/cadastros/fornecedores/${fornecedor.id}`)}>
                 <IconEye className="mr-2 h-4 w-4" />
                 Visualizar
               </DropdownMenuItem>
