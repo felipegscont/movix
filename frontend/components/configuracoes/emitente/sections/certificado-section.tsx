@@ -132,40 +132,40 @@ export function CertificadoSection({
             </div>
             
             <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-xs">
-              {certificado.info.cnpjFormatado && (
+              {certificadoInfo.cnpjFormatado && (
                 <div className="flex flex-col">
                   <span className="text-[10px] font-medium text-gray-600 uppercase">CNPJ</span>
-                  <span className="font-semibold text-gray-900">{certificado.info.cnpjFormatado}</span>
+                  <span className="font-semibold text-gray-900">{certificadoInfo.cnpjFormatado}</span>
                 </div>
               )}
               <div className="flex flex-col">
                 <span className="text-[10px] font-medium text-gray-600 uppercase">Validade</span>
                 <span className="font-semibold text-gray-900">
-                  {new Date(certificado.info.validFrom).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })} - {new Date(certificado.info.validTo).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })}
+                  {new Date(certificadoInfo.validFrom).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })} - {new Date(certificadoInfo.validTo).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })}
                 </span>
               </div>
-              {certificado.info.titular && (
+              {certificadoInfo.titular && (
                 <div className="flex flex-col col-span-2">
                   <span className="text-[10px] font-medium text-gray-600 uppercase">Titular</span>
-                  <span className="font-semibold text-gray-900 text-xs">{certificado.info.titular}</span>
+                  <span className="font-semibold text-gray-900 text-xs">{certificadoInfo.titular}</span>
                 </div>
               )}
               <div className="flex flex-col">
                 <span className="text-[10px] font-medium text-gray-600 uppercase">Vencimento</span>
                 <span className={`font-bold text-sm ${
-                  certificado.info.expired 
-                    ? "text-red-700" 
-                    : certificado.info.daysUntilExpiration <= 30 
-                    ? "text-yellow-700" 
+                  certificadoInfo.expired
+                    ? "text-red-700"
+                    : certificadoInfo.daysUntilExpiration <= 30
+                    ? "text-yellow-700"
                     : "text-green-700"
                 }`}>
-                  {certificado.info.expired ? "Expirado" : `${certificado.info.daysUntilExpiration} dias`}
+                  {certificadoInfo.expired ? "Expirado" : `${certificadoInfo.daysUntilExpiration} dias`}
                 </span>
               </div>
-              {certificado.info.issuer && (
+              {certificadoInfo.issuer && (
                 <div className="flex flex-col">
                   <span className="text-[10px] font-medium text-gray-600 uppercase">Autoridade Certificadora</span>
-                  <span className="font-semibold text-gray-900 truncate" title={certificado.info.issuer}>{certificado.info.issuer}</span>
+                  <span className="font-semibold text-gray-900 truncate" title={certificadoInfo.issuer}>{certificadoInfo.issuer}</span>
                 </div>
               )}
             </div>

@@ -68,7 +68,54 @@ export class EmitenteController {
   }
 
   @Get(':id/certificado')
-  getCertificadoAtivo(@Param('id') id: string) {
-    return this.emitenteService.getCertificadoAtivo(id);
+  async getCertificadoAtivo(@Param('id') id: string) {
+    const certificado = await this.emitenteService.getCertificadoAtivo(id);
+
+    if (!certificado) {
+      return null;
+    }
+
+    console.log('Certificado do banco:', {
+      validoDe: certificado.validoDe,
+      validoAte: certificado.validoAte,
+      diasParaVencimento: certificado.diasParaVencimento,
+    });
+
+    // Calcular dias para vencimento atualizado
+    const hoje = new Date();
+    const validoAte = new Date(certificado.validoAte);
+    const diffTime = validoAte.getTime() - hoje.getTime();
+    const diasParaVencimento = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const expirado = diasParaVencimento < 0;
+    const proximoVencimento = diasParaVencimento <= 30 && diasParaVencimento >= 0;
+
+    const response = {
+      id: certificado.id,
+      cnpj: certificado.cnpjCertificado || '',
+      cnpjFormatado: this.formatCNPJ(certificado.cnpjCertificado || ''),
+      razaoSocial: certificado.razaoSocialCertificado || '',
+      titular: certificado.titular || '',
+      validFrom: certificado.validoDe.toISOString(),
+      validTo: certificado.validoAte.toISOString(),
+      daysUntilExpiration: diasParaVencimento,
+      expired: expirado,
+      issuer: certificado.emissor || '',
+      nearExpiration: proximoVencimento,
+      dataUpload: certificado.dataUpload.toISOString(),
+      arquivoNome: certificado.arquivoNome,
+      arquivoTamanho: certificado.arquivoTamanho,
+    };
+
+    console.log('Resposta formatada:', response);
+
+    return response;
+  }
+
+  private formatCNPJ(cnpj: string): string {
+    if (!cnpj) return '';
+    return cnpj.replace(
+      /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
+      '$1.$2.$3/$4-$5',
+    );
   }
 }

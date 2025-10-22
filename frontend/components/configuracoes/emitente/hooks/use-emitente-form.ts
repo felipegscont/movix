@@ -92,6 +92,7 @@ export function useEmitenteForm() {
         // Carregar informações do certificado se existir
         try {
           const certInfo = await EmitenteService.getCertificadoAtivo(emitente.id)
+          console.log('Certificado recebido do backend:', certInfo)
           if (certInfo) {
             setCertificadoInfo(certInfo)
           }
