@@ -38,6 +38,7 @@ import { IconDeviceFloppy, IconLoader2, IconX } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { NaturezaOperacaoService } from "@/lib/services/natureza-operacao.service"
 import { AuxiliarService } from "@/lib/services/auxiliar.service"
+import { CFOPCombobox } from "@/components/shared/combobox/cfop-combobox"
 
 const naturezaOperacaoFormSchema = z.object({
   codigo: z.string().min(1, "Código é obrigatório").max(10, "Código deve ter no máximo 10 caracteres"),
@@ -69,8 +70,6 @@ export function NaturezaOperacaoFormDialog({
   onSuccess,
 }: NaturezaOperacaoFormDialogProps) {
   const [loading, setLoading] = useState(false)
-  const [cfops, setCfops] = useState<any[]>([])
-  const [loadingCfops, setLoadingCfops] = useState(false)
 
   const form = useForm<NaturezaOperacaoFormValues>({
     resolver: zodResolver(naturezaOperacaoFormSchema),
@@ -91,29 +90,12 @@ export function NaturezaOperacaoFormDialog({
   })
 
   useEffect(() => {
-    loadCfops()
-  }, [])
-
-  useEffect(() => {
     if (open && naturezaId) {
       loadNatureza()
     } else if (open) {
       form.reset()
     }
   }, [open, naturezaId])
-
-  const loadCfops = async () => {
-    try {
-      setLoadingCfops(true)
-      const data = await AuxiliarService.getCfops()
-      setCfops(data)
-    } catch (error) {
-      console.error("Erro ao carregar CFOPs:", error)
-      toast.error("Erro ao carregar CFOPs")
-    } finally {
-      setLoadingCfops(false)
-    }
-  }
 
   const loadNatureza = async () => {
     if (!naturezaId) return
@@ -173,11 +155,8 @@ export function NaturezaOperacaoFormDialog({
     }
   }
 
-  // Filtrar CFOPs por tipo
-  const cfopsSaida = cfops.filter(c => c.tipo === 'SAIDA')
-  const cfopsEntrada = cfops.filter(c => c.tipo === 'ENTRADA')
   const tipoOperacao = form.watch("tipoOperacao")
-  const cfopsFiltrados = tipoOperacao === 1 ? cfopsSaida : cfopsEntrada
+  const cfopTipo = tipoOperacao === 1 ? 'SAIDA' : 'ENTRADA'
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -284,24 +263,13 @@ export function NaturezaOperacaoFormDialog({
                     <FormItem>
                       <FormLabel>CFOP Dentro do Estado</FormLabel>
                       <div className="flex gap-2">
-                        <Select
-                          value={field.value || undefined}
+                        <CFOPCombobox
+                          value={field.value}
                           onValueChange={field.onChange}
-                          disabled={loadingCfops}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {cfopsFiltrados.map((cfop) => (
-                              <SelectItem key={cfop.id} value={cfop.id}>
-                                {cfop.codigo} - {cfop.descricao}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          tipo={cfopTipo}
+                          placeholder="Selecione o CFOP"
+                          className="flex-1"
+                        />
                         {field.value && (
                           <Button
                             type="button"
@@ -325,24 +293,13 @@ export function NaturezaOperacaoFormDialog({
                     <FormItem>
                       <FormLabel>CFOP Fora do Estado</FormLabel>
                       <div className="flex gap-2">
-                        <Select
-                          value={field.value || undefined}
+                        <CFOPCombobox
+                          value={field.value}
                           onValueChange={field.onChange}
-                          disabled={loadingCfops}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {cfopsFiltrados.map((cfop) => (
-                              <SelectItem key={cfop.id} value={cfop.id}>
-                                {cfop.codigo} - {cfop.descricao}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          tipo={cfopTipo}
+                          placeholder="Selecione o CFOP"
+                          className="flex-1"
+                        />
                         {field.value && (
                           <Button
                             type="button"
@@ -366,24 +323,13 @@ export function NaturezaOperacaoFormDialog({
                     <FormItem>
                       <FormLabel>CFOP Exterior</FormLabel>
                       <div className="flex gap-2">
-                        <Select
-                          value={field.value || undefined}
+                        <CFOPCombobox
+                          value={field.value}
                           onValueChange={field.onChange}
-                          disabled={loadingCfops}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {cfopsFiltrados.map((cfop) => (
-                              <SelectItem key={cfop.id} value={cfop.id}>
-                                {cfop.codigo} - {cfop.descricao}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          tipo={cfopTipo}
+                          placeholder="Selecione o CFOP"
+                          className="flex-1"
+                        />
                         {field.value && (
                           <Button
                             type="button"

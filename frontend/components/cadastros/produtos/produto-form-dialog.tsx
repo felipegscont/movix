@@ -39,6 +39,9 @@ import { Separator } from "@/components/ui/separator"
 import { ProdutoService } from "@/lib/services/produto.service"
 import { AuxiliarService, type NCM, type CEST } from "@/lib/services/auxiliar.service"
 import { FornecedorService, type Fornecedor } from "@/lib/services/fornecedor.service"
+import { NCMCombobox } from "@/components/shared/combobox/ncm-combobox"
+import { CSTCombobox } from "@/components/shared/combobox/cst-combobox"
+import { CSOSNCombobox } from "@/components/shared/combobox/csosn-combobox"
 
 type FornecedorSelect = {
   id: string
@@ -105,14 +108,8 @@ export function ProdutoFormDialog({
   onSuccess,
 }: ProdutoFormDialogProps) {
   const [loading, setLoading] = useState(false)
-  const [ncms, setNcms] = useState<NCM[]>([])
   const [cests, setCests] = useState<CEST[]>([])
   const [fornecedores, setFornecedores] = useState<FornecedorSelect[]>([])
-  const [cstsICMS, setCstsICMS] = useState<any[]>([])
-  const [cstsPIS, setCstsPIS] = useState<any[]>([])
-  const [cstsCOFINS, setCstsCOFINS] = useState<any[]>([])
-  const [cstsIPI, setCstsIPI] = useState<any[]>([])
-  const [csosns, setCsosns] = useState<any[]>([])
   const [emitente, setEmitente] = useState<any>(null)
 
   const form = useForm({
@@ -166,43 +163,39 @@ export function ProdutoFormDialog({
     try {
       const { EmitenteService } = await import("@/lib/services/emitente.service")
 
-      const [ncmsData, cestsData, fornecedoresData, emitenteData, cstsICMSData, cstsPISData, cstsCOFINSData, cstsIPIData, csosnsData] = await Promise.all([
-        AuxiliarService.getNCMs(),
+      const [cestsData, fornecedoresData, emitenteData] = await Promise.all([
         AuxiliarService.getCESTs(),
         FornecedorService.getForSelect(),
         EmitenteService.getEmitenteAtivo(),
-        AuxiliarService.getCSTs('ICMS'),
-        AuxiliarService.getCSTs('PIS'),
-        AuxiliarService.getCSTs('COFINS'),
-        AuxiliarService.getCSTs('IPI'),
-        AuxiliarService.getCSOSNs(),
       ])
 
-      setNcms(ncmsData)
       setCests(cestsData)
       setFornecedores(fornecedoresData)
       setEmitente(emitenteData)
-      setCstsICMS(cstsICMSData)
-      setCstsPIS(cstsPISData)
-      setCstsCOFINS(cstsCOFINSData)
-      setCstsIPI(cstsIPIData)
-      setCsosns(csosnsData)
 
-      // Pré-selecionar CSTs padrão
-      if (!produtoId) {
-        const cstPISPadrao = cstsPISData.find((c: any) => c.codigo === '01')
-        const cstCOFINSPadrao = cstsCOFINSData.find((c: any) => c.codigo === '01')
+      // Pré-selecionar valores padrão baseado no regime tributário
+      if (!produtoId && emitenteData) {
+        // PIS e COFINS padrão (código 01)
+        const [cstsPIS, cstsCOFINS, csosns, cstsICMS] = await Promise.all([
+          AuxiliarService.getCSTs('PIS'),
+          AuxiliarService.getCSTs('COFINS'),
+          emitenteData.regimeTributario === 1 ? AuxiliarService.getCSOSNs() : Promise.resolve([]),
+          emitenteData.regimeTributario !== 1 ? AuxiliarService.getCSTs('ICMS') : Promise.resolve([]),
+        ])
+
+        const cstPISPadrao = cstsPIS.find((c: any) => c.codigo === '01')
+        const cstCOFINSPadrao = cstsCOFINS.find((c: any) => c.codigo === '01')
 
         if (cstPISPadrao) form.setValue('pisCstId', cstPISPadrao.id)
         if (cstCOFINSPadrao) form.setValue('cofinsCstId', cstCOFINSPadrao.id)
 
         // Se Simples Nacional, pré-selecionar CSOSN 102
-        if (emitenteData?.regimeTributario === 1) {
-          const csosnPadrao = csosnsData.find((c: any) => c.codigo === '102')
+        if (emitenteData.regimeTributario === 1) {
+          const csosnPadrao = csosns.find((c: any) => c.codigo === '102')
           if (csosnPadrao) form.setValue('icmsCsosnId', csosnPadrao.id)
         } else {
           // Senão, pré-selecionar CST 00
-          const cstICMSPadrao = cstsICMSData.find((c: any) => c.codigo === '00')
+          const cstICMSPadrao = cstsICMS.find((c: any) => c.codigo === '00')
           if (cstICMSPadrao) form.setValue('icmsCstId', cstICMSPadrao.id)
         }
       }
@@ -426,26 +419,11 @@ export function ProdutoFormDialog({
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>NCM *</FormLabel>
-                              <Select onValueChange={field.onChange} value={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Selecione o NCM" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent className="max-h-[300px]">
-                                  {ncms.length === 0 ? (
-                                    <div className="p-2 text-sm text-muted-foreground text-center">
-                                      Carregando NCMs...
-                                    </div>
-                                  ) : (
-                                    ncms.map((ncm) => (
-                                      <SelectItem key={ncm.id} value={ncm.id}>
-                                        {ncm.codigo} - {ncm.descricao}
-                                      </SelectItem>
-                                    ))
-                                  )}
-                                </SelectContent>
-                              </Select>
+                              <NCMCombobox
+                                value={field.value}
+                                onValueChange={field.onChange}
+                                placeholder="Selecione o NCM"
+                              />
                               <FormDescription>
                                 Nomenclatura Comum do Mercosul
                               </FormDescription>
@@ -679,20 +657,11 @@ export function ProdutoFormDialog({
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>CSOSN *</FormLabel>
-                                  <Select onValueChange={field.onChange} value={field.value}>
-                                    <FormControl>
-                                      <SelectTrigger>
-                                        <SelectValue placeholder="Selecione o CSOSN" />
-                                      </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                      {csosns.map((csosn) => (
-                                        <SelectItem key={csosn.id} value={csosn.id}>
-                                          {csosn.codigo} - {csosn.descricao}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
+                                  <CSOSNCombobox
+                                    value={field.value}
+                                    onValueChange={field.onChange}
+                                    placeholder="Selecione o CSOSN"
+                                  />
                                   <FormMessage />
                                 </FormItem>
                               )}
@@ -726,20 +695,12 @@ export function ProdutoFormDialog({
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>CST ICMS *</FormLabel>
-                                  <Select onValueChange={field.onChange} value={field.value}>
-                                    <FormControl>
-                                      <SelectTrigger>
-                                        <SelectValue placeholder="Selecione o CST" />
-                                      </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                      {cstsICMS.map((cst) => (
-                                        <SelectItem key={cst.id} value={cst.id}>
-                                          {cst.codigo} - {cst.descricao}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
+                                  <CSTCombobox
+                                    value={field.value}
+                                    onValueChange={field.onChange}
+                                    tipo="ICMS"
+                                    placeholder="Selecione o CST ICMS"
+                                  />
                                   <FormMessage />
                                 </FormItem>
                               )}
@@ -798,20 +759,12 @@ export function ProdutoFormDialog({
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>CST PIS</FormLabel>
-                                <Select onValueChange={field.onChange} value={field.value}>
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Selecione o CST" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    {cstsPIS.map((cst) => (
-                                      <SelectItem key={cst.id} value={cst.id}>
-                                        {cst.codigo} - {cst.descricao}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
+                                <CSTCombobox
+                                  value={field.value}
+                                  onValueChange={field.onChange}
+                                  tipo="PIS"
+                                  placeholder="Selecione o CST PIS"
+                                />
                                 <FormMessage />
                               </FormItem>
                             )}
@@ -850,20 +803,12 @@ export function ProdutoFormDialog({
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>CST COFINS</FormLabel>
-                                <Select onValueChange={field.onChange} value={field.value}>
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Selecione o CST" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    {cstsCOFINS.map((cst) => (
-                                      <SelectItem key={cst.id} value={cst.id}>
-                                        {cst.codigo} - {cst.descricao}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
+                                <CSTCombobox
+                                  value={field.value}
+                                  onValueChange={field.onChange}
+                                  tipo="COFINS"
+                                  placeholder="Selecione o CST COFINS"
+                                />
                                 <FormMessage />
                               </FormItem>
                             )}
@@ -902,20 +847,12 @@ export function ProdutoFormDialog({
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>CST IPI</FormLabel>
-                                <Select onValueChange={field.onChange} value={field.value}>
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Selecione o CST" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    {cstsIPI.map((cst) => (
-                                      <SelectItem key={cst.id} value={cst.id}>
-                                        {cst.codigo} - {cst.descricao}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
+                                <CSTCombobox
+                                  value={field.value}
+                                  onValueChange={field.onChange}
+                                  tipo="IPI"
+                                  placeholder="Selecione o CST IPI"
+                                />
                                 <FormMessage />
                               </FormItem>
                             )}
