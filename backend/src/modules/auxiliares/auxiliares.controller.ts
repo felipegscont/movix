@@ -107,18 +107,29 @@ export class AuxiliaresController {
   }
 
   @Get('cfops')
-  async getCfops(@Query('search') search?: string) {
-    const where = search ? {
-      OR: [
+  async getCfops(
+    @Query('search') search?: string,
+    @Query('tipo') tipo?: string,
+  ) {
+    const where: any = {};
+
+    // Filtro por tipo (ENTRADA ou SAIDA)
+    if (tipo) {
+      where.tipo = tipo;
+    }
+
+    // Filtro por busca
+    if (search) {
+      where.OR = [
         { codigo: { contains: search } },
         { descricao: { contains: search, mode: 'insensitive' as const } },
-      ],
-    } : {};
+      ];
+    }
 
     const cfops = await this.prisma.cFOP.findMany({
       where,
       orderBy: { codigo: 'asc' },
-      take: 50,
+      take: 500, // Aumentado para retornar mais CFOPs
     });
 
     return { data: cfops };

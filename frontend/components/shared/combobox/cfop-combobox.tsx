@@ -51,12 +51,13 @@ export function CFOPCombobox({
 
   React.useEffect(() => {
     loadCFOPs()
-  }, [])
+  }, [tipo]) // Recarregar quando tipo mudar
 
   const loadCFOPs = async () => {
     try {
       setLoading(true)
-      const data = await AuxiliarService.getCFOPs()
+      // Buscar CFOPs já filtrados pela API
+      const data = await AuxiliarService.getCFOPs(undefined, tipo)
       setCfops(data)
     } catch (error) {
       console.error("Erro ao carregar CFOPs:", error)
@@ -68,14 +69,12 @@ export function CFOPCombobox({
   const filteredCFOPs = React.useMemo(() => {
     let filtered = cfops
 
-    // Filtrar por tipo
-    if (tipo) {
-      filtered = filtered.filter(cfop => cfop.tipo === tipo)
-    }
+    // Não precisa mais filtrar por tipo aqui, já vem filtrado da API
 
     // Busca robusta por código e descrição
     if (search) {
       filtered = searchInFields(filtered, search, ['codigo', 'descricao'])
+      console.log(`[CFOPCombobox] Busca: "${search}", Resultados: ${filtered.length}`, filtered.slice(0, 3))
     }
 
     // Ordenar por relevância: código exato primeiro, depois por código, depois por descrição
@@ -96,6 +95,7 @@ export function CFOPCombobox({
       })
     }
 
+    console.log(`[CFOPCombobox] Total CFOPs: ${cfops.length}, Filtrados: ${filtered.length}, Tipo: ${tipo}`)
     return filtered
   }, [cfops, tipo, search])
 
@@ -143,9 +143,9 @@ export function CFOPCombobox({
               {filteredCFOPs.map((cfop) => (
                 <CommandItem
                   key={cfop.id}
-                  value={cfop.id}
-                  onSelect={(currentValue) => {
-                    onValueChange(currentValue === value ? undefined : currentValue)
+                  value={`${cfop.codigo}-${cfop.descricao}-${cfop.id}`}
+                  onSelect={() => {
+                    onValueChange(cfop.id === value ? undefined : cfop.id)
                     setOpen(false)
                   }}
                 >

@@ -106,10 +106,13 @@ export class AuxiliarService {
     return this.getNcms(search);
   }
 
-  static async getCfops(search?: string): Promise<CFOP[]> {
+  static async getCfops(search?: string, tipo?: string): Promise<CFOP[]> {
     const params = new URLSearchParams();
     if (search) {
       params.append('search', search);
+    }
+    if (tipo) {
+      params.append('tipo', tipo);
     }
 
     const response = await fetch(`${API_BASE_URL}/cfops?${params}`);
@@ -121,8 +124,8 @@ export class AuxiliarService {
   }
 
   // Alias para compatibilidade
-  static async getCFOPs(search?: string): Promise<CFOP[]> {
-    return this.getCfops(search);
+  static async getCFOPs(search?: string, tipo?: string): Promise<CFOP[]> {
+    return this.getCfops(search, tipo);
   }
 
   static async getCSTs(tipo?: string): Promise<CST[]> {
