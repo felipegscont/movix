@@ -8,9 +8,12 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { IconChevronDown, IconDeviceFloppy, IconX, IconPlus, IconTrash, IconLoader2, IconAlertCircle } from "@tabler/icons-react"
 import { ClienteCombobox } from "@/components/shared/combobox/cliente-combobox"
 import { NaturezaOperacaoCombobox } from "@/components/shared/combobox/natureza-operacao-combobox"
+import { ProdutoCombobox } from "@/components/shared/combobox/produto-combobox"
+import { CFOPCombobox } from "@/components/shared/combobox/cfop-combobox"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import Link from "next/link"
 import { DuplicatasForm } from "./duplicatas-form"
@@ -596,18 +599,10 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
               <div className="grid grid-cols-1 md:grid-cols-6 gap-4 p-4 border rounded-lg">
                 <div className="md:col-span-2">
                   <Label htmlFor="produto">Produto</Label>
-                  <Select value={produtoSelecionado} onValueChange={handleProdutoChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {produtos.map((produto) => (
-                        <SelectItem key={produto.id} value={produto.id}>
-                          {produto.codigo} - {produto.descricao}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <ProdutoCombobox
+                    value={produtoSelecionado}
+                    onValueChange={(value) => handleProdutoChange(value || "")}
+                  />
                 </div>
 
                 <div>
@@ -634,18 +629,11 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
 
                 <div>
                   <Label htmlFor="cfop">CFOP</Label>
-                  <Select value={cfopItem} onValueChange={setCfopItem}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="CFOP" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {cfops.filter((c: any) => c.tipo === 'SAIDA').map((cfop: any) => (
-                        <SelectItem key={cfop.id} value={cfop.id}>
-                          {cfop.codigo}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <CFOPCombobox
+                    value={cfopItem}
+                    onValueChange={(value) => setCfopItem(value || "")}
+                    tipo="SAIDA"
+                  />
                 </div>
 
                 <div className="flex items-end">

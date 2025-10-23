@@ -18,7 +18,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { FormaPagamentoService } from "@/lib/services/forma-pagamento.service"
+import { NfeService } from "@/lib/services/nfe.service"
 
 interface FormaPagamento {
   id: string
@@ -57,7 +57,7 @@ export function FormaPagamentoCombobox({
   const loadFormasPagamento = async () => {
     try {
       setLoading(true)
-      const data = await FormaPagamentoService.getAll()
+      const data = await NfeService.getFormasPagamento()
       setFormasPagamento(data)
     } catch (error) {
       console.error("Erro ao carregar formas de pagamento:", error)

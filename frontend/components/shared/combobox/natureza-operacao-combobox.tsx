@@ -53,8 +53,8 @@ export function NaturezaOperacaoCombobox({
   const loadNaturezas = async () => {
     try {
       setLoading(true)
-      const data = await NaturezaOperacaoService.getAll()
-      setNaturezas(data)
+      const response = await NaturezaOperacaoService.getAll({ page: 1, limit: 1000 })
+      setNaturezas(response.data)
     } catch (error) {
       console.error("Erro ao carregar naturezas:", error)
     } finally {

@@ -55,8 +55,8 @@ export function ClienteCombobox({
   const loadClientes = async () => {
     try {
       setLoading(true)
-      const data = await ClienteService.getAll()
-      setClientes(data)
+      const response = await ClienteService.getAll({ page: 1, limit: 1000 })
+      setClientes(response.data)
     } catch (error) {
       console.error("Erro ao carregar clientes:", error)
     } finally {

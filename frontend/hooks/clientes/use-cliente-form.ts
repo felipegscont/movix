@@ -260,6 +260,16 @@ export function useClienteForm({ clienteId, onSuccess }: UseClienteFormProps): U
     if (cnpjData.nomeFantasia) {
       form.setValue("nomeFantasia", cnpjData.nomeFantasia)
     }
+
+    // Inscrição Estadual - preencher se disponível
+    if (cnpjData.inscricoesEstaduais && cnpjData.inscricoesEstaduais.length > 0) {
+      // Pega a primeira inscrição ativa
+      const inscricaoAtiva = cnpjData.inscricoesEstaduais.find(ie => ie.ativo)
+      if (inscricaoAtiva) {
+        form.setValue("inscricaoEstadual", inscricaoAtiva.numero)
+      }
+    }
+
     if (cnpjData.logradouro) {
       form.setValue("logradouro", cnpjData.logradouro)
     }

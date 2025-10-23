@@ -53,8 +53,8 @@ export function ProdutoCombobox({
   const loadProdutos = async () => {
     try {
       setLoading(true)
-      const data = await ProdutoService.getAll()
-      setProdutos(data)
+      const response = await ProdutoService.getAll({ page: 1, limit: 1000 })
+      setProdutos(response.data)
     } catch (error) {
       console.error("Erro ao carregar produtos:", error)
     } finally {
