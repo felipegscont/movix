@@ -39,6 +39,13 @@ import { toast } from "sonner"
 import { NaturezaOperacaoService } from "@/lib/services/natureza-operacao.service"
 import { AuxiliarService } from "@/lib/services/auxiliar.service"
 import { CFOPCombobox } from "@/components/shared/combobox/cfop-combobox"
+import {
+  StaticCombobox,
+  TIPO_OPERACAO_OPTIONS,
+  FINALIDADE_OPTIONS,
+  CONSUMIDOR_FINAL_OPTIONS,
+  PRESENCA_COMPRADOR_OPTIONS
+} from "@/components/shared/combobox/static-combobox"
 
 const naturezaOperacaoFormSchema = z.object({
   codigo: z.string().min(1, "Código é obrigatório").max(10, "Código deve ter no máximo 10 caracteres"),
@@ -365,20 +372,14 @@ export function NaturezaOperacaoFormDialog({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Tipo de Operação *</FormLabel>
-                      <Select
-                        value={field.value.toString()}
-                        onValueChange={(value) => field.onChange(parseInt(value))}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="0">0 - Entrada</SelectItem>
-                          <SelectItem value="1">1 - Saída</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        <StaticCombobox
+                          options={TIPO_OPERACAO_OPTIONS}
+                          value={field.value}
+                          onValueChange={(value) => field.onChange(value as number)}
+                          placeholder="Selecione o tipo"
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -390,22 +391,14 @@ export function NaturezaOperacaoFormDialog({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Finalidade *</FormLabel>
-                      <Select
-                        value={field.value.toString()}
-                        onValueChange={(value) => field.onChange(parseInt(value))}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="1">1 - Normal</SelectItem>
-                          <SelectItem value="2">2 - Complementar</SelectItem>
-                          <SelectItem value="3">3 - Ajuste</SelectItem>
-                          <SelectItem value="4">4 - Devolução</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        <StaticCombobox
+                          options={FINALIDADE_OPTIONS}
+                          value={field.value}
+                          onValueChange={(value) => field.onChange(value as number)}
+                          placeholder="Selecione a finalidade"
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -417,20 +410,14 @@ export function NaturezaOperacaoFormDialog({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Consumidor Final *</FormLabel>
-                      <Select
-                        value={field.value.toString()}
-                        onValueChange={(value) => field.onChange(parseInt(value))}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="0">0 - Não</SelectItem>
-                          <SelectItem value="1">1 - Sim</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        <StaticCombobox
+                          options={CONSUMIDOR_FINAL_OPTIONS}
+                          value={field.value}
+                          onValueChange={(value) => field.onChange(value as number)}
+                          placeholder="Selecione"
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -442,24 +429,14 @@ export function NaturezaOperacaoFormDialog({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Presença do Comprador *</FormLabel>
-                      <Select
-                        value={field.value.toString()}
-                        onValueChange={(value) => field.onChange(parseInt(value))}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="0">0 - Não se aplica</SelectItem>
-                          <SelectItem value="1">1 - Presencial</SelectItem>
-                          <SelectItem value="2">2 - Internet</SelectItem>
-                          <SelectItem value="3">3 - Teleatendimento</SelectItem>
-                          <SelectItem value="4">4 - Entrega em domicílio</SelectItem>
-                          <SelectItem value="9">9 - Outros</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        <StaticCombobox
+                          options={PRESENCA_COMPRADOR_OPTIONS}
+                          value={field.value}
+                          onValueChange={(value) => field.onChange(value as number)}
+                          placeholder="Selecione"
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}

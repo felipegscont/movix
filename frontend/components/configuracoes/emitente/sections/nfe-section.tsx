@@ -8,13 +8,7 @@ import {
   FormDescription,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { StaticCombobox, AMBIENTE_NFE_OPTIONS } from "@/components/shared/combobox/static-combobox"
 import type { EmitenteFormData } from "../types"
 
 interface NfeSectionProps {
@@ -32,20 +26,14 @@ export function NfeSection({ form }: NfeSectionProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Ambiente NFe *</FormLabel>
-              <Select
-                value={field.value?.toString()}
-                onValueChange={(value) => field.onChange(parseInt(value))}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="1">Produção</SelectItem>
-                  <SelectItem value="2">Homologação</SelectItem>
-                </SelectContent>
-              </Select>
+              <FormControl>
+                <StaticCombobox
+                  options={AMBIENTE_NFE_OPTIONS}
+                  value={field.value}
+                  onValueChange={(value) => field.onChange(value as number)}
+                  placeholder="Selecione o ambiente"
+                />
+              </FormControl>
               <FormDescription>
                 Use Homologação para testes
               </FormDescription>

@@ -262,7 +262,11 @@ export class NfeIntegrationService {
           },
           orderBy: { numeroItem: 'asc' },
         },
-        pagamentos: true,
+        pagamentos: {
+          include: {
+            formaPagamento: true,
+          },
+        },
       },
     });
 
@@ -363,7 +367,7 @@ export class NfeIntegrationService {
         valorCOFINS: Number(nfe.valorCOFINS),
       },
       pagamentos: nfe.pagamentos?.map(pag => ({
-        formaPagamento: pag.formaPagamento,
+        formaPagamento: pag.formaPagamento.codigo,
         valor: Number(pag.valor),
       })),
       informacoesAdicionais: nfe.informacoesAdicionais || undefined,

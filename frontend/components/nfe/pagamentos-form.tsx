@@ -10,6 +10,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { IconPlus, IconTrash, IconAlertCircle } from "@tabler/icons-react"
 import { CreateNfePagamentoData, FormaPagamento, NfeService } from "@/lib/services/nfe.service"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { IndicadorPagamentoCombobox } from "@/components/shared/combobox/indicador-pagamento-combobox"
+import { FormaPagamentoCombobox } from "@/components/shared/combobox/forma-pagamento-combobox"
 
 interface PagamentosFormProps {
   pagamentos: CreateNfePagamentoData[]
@@ -119,38 +121,20 @@ export function PagamentosForm({ pagamentos, onChange, valorTotal, disabled = fa
                   return (
                     <TableRow key={index}>
                       <TableCell>
-                        <Select
-                          value={pagamento.indicadorPagamento.toString()}
-                          onValueChange={(value) => atualizarPagamento(index, "indicadorPagamento", parseInt(value))}
+                        <IndicadorPagamentoCombobox
+                          value={pagamento.indicadorPagamento}
+                          onValueChange={(value) => atualizarPagamento(index, "indicadorPagamento", value ?? 0)}
                           disabled={disabled}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="0">À vista</SelectItem>
-                            <SelectItem value="1">A prazo</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        />
                       </TableCell>
                       <TableCell>
                         <div className="space-y-2">
-                          <Select
+                          <FormaPagamentoCombobox
                             value={pagamento.formaPagamento}
-                            onValueChange={(value) => atualizarPagamento(index, "formaPagamento", value)}
+                            onValueChange={(value) => atualizarPagamento(index, "formaPagamento", value || "01")}
                             disabled={disabled || loading}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {formasPagamento.map((forma) => (
-                                <SelectItem key={forma.id} value={forma.codigo}>
-                                  {forma.codigo} - {forma.descricao}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                            returnCode={true}
+                          />
 
                           {/* Campos adicionais para cartão */}
                           {requerCard && (

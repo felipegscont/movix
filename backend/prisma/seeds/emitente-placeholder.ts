@@ -60,7 +60,7 @@ export async function seedEmitentePlaceholder(prisma: PrismaClient) {
 
   // Buscar estado
   const estado = await prisma.estado.findUnique({
-    where: { sigla: emitenteData.municipio.estado },
+    where: { uf: emitenteData.municipio.estado },
   });
 
   if (!estado) {

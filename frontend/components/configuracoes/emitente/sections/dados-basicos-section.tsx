@@ -9,15 +9,9 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { IconLoader2, IconSearch } from "@tabler/icons-react"
+import { StaticCombobox, REGIME_TRIBUTARIO_OPTIONS } from "@/components/shared/combobox/static-combobox"
 import type { EmitenteFormData } from "../types"
 
 interface DadosBasicosSectionProps {
@@ -160,21 +154,14 @@ export function DadosBasicosSection({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Regime Tributário *</FormLabel>
-              <Select
-                value={field.value?.toString()}
-                onValueChange={(value) => field.onChange(parseInt(value))}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="1">Simples Nacional</SelectItem>
-                  <SelectItem value="2">Lucro Presumido</SelectItem>
-                  <SelectItem value="3">Regime Normal</SelectItem>
-                </SelectContent>
-              </Select>
+              <FormControl>
+                <StaticCombobox
+                  options={REGIME_TRIBUTARIO_OPTIONS}
+                  value={field.value}
+                  onValueChange={(value) => field.onChange(value as number)}
+                  placeholder="Selecione o regime"
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}

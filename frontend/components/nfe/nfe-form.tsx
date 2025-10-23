@@ -7,15 +7,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { IconChevronDown, IconDeviceFloppy, IconX, IconPlus, IconTrash, IconLoader2, IconAlertCircle } from "@tabler/icons-react"
+import { ClienteCombobox } from "@/components/shared/combobox/cliente-combobox"
+import { NaturezaOperacaoCombobox } from "@/components/shared/combobox/natureza-operacao-combobox"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import Link from "next/link"
 import { DuplicatasForm } from "./duplicatas-form"
@@ -536,34 +531,18 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="cliente">Cliente *</Label>
-                  <Select value={clienteId} onValueChange={setClienteId}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o cliente" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {clientes.map((cliente) => (
-                        <SelectItem key={cliente.id} value={cliente.id}>
-                          {cliente.nome} - {cliente.documento}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <ClienteCombobox
+                    value={clienteId}
+                    onValueChange={(value) => setClienteId(value || "")}
+                  />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="naturezaOperacaoId">Natureza da Operação *</Label>
-                  <Select value={naturezaOperacaoId} onValueChange={handleNaturezaChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione a natureza da operação" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {naturezasOperacao.map((natureza) => (
-                        <SelectItem key={natureza.id} value={natureza.id}>
-                          {natureza.codigo} - {natureza.descricao}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <NaturezaOperacaoCombobox
+                    value={naturezaOperacaoId}
+                    onValueChange={(value) => handleNaturezaChange(value || "")}
+                  />
                   {naturezaOperacao && (
                     <p className="text-sm text-muted-foreground mt-1">
                       {naturezaOperacao}
