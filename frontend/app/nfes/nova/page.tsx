@@ -1,10 +1,17 @@
+"use client"
+
+import { useRouter } from "next/navigation"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/layout/app-sidebar"
 import { SiteHeader } from "@/components/layout/site-header"
-import { NfeFormWrapper } from "@/components/nfe/nfe-form-wrapper"
-import { NfeBreadcrumb } from "@/components/nfe/nfe-breadcrumb"
+import { NfeWizard } from "@/components/nfe/nfe-wizard"
 
 export default function NovaFePage() {
+  const router = useRouter()
+
+  const handleSuccess = () => {
+    router.push('/nfes')
+  }
   return (
     <SidebarProvider
       style={
@@ -20,16 +27,7 @@ export default function NovaFePage() {
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 px-4 md:gap-6 md:py-6 md:px-6">
-              {/* Breadcrumb */}
-              <NfeBreadcrumb currentStep="digitacao" />
-
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight">Nova NFe</h1>
-                <p className="text-muted-foreground">
-                  Preencha os dados para emitir uma nova Nota Fiscal Eletrônica
-                </p>
-              </div>
-              <NfeFormWrapper />
+              <NfeWizard onSuccess={handleSuccess} />
             </div>
           </div>
         </div>

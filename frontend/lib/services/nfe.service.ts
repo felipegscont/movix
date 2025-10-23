@@ -273,13 +273,24 @@ export class NfeService {
       },
       body: JSON.stringify(data),
     });
-    
+
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || 'Erro ao atualizar NFe');
     }
-    
+
     return response.json();
+  }
+
+  static async delete(id: string): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/nfes/${id}`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Erro ao excluir NFe');
+    }
   }
 
   static async transmitir(id: string): Promise<any> {

@@ -44,11 +44,11 @@ import {
 } from "@/components/ui/alert-dialog"
 
 interface NfeDataTableProps {
-  data: Nfe[]
+  nfes: Nfe[]
   onRefresh: () => void
 }
 
-export function NfeDataTable({ data, onRefresh }: NfeDataTableProps) {
+export function NfeDataTable({ nfes, onRefresh }: NfeDataTableProps) {
   const router = useRouter()
   const [sorting, setSorting] = useState<SortingState>([])
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -186,7 +186,7 @@ export function NfeDataTable({ data, onRefresh }: NfeDataTableProps) {
   ]
 
   const table = useReactTable({
-    data,
+    data: nfes,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
