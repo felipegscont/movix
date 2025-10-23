@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useCallback } from 'react'
-import { NfeItemFormData } from '@/components/nfe/types'
+import { type NfeItemFormData } from '@/lib/schemas/nfe.schema'
 import { toast } from 'sonner'
 
 export function useNfeItems(initialItems: NfeItemFormData[] = []) {

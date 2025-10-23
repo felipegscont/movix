@@ -2,13 +2,29 @@
 
 import { useState, useCallback } from 'react'
 import { toast } from 'sonner'
-import { 
-  WizardStep, 
-  WizardState, 
-  NfeFormData, 
-  ValidationResult,
-  WIZARD_STEPS 
-} from '@/components/nfe/types'
+import { type NfeFormData } from '@/lib/schemas/nfe.schema'
+
+// Tipos do Wizard
+type WizardStep = 'geral' | 'itens' | 'cobranca' | 'revisao'
+
+interface WizardState {
+  currentStep: WizardStep
+  completedSteps: WizardStep[]
+  canProceed: boolean
+  errors: Record<string, string[]>
+}
+
+interface ValidationResult {
+  isValid: boolean
+  errors: Record<string, string[]>
+}
+
+const WIZARD_STEPS: { key: WizardStep; label: string; description: string }[] = [
+  { key: 'geral', label: 'Dados Gerais', description: 'Informações básicas da NFe' },
+  { key: 'itens', label: 'Itens', description: 'Produtos e serviços' },
+  { key: 'cobranca', label: 'Cobrança', description: 'Duplicatas e pagamentos' },
+  { key: 'revisao', label: 'Revisão', description: 'Conferir dados antes de salvar' }
+]
 
 const INITIAL_FORM_DATA: NfeFormData = {
   clienteId: '',

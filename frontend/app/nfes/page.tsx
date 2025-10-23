@@ -28,10 +28,11 @@ export default function NfesPage() {
     try {
       setLoading(true)
       const response = await NfeService.getAll({ page, limit: 20, search })
-      setNfes(response.data)
+      setNfes(response?.data || [])
     } catch (error) {
       console.error("Erro ao carregar NFes:", error)
       toast.error("Erro ao carregar NFes")
+      setNfes([])
     } finally {
       setLoading(false)
     }

@@ -1,6 +1,5 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -9,25 +8,41 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
 import { IconAlertCircle } from "@tabler/icons-react"
 import Link from "next/link"
+import { UseFormReturn } from "react-hook-form"
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form"
 
 import { ClienteCombobox } from "@/components/shared/combobox/cliente-combobox"
 import { NaturezaOperacaoCombobox } from "@/components/shared/combobox/natureza-operacao-combobox"
-import { EmitenteService } from "@/lib/services/emitente.service"
-import { NfeFormData } from "../types"
 
 interface NfeStepGeralProps {
-  formData: NfeFormData
-  updateFormData: (data: Partial<NfeFormData>) => void
-  errors: Record<string, string[]>
+  form: UseFormReturn<any>
+  emitente: any
 }
 
-export function NfeStepGeral({ formData, updateFormData, errors }: NfeStepGeralProps) {
-  const [emitente, setEmitente] = useState<any>(null)
-  const [loadingEmitente, setLoadingEmitente] = useState(true)
+export function NfeStepGeral({ form, emitente }: NfeStepGeralProps) {
+  if (!emitente) {
+    return (
+      <Alert>
+        <IconAlertCircle className="h-4 w-4" />
+        <AlertTitle>Emitente não configurado</AlertTitle>
+        <AlertDescription>
+          Configure o emitente antes de criar NFes.{" "}
+          <Link href="/configuracoes/emitente" className="underline font-medium">
+            Clique aqui para configurar
+          </Link>
+        </AlertDescription>
+      </Alert>
+    )
+  }
 
-  // Carregar emitente ativo
-  useEffect(() => {
-    const loadEmitente = async () => {
+  return (
+    <div className="space-y-6">{
       try {
         const emitenteAtivo = await EmitenteService.getEmitenteAtivo()
         setEmitente(emitenteAtivo)

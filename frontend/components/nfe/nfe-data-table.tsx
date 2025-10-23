@@ -186,7 +186,7 @@ export function NfeDataTable({ nfes, onRefresh }: NfeDataTableProps) {
   ]
 
   const table = useReactTable({
-    data: nfes,
+    data: nfes || [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -244,7 +244,7 @@ export function NfeDataTable({ nfes, onRefresh }: NfeDataTableProps) {
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {table.getRowModel()?.rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}

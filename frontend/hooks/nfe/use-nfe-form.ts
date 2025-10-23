@@ -1,282 +1,303 @@
 "use client"
 
-import { useState, useCallback } from "react"
-import { NfeService, CreateNfeData, CreateNfeDuplicataData } from "@/lib/services/nfe.service"
+import { useState, useEffect, useCallback } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
+import { useRouter } from "next/navigation"
+import { 
+  nfeFormSchema, 
+  type NfeFormData,
+  type NfeItemFormData,
+  defaultNfeFormData 
+} from "@/lib/schemas/nfe.schema"
+import { NfeService } from "@/lib/services/nfe.service"
+import { EmitenteService } from "@/lib/services/emitente.service"
 
 interface UseNfeFormProps {
   nfeId?: string
   onSuccess?: () => void
 }
 
-export function useNfeForm({ nfeId, onSuccess }: UseNfeFormProps = {}) {
+interface UseNfeFormReturn {
+  // Form
+  form: any
+  
+  // Loading states
+  loading: boolean
+  loadingNfe: boolean
+  loadingEmitente: boolean
+  
+  // Data
+  emitente: any
+  nfe: any
+  
+  // Actions
+  handleSubmit: (data: NfeFormData) => Promise<void>
+  loadNfe: () => Promise<void>
+  resetForm: () => void
+  
+  // Item management
+  addItem: (item: NfeItemFormData) => void
+  updateItem: (index: number, item: NfeItemFormData) => void
+  removeItem: (index: number) => void
+  
+  // Calculations
+  calculateItemTotal: (item: Partial<NfeItemFormData>) => number
+  calculateNfeTotal: () => number
+  calculateTotals: () => {
+    valorProdutos: number
+    valorTotal: number
+    valorTotalImpostos: number
+    valorICMS: number
+    valorIPI: number
+    valorPIS: number
+    valorCOFINS: number
+  }
+}
+
+export function useNfeForm({ nfeId, onSuccess }: UseNfeFormProps = {}): UseNfeFormReturn {
+  const router = useRouter()
   const [loading, setLoading] = useState(false)
-  
-  // Dados básicos
-  const [emitenteId, setEmitenteId] = useState("")
-  const [clienteId, setClienteId] = useState("")
-  const [naturezaOperacao, setNaturezaOperacao] = useState("Venda de mercadoria")
-  const [serie, setSerie] = useState(1)
-  const [tipoOperacao, setTipoOperacao] = useState(1) // 1=Saída
-  const [consumidorFinal, setConsumidorFinal] = useState(1) // 1=Sim
-  const [presencaComprador, setPresencaComprador] = useState(1) // 1=Presencial
-  
-  // Totalizadores
-  const [valorProdutos, setValorProdutos] = useState(0)
-  const [valorFrete, setValorFrete] = useState(0)
-  const [valorSeguro, setValorSeguro] = useState(0)
-  const [valorDesconto, setValorDesconto] = useState(0)
-  const [valorOutros, setValorOutros] = useState(0)
-  
-  // Totalizadores raros (baseado em XMLs reais)
-  const [valorICMSDesonerado, setValorICMSDesonerado] = useState(0)
-  const [valorFCP, setValorFCP] = useState(0)
-  const [valorII, setValorII] = useState(0)
-  const [valorOutrasDespesas, setValorOutrasDespesas] = useState(0)
-  
-  // Duplicatas
-  const [duplicatas, setDuplicatas] = useState<CreateNfeDuplicataData[]>([])
-  
-  // Informações adicionais
-  const [informacoesAdicionais, setInformacoesAdicionais] = useState("")
-  const [informacoesFisco, setInformacoesFisco] = useState("")
+  const [loadingNfe, setLoadingNfe] = useState(!!nfeId)
+  const [loadingEmitente, setLoadingEmitente] = useState(true)
+  const [emitente, setEmitente] = useState<any>(null)
+  const [nfe, setNfe] = useState<any>(null)
 
-  // Calcular valor total
-  const valorTotal = valorProdutos + valorFrete + valorSeguro - valorDesconto + valorOutros
+  // Inicializar form com React Hook Form + Zod
+  const form = useForm<NfeFormData>({
+    resolver: zodResolver(nfeFormSchema),
+    mode: "onBlur",
+    defaultValues: {
+      ...defaultNfeFormData,
+      dataEmissao: new Date().toISOString().split('T')[0],
+    } as NfeFormData,
+  })
 
-  /**
-   * Adicionar duplicata
-   */
-  const adicionarDuplicata = useCallback((duplicata: CreateNfeDuplicataData) => {
-    // Verificar se número já existe
-    if (duplicatas.some(d => d.numero === duplicata.numero)) {
-      toast.error("Já existe uma duplicata com este número")
-      return false
-    }
-
-    setDuplicatas(prev => [...prev, duplicata])
-    return true
-  }, [duplicatas])
-
-  /**
-   * Remover duplicata
-   */
-  const removerDuplicata = useCallback((index: number) => {
-    setDuplicatas(prev => prev.filter((_, i) => i !== index))
+  // Carregar emitente ativo
+  useEffect(() => {
+    loadEmitente()
   }, [])
 
-  /**
-   * Validar duplicatas
-   */
-  const validarDuplicatas = useCallback(() => {
-    if (duplicatas.length === 0) {
-      return true // Sem duplicatas é válido
+  // Carregar NFe se estiver editando
+  useEffect(() => {
+    if (nfeId) {
+      loadNfe()
     }
+  }, [nfeId])
 
-    const somaDuplicatas = duplicatas.reduce((sum, dup) => sum + dup.valor, 0)
-    const diferenca = Math.abs(somaDuplicatas - valorTotal)
-
-    if (diferenca > 0.01) {
-      toast.error(
-        `Soma das duplicatas (${somaDuplicatas.toFixed(2)}) deve ser igual ao valor total (${valorTotal.toFixed(2)})`
-      )
-      return false
+  const loadEmitente = async () => {
+    try {
+      setLoadingEmitente(true)
+      const emitenteAtivo = await EmitenteService.getEmitenteAtivo()
+      setEmitente(emitenteAtivo)
+      
+      // Atualizar série no form
+      if (emitenteAtivo?.serieNfe) {
+        form.setValue('serie', emitenteAtivo.serieNfe)
+      }
+    } catch (error) {
+      console.error("Erro ao carregar emitente:", error)
+      toast.error("Erro ao carregar emitente")
+    } finally {
+      setLoadingEmitente(false)
     }
+  }
 
-    return true
-  }, [duplicatas, valorTotal])
+  const loadNfe = async () => {
+    if (!nfeId) return
 
-  /**
-   * Gerar parcelas automaticamente
-   */
-  const gerarParcelas = useCallback((numeroParcelas: number) => {
-    if (numeroParcelas < 1 || numeroParcelas > 12) {
-      toast.error("Número de parcelas deve ser entre 1 e 12")
-      return
-    }
+    try {
+      setLoadingNfe(true)
+      const nfeData = await NfeService.getById(nfeId)
+      setNfe(nfeData)
 
-    if (valorTotal <= 0) {
-      toast.error("Valor total deve ser maior que zero")
-      return
-    }
-
-    const valorParcela = valorTotal / numeroParcelas
-    const hoje = new Date()
-    const novasDuplicatas: CreateNfeDuplicataData[] = []
-
-    for (let i = 0; i < numeroParcelas; i++) {
-      const dataVenc = new Date(hoje)
-      dataVenc.setDate(dataVenc.getDate() + (30 * (i + 1))) // 30 dias entre parcelas
-
-      novasDuplicatas.push({
-        numero: String(i + 1).padStart(3, '0'),
-        dataVencimento: dataVenc.toISOString().split('T')[0],
-        valor: i === numeroParcelas - 1 
-          ? valorTotal - (valorParcela * (numeroParcelas - 1)) // Última parcela ajusta diferença
-          : valorParcela,
+      // Preencher formulário com dados da NFe
+      form.reset({
+        clienteId: nfeData.clienteId,
+        serie: nfeData.serie,
+        naturezaOperacao: nfeData.naturezaOperacao,
+        tipoOperacao: nfeData.tipoOperacao,
+        finalidade: nfeData.finalidade || 0,
+        consumidorFinal: nfeData.consumidorFinal,
+        presencaComprador: nfeData.presencaComprador,
+        dataEmissao: nfeData.dataEmissao?.split('T')[0],
+        dataSaida: nfeData.dataSaida?.split('T')[0],
+        modalidadeFrete: nfeData.modalidadeFrete,
+        valorFrete: nfeData.valorFrete,
+        valorSeguro: nfeData.valorSeguro,
+        valorDesconto: nfeData.valorDesconto,
+        valorOutros: nfeData.valorOutros,
+        valorICMSDesonerado: nfeData.valorICMSDesonerado,
+        valorFCP: nfeData.valorFCP,
+        valorII: nfeData.valorII,
+        valorOutrasDespesas: nfeData.valorOutrasDespesas,
+        informacoesAdicionais: nfeData.informacoesAdicionais,
+        informacoesFisco: nfeData.informacoesFisco,
+        itens: nfeData.itens?.map((item: any) => ({
+          produtoId: item.produtoId,
+          codigo: item.codigo,
+          codigoBarras: item.codigoBarras,
+          descricao: item.descricao,
+          ncmId: item.ncmId,
+          cfopId: item.cfopId,
+          unidadeComercial: item.unidadeComercial,
+          quantidadeComercial: item.quantidadeComercial,
+          valorUnitario: item.valorUnitario,
+          valorTotal: item.valorTotal,
+          unidadeTributavel: item.unidadeTributavel,
+          quantidadeTributavel: item.quantidadeTributavel,
+          valorUnitarioTrib: item.valorUnitarioTrib,
+          valorFrete: item.valorFrete,
+          valorSeguro: item.valorSeguro,
+          valorDesconto: item.valorDesconto,
+          valorOutros: item.valorOutros,
+          origem: item.origem,
+          incluiTotal: item.incluiTotal,
+          informacoesAdicionais: item.informacoesAdicionais,
+          icms: item.icms,
+          ipi: item.ipi,
+          pis: item.pis,
+          cofins: item.cofins,
+        })) || [],
+        duplicatas: nfeData.duplicatas?.map((dup: any) => ({
+          numero: dup.numero,
+          dataVencimento: dup.dataVencimento?.split('T')[0],
+          valor: dup.valor,
+        })) || [],
+        pagamentos: nfeData.pagamentos?.map((pag: any) => ({
+          indicadorPagamento: pag.indicadorPagamento,
+          formaPagamentoId: pag.formaPagamentoId,
+          descricaoPagamento: pag.descricaoPagamento,
+          valor: pag.valor,
+          dataPagamento: pag.dataPagamento?.split('T')[0],
+          tipoIntegracao: pag.tipoIntegracao,
+          cnpjCredenciadora: pag.cnpjCredenciadora,
+          bandeira: pag.bandeira,
+          numeroAutorizacao: pag.numeroAutorizacao,
+        })) || [],
       })
+    } catch (error) {
+      console.error("Erro ao carregar NFe:", error)
+      toast.error("Erro ao carregar NFe")
+    } finally {
+      setLoadingNfe(false)
     }
+  }
 
-    setDuplicatas(novasDuplicatas)
-    toast.success(`${numeroParcelas} parcelas geradas automaticamente`)
-  }, [valorTotal])
-
-  /**
-   * Validar formulário
-   */
-  const validarFormulario = useCallback(() => {
-    if (!emitenteId) {
-      toast.error("Selecione um emitente")
-      return false
-    }
-
-    if (!clienteId) {
-      toast.error("Selecione um cliente")
-      return false
-    }
-
-    if (!naturezaOperacao.trim()) {
-      toast.error("Informe a natureza da operação")
-      return false
-    }
-
-    if (valorTotal <= 0) {
-      toast.error("Valor total deve ser maior que zero")
-      return false
-    }
-
-    if (!validarDuplicatas()) {
-      return false
-    }
-
-    return true
-  }, [emitenteId, clienteId, naturezaOperacao, valorTotal, validarDuplicatas])
-
-  /**
-   * Submeter formulário
-   */
-  const handleSubmit = useCallback(async () => {
-    if (!validarFormulario()) {
-      return false
-    }
-
+  const handleSubmit = async (data: NfeFormData) => {
     try {
       setLoading(true)
 
-      const data: CreateNfeData = {
-        emitenteId,
-        clienteId,
-        serie,
-        naturezaOperacao,
-        tipoOperacao,
-        consumidorFinal,
-        presencaComprador,
-        valorFrete,
-        valorSeguro,
-        valorDesconto,
-        valorOutros,
-        // Totalizadores raros
-        valorICMSDesonerado,
-        valorFCP,
-        valorII,
-        valorOutrasDespesas,
-        informacoesAdicionais,
-        informacoesFisco,
-        itens: [], // TODO: Implementar itens
-        duplicatas: duplicatas.length > 0 ? duplicatas : undefined,
-      }
-
       if (nfeId) {
+        // Atualizar NFe existente
         await NfeService.update(nfeId, data)
         toast.success("NFe atualizada com sucesso!")
       } else {
+        // Criar nova NFe
         await NfeService.create(data)
         toast.success("NFe criada com sucesso!")
       }
 
       onSuccess?.()
-      return true
     } catch (error: any) {
+      console.error("Erro ao salvar NFe:", error)
       toast.error(error.message || "Erro ao salvar NFe")
-      return false
     } finally {
       setLoading(false)
     }
-  }, [
-    validarFormulario,
-    emitenteId,
-    clienteId,
-    serie,
-    naturezaOperacao,
-    tipoOperacao,
-    consumidorFinal,
-    presencaComprador,
-    valorFrete,
-    valorSeguro,
-    valorDesconto,
-    valorOutros,
-    valorICMSDesonerado,
-    valorFCP,
-    valorII,
-    valorOutrasDespesas,
-    informacoesAdicionais,
-    informacoesFisco,
-    duplicatas,
-    nfeId,
-    onSuccess,
-  ])
+  }
+
+  const resetForm = useCallback(() => {
+    form.reset({
+      ...defaultNfeFormData,
+      dataEmissao: new Date().toISOString().split('T')[0],
+      serie: emitente?.serieNfe || 1,
+    } as NfeFormData)
+  }, [form, emitente])
+
+  // Gerenciamento de itens
+  const addItem = useCallback((item: NfeItemFormData) => {
+    const currentItens = form.getValues('itens') || []
+    form.setValue('itens', [...currentItens, item])
+  }, [form])
+
+  const updateItem = useCallback((index: number, item: NfeItemFormData) => {
+    const currentItens = form.getValues('itens') || []
+    const newItens = [...currentItens]
+    newItens[index] = item
+    form.setValue('itens', newItens)
+  }, [form])
+
+  const removeItem = useCallback((index: number) => {
+    const currentItens = form.getValues('itens') || []
+    const newItens = currentItens.filter((_, i) => i !== index)
+    form.setValue('itens', newItens)
+  }, [form])
+
+  // Cálculos
+  const calculateItemTotal = useCallback((item: Partial<NfeItemFormData>): number => {
+    const quantidade = item.quantidadeComercial || 0
+    const valorUnitario = item.valorUnitario || 0
+    const desconto = item.valorDesconto || 0
+    const frete = item.valorFrete || 0
+    const seguro = item.valorSeguro || 0
+    const outros = item.valorOutros || 0
+    
+    return (quantidade * valorUnitario) - desconto + frete + seguro + outros
+  }, [])
+
+  const calculateTotals = useCallback(() => {
+    const itens = form.getValues('itens') || []
+    const valorFrete = form.getValues('valorFrete') || 0
+    const valorSeguro = form.getValues('valorSeguro') || 0
+    const valorDesconto = form.getValues('valorDesconto') || 0
+    const valorOutros = form.getValues('valorOutros') || 0
+
+    const valorProdutos = itens.reduce((sum, item) => {
+      return sum + (item.quantidadeComercial * item.valorUnitario)
+    }, 0)
+
+    const valorICMS = itens.reduce((sum, item) => sum + (item.icms?.valor || 0), 0)
+    const valorIPI = itens.reduce((sum, item) => sum + (item.ipi?.valor || 0), 0)
+    const valorPIS = itens.reduce((sum, item) => sum + (item.pis?.valor || 0), 0)
+    const valorCOFINS = itens.reduce((sum, item) => sum + (item.cofins?.valor || 0), 0)
+
+    const valorTotalImpostos = valorICMS + valorIPI + valorPIS + valorCOFINS
+
+    const valorTotal = valorProdutos + valorFrete + valorSeguro + valorOutros - valorDesconto
+
+    return {
+      valorProdutos,
+      valorTotal,
+      valorTotalImpostos,
+      valorICMS,
+      valorIPI,
+      valorPIS,
+      valorCOFINS,
+    }
+  }, [form])
+
+  const calculateNfeTotal = useCallback((): number => {
+    return calculateTotals().valorTotal
+  }, [calculateTotals])
 
   return {
-    // Estado
+    form,
     loading,
-    emitenteId,
-    clienteId,
-    naturezaOperacao,
-    serie,
-    tipoOperacao,
-    consumidorFinal,
-    presencaComprador,
-    valorProdutos,
-    valorFrete,
-    valorSeguro,
-    valorDesconto,
-    valorOutros,
-    valorICMSDesonerado,
-    valorFCP,
-    valorII,
-    valorOutrasDespesas,
-    duplicatas,
-    informacoesAdicionais,
-    informacoesFisco,
-    valorTotal,
-
-    // Setters
-    setEmitenteId,
-    setClienteId,
-    setNaturezaOperacao,
-    setSerie,
-    setTipoOperacao,
-    setConsumidorFinal,
-    setPresencaComprador,
-    setValorProdutos,
-    setValorFrete,
-    setValorSeguro,
-    setValorDesconto,
-    setValorOutros,
-    setValorICMSDesonerado,
-    setValorFCP,
-    setValorII,
-    setValorOutrasDespesas,
-    setDuplicatas,
-    setInformacoesAdicionais,
-    setInformacoesFisco,
-
-    // Ações
-    adicionarDuplicata,
-    removerDuplicata,
-    validarDuplicatas,
-    gerarParcelas,
-    handleSubmit,
+    loadingNfe,
+    loadingEmitente,
+    emitente,
+    nfe,
+    handleSubmit: form.handleSubmit(handleSubmit),
+    loadNfe,
+    resetForm,
+    addItem,
+    updateItem,
+    removeItem,
+    calculateItemTotal,
+    calculateNfeTotal,
+    calculateTotals,
   }
 }
 
