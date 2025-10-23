@@ -68,6 +68,7 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
   const [clientes, setClientes] = useState<any[]>([])
   const [produtos, setProdutos] = useState<any[]>([])
   const [naturezasOperacao, setNaturezasOperacao] = useState<any[]>([])
+  const [cfops, setCfops] = useState<any[]>([])
 
   // Emitente ativo (fixo do sistema)
   const [emitente, setEmitente] = useState<any>(null)
@@ -141,13 +142,14 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
         ClienteService.getAll({ page: 1, limit: 1000 }),
         ProdutoService.getAll({ page: 1, limit: 1000 }),
         NaturezaOperacaoService.getAtivas(),
+        AuxiliarService.getCFOPs(),
       ])
 
       // Processar emitente ativo
       if (results[0].status === 'fulfilled') {
         const emitenteAtivo = results[0].value
         setEmitente(emitenteAtivo)
-        setSerie(emitenteAtivo.serieNfe || 1)
+        setSerie(emitenteAtivo?.serieNfe || 1)
       } else {
         console.error("Erro ao carregar emitente:", results[0].reason)
         // Emitente não configurado - não é erro fatal, apenas aviso
@@ -182,6 +184,14 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
       } else {
         console.error("Erro ao carregar naturezas de operação:", results[3].reason)
         toast.error("Erro ao carregar naturezas de operação")
+      }
+
+      // Processar CFOPs
+      if (results[4].status === 'fulfilled') {
+        setCfops(results[4].value || [])
+      } else {
+        console.error("Erro ao carregar CFOPs:", results[4].reason)
+        toast.error("Erro ao carregar CFOPs")
       }
     } catch (error) {
       console.error("Erro geral ao carregar dados:", error)
