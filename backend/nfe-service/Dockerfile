@@ -24,8 +24,7 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
         xml \
         zip \
         pdo \
-        pdo_mysql \
-        openssl
+        pdo_mysql
 
 # Habilitar mod_rewrite do Apache
 RUN a2enmod rewrite

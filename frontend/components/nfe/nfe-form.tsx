@@ -264,7 +264,17 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
 
     // Validar se produto tem impostos configurados
     if (!produto.icmsCstId && !produto.icmsCsosnId) {
-      toast.error("Produto sem impostos configurados. Configure os impostos no cadastro do produto.")
+      toast.error("Produto sem impostos ICMS configurados. Configure os impostos no cadastro do produto.")
+      return
+    }
+
+    if (!produto.pisCstId) {
+      toast.error("Produto sem CST de PIS configurado. Configure os impostos no cadastro do produto.")
+      return
+    }
+
+    if (!produto.cofinsCstId) {
+      toast.error("Produto sem CST de COFINS configurado. Configure os impostos no cadastro do produto.")
       return
     }
 
@@ -423,18 +433,13 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
         valorII,
         valorOutrasDespesas,
         informacoesAdicionais,
-        itens: itens.map(item => ({
+        itens: itens.map((item, index) => ({
           produtoId: item.produtoId,
-          codigo: item.codigo,
-          descricao: item.descricao,
-          ncmId: item.ncmId,
+          numeroItem: index + 1, // Número sequencial do item (obrigatório)
           cfopId: item.cfopId,
-          unidadeComercial: item.unidadeComercial,
           quantidadeComercial: item.quantidadeComercial,
           valorUnitario: item.valorUnitario,
-          valorDesconto: item.valorDesconto,
-          valorTotal: item.valorTotal,
-          origem: item.origem,
+          valorDesconto: item.valorDesconto || 0,
           // Impostos ICMS
           icmsCstId: item.icmsCstId,
           icmsCsosnId: item.icmsCsosnId,
