@@ -107,18 +107,55 @@ export class CreateNfeItemDto {
   cofinsValor?: number;
 }
 
-export class CreateNfePagamentoDto {
+export class CreateNfeCobrancaDto {
+  @IsOptional()
   @IsString()
-  @IsIn(['01', '02', '03', '04', '05', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '90', '99'])
-  formaPagamento: string; // 01=Dinheiro, 02=Cheque, 03=Cartão Crédito, etc
+  numeroFatura?: string;
+
+  @Transform(({ value }) => parseFloat(value))
+  @IsNumber({ maxDecimalPlaces: 2 })
+  valorOriginal: number;
+
+  @IsOptional()
+  @Transform(({ value }) => value ? parseFloat(value) : 0)
+  @IsNumber({ maxDecimalPlaces: 2 })
+  valorDesconto?: number;
+
+  @Transform(({ value }) => parseFloat(value))
+  @IsNumber({ maxDecimalPlaces: 2 })
+  valorLiquido: number;
+}
+
+export class CreateNfePagamentoDto {
+  // Indicador de Pagamento: 0=À vista, 1=A prazo
+  @IsInt()
+  @IsIn([0, 1])
+  indicadorPagamento: number;
+
+  // Forma de Pagamento (código da tabela)
+  @IsString()
+  @IsIn(['01', '02', '03', '04', '05', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '90', '91', '99'])
+  formaPagamento: string;
+
+  // Descrição do pagamento (obrigatório se formaPagamento=99)
+  @IsOptional()
+  @IsString()
+  descricaoPagamento?: string;
 
   @Transform(({ value }) => parseFloat(value))
   @IsNumber({ maxDecimalPlaces: 2 })
   valor: number;
 
+  // Data do pagamento (opcional)
   @IsOptional()
-  @IsString()
-  tipoIntegracao?: string;
+  @IsDateString()
+  dataPagamento?: string;
+
+  // Dados de Cartão (obrigatório para tPag=03,04,17)
+  @IsOptional()
+  @IsInt()
+  @IsIn([1, 2])
+  tipoIntegracao?: number; // 1=Integrado, 2=Não integrado
 
   @IsOptional()
   @IsString()
@@ -131,11 +168,6 @@ export class CreateNfePagamentoDto {
   @IsOptional()
   @IsString()
   numeroAutorizacao?: string;
-
-  @IsOptional()
-  @Transform(({ value }) => value ? parseFloat(value) : undefined)
-  @IsNumber({ maxDecimalPlaces: 2 })
-  valorTroco?: number;
 }
 
 export class CreateNfeDto {
@@ -245,6 +277,11 @@ export class CreateNfeDto {
   @ValidateNested({ each: true })
   @Type(() => CreateNfeDuplicataDto)
   duplicatas?: CreateNfeDuplicataDto[];
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => CreateNfeCobrancaDto)
+  cobranca?: CreateNfeCobrancaDto;
 
   @IsOptional()
   @IsArray()

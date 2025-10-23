@@ -500,6 +500,7 @@ model Nfe {
   emitente               Emitente @relation(fields: [emitenteId], references: [id])
   cliente               Cliente @relation(fields: [clienteId], references: [id])
   itens                 NfeItem[]
+  cobranca              NfeCobranca?
   duplicatas            NfeDuplicata[]
   pagamentos            NfePagamento[]
   eventos               NfeEvento[]
@@ -701,6 +702,45 @@ model NfeItemCOFINS {
 // TABELAS DE COBRANÇA, PAGAMENTO E EVENTOS
 // ================================
 
+// Formas de Pagamento (Tabela Auxiliar)
+model FormaPagamento {
+  id                    String @id @default(cuid())
+  codigo                String @unique @db.VarChar(2) // 01, 02, 03, etc
+  descricao             String @db.VarChar(200)
+  requerCard            Boolean @default(false) // Se requer dados de cartão
+  vigenciaInicio        DateTime? // Data de início de vigência
+  observacoes           String? @db.Text
+  ativo                 Boolean @default(true)
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  // Relacionamentos
+  pagamentos            NfePagamento[]
+
+  @@map("formas_pagamento")
+}
+
+// Cobrança da NFe (Fatura)
+model NfeCobranca {
+  id                    String @id @default(cuid())
+  nfeId                 String @unique
+
+  // Fatura
+  numeroFatura          String? @db.VarChar(20)
+  valorOriginal         Decimal @db.Decimal(15,2)
+  valorDesconto         Decimal @default(0) @db.Decimal(15,2)
+  valorLiquido          Decimal @db.Decimal(15,2)
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  // Relacionamentos
+  nfe                   Nfe @relation(fields: [nfeId], references: [id], onDelete: Cascade)
+
+  @@map("nfe_cobrancas")
+}
+
 // Duplicatas da NFe (Cobrança/Parcelamento)
 model NfeDuplicata {
   id                    String @id @default(cuid())
@@ -724,24 +764,27 @@ model NfePagamento {
   id                    String @id @default(cuid())
   nfeId                 String
 
-  // Forma de Pagamento
-  formaPagamento        String @db.VarChar(2) // 01=Dinheiro, 02=Cheque, etc
-  valor                 Decimal @db.Decimal(15,2)
+  // Indicador de Pagamento
+  indicadorPagamento    Int @default(0) // 0=À vista, 1=A prazo
 
-  // Cartão (se aplicável)
-  tipoIntegracao        String? @db.VarChar(1) // 1=Integrado, 2=Não integrado
+  // Forma de Pagamento
+  formaPagamentoId      String
+  descricaoPagamento    String? @db.VarChar(200) // Obrigatório se tPag=99
+  valor                 Decimal @db.Decimal(15,2)
+  dataPagamento         DateTime? // Data do pagamento (opcional)
+
+  // Dados de Cartão (se aplicável)
+  tipoIntegracao        Int? // 1=Integrado, 2=Não integrado
   cnpjCredenciadora     String? @db.VarChar(14)
   bandeira              String? @db.VarChar(2)
   numeroAutorizacao     String? @db.VarChar(20)
-
-  // Troco
-  valorTroco            Decimal? @db.Decimal(15,2)
 
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 
   // Relacionamentos
   nfe                   Nfe @relation(fields: [nfeId], references: [id], onDelete: Cascade)
+  formaPagamento        FormaPagamento @relation(fields: [formaPagamentoId], references: [id])
 
   @@map("nfe_pagamentos")
 }

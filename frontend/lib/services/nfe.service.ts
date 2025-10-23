@@ -31,15 +31,36 @@ export interface NfeDuplicata {
   valor: number;
 }
 
+export interface FormaPagamento {
+  id: string;
+  codigo: string;
+  descricao: string;
+  requerCard: boolean;
+  vigenciaInicio?: string;
+  observacoes?: string;
+  ativo: boolean;
+}
+
+export interface NfeCobranca {
+  id: string;
+  numeroFatura?: string;
+  valorOriginal: number;
+  valorDesconto: number;
+  valorLiquido: number;
+}
+
 export interface NfePagamento {
   id: string;
-  formaPagamento: string;
+  indicadorPagamento: number;
+  formaPagamentoId: string;
+  descricaoPagamento?: string;
   valor: number;
-  tipoIntegracao?: string;
+  dataPagamento?: string;
+  tipoIntegracao?: number;
   cnpjCredenciadora?: string;
   bandeira?: string;
   numeroAutorizacao?: string;
-  valorTroco?: number;
+  formaPagamento?: FormaPagamento;
 }
 
 export interface Nfe {
@@ -110,14 +131,23 @@ export interface CreateNfeDuplicataData {
   valor: number;
 }
 
+export interface CreateNfeCobrancaData {
+  numeroFatura?: string;
+  valorOriginal: number;
+  valorDesconto?: number;
+  valorLiquido: number;
+}
+
 export interface CreateNfePagamentoData {
+  indicadorPagamento: number;
   formaPagamento: string;
+  descricaoPagamento?: string;
   valor: number;
-  tipoIntegracao?: string;
+  dataPagamento?: string;
+  tipoIntegracao?: number;
   cnpjCredenciadora?: string;
   bandeira?: string;
   numeroAutorizacao?: string;
-  valorTroco?: number;
 }
 
 export interface CreateNfeData {
@@ -143,6 +173,7 @@ export interface CreateNfeData {
   informacoesAdicionais?: string;
   informacoesFisco?: string;
   itens: CreateNfeItemData[];
+  cobranca?: CreateNfeCobrancaData;
   duplicatas?: CreateNfeDuplicataData[];
   pagamentos?: CreateNfePagamentoData[];
 }
@@ -158,6 +189,14 @@ export interface NfesResponse {
 }
 
 export class NfeService {
+  static async getFormasPagamento(): Promise<FormaPagamento[]> {
+    const response = await fetch(`${API_BASE_URL}/formas-pagamento`);
+    if (!response.ok) {
+      throw new Error('Erro ao buscar formas de pagamento');
+    }
+    return response.json();
+  }
+
   static async getAll(params?: { page?: number; limit?: number; search?: string; emitenteId?: string; status?: string } | number, limit?: number, emitenteId?: string, status?: string): Promise<NfesResponse> {
     // Suportar ambas as assinaturas para compatibilidade
     let queryParams: URLSearchParams;

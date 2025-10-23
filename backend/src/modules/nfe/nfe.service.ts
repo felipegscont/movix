@@ -156,14 +156,28 @@ export class NfeService {
       });
     }
 
+    // Criar cobrança se fornecida
+    if (createNfeDto.cobranca) {
+      await this.prisma.nfeCobranca.create({
+        data: {
+          nfeId: nfe.id,
+          numeroFatura: createNfeDto.cobranca.numeroFatura,
+          valorOriginal: createNfeDto.cobranca.valorOriginal,
+          valorDesconto: createNfeDto.cobranca.valorDesconto || 0,
+          valorLiquido: createNfeDto.cobranca.valorLiquido,
+        },
+      });
+    }
+
     // Criar duplicatas se fornecidas (baseado em XML real)
     // XML: <dup><nDup>001</nDup><dVenc>2025-10-06</dVenc><vDup>7200.00</vDup></dup>
     if (createNfeDto.duplicatas && createNfeDto.duplicatas.length > 0) {
-      // Validar soma das duplicatas = valor total da NFe
+      // Validar soma das duplicatas = valor total da NFe ou valor líquido da cobrança
+      const valorReferencia = createNfeDto.cobranca?.valorLiquido || totais.valorTotal;
       const somaDuplicatas = createNfeDto.duplicatas.reduce((sum, dup) => sum + dup.valor, 0);
-      if (Math.abs(somaDuplicatas - totais.valorTotal) > 0.01) {
+      if (Math.abs(somaDuplicatas - valorReferencia) > 0.01) {
         throw new BadRequestException(
-          `Soma das duplicatas (${somaDuplicatas.toFixed(2)}) deve ser igual ao valor total da NFe (${totais.valorTotal.toFixed(2)})`
+          `Soma das duplicatas (${somaDuplicatas.toFixed(2)}) deve ser igual ao valor ${createNfeDto.cobranca ? 'líquido da cobrança' : 'total da NFe'} (${valorReferencia.toFixed(2)})`
         );
       }
 
@@ -181,17 +195,50 @@ export class NfeService {
 
     // Criar pagamentos se fornecidos
     if (createNfeDto.pagamentos && createNfeDto.pagamentos.length > 0) {
+      // Validar soma dos pagamentos = valor total da NFe
+      const somaPagamentos = createNfeDto.pagamentos.reduce((sum, pag) => sum + pag.valor, 0);
+      if (Math.abs(somaPagamentos - totais.valorTotal) > 0.01) {
+        throw new BadRequestException(
+          `Soma dos pagamentos (${somaPagamentos.toFixed(2)}) deve ser igual ao valor total da NFe (${totais.valorTotal.toFixed(2)})`
+        );
+      }
+
       for (const pagamentoDto of createNfeDto.pagamentos) {
+        // Buscar forma de pagamento
+        const formaPagamento = await this.prisma.formaPagamento.findUnique({
+          where: { codigo: pagamentoDto.formaPagamento },
+        });
+
+        if (!formaPagamento) {
+          throw new BadRequestException(`Forma de pagamento ${pagamentoDto.formaPagamento} não encontrada`);
+        }
+
+        // Validar campos obrigatórios por forma de pagamento
+        if (pagamentoDto.formaPagamento === '99' && !pagamentoDto.descricaoPagamento) {
+          throw new BadRequestException('Descrição do pagamento é obrigatória para forma de pagamento "99 - Outros"');
+        }
+
+        // Validar grupo <card> para cartões e PIX dinâmico
+        if (['03', '04', '17'].includes(pagamentoDto.formaPagamento)) {
+          if (!pagamentoDto.tipoIntegracao || !pagamentoDto.cnpjCredenciadora || !pagamentoDto.bandeira || !pagamentoDto.numeroAutorizacao) {
+            throw new BadRequestException(
+              `Dados de cartão (tipoIntegracao, cnpjCredenciadora, bandeira, numeroAutorizacao) são obrigatórios para forma de pagamento ${pagamentoDto.formaPagamento}`
+            );
+          }
+        }
+
         await this.prisma.nfePagamento.create({
           data: {
             nfeId: nfe.id,
-            formaPagamento: pagamentoDto.formaPagamento,
+            indicadorPagamento: pagamentoDto.indicadorPagamento,
+            formaPagamentoId: formaPagamento.id,
+            descricaoPagamento: pagamentoDto.descricaoPagamento,
             valor: pagamentoDto.valor,
+            dataPagamento: pagamentoDto.dataPagamento ? new Date(pagamentoDto.dataPagamento) : null,
             tipoIntegracao: pagamentoDto.tipoIntegracao,
             cnpjCredenciadora: pagamentoDto.cnpjCredenciadora,
             bandeira: pagamentoDto.bandeira,
             numeroAutorizacao: pagamentoDto.numeroAutorizacao,
-            valorTroco: pagamentoDto.valorTroco,
           },
         });
       }
@@ -273,10 +320,15 @@ export class NfeService {
           },
           orderBy: { numeroItem: 'asc' },
         },
+        cobranca: true,
         duplicatas: {
           orderBy: { numero: 'asc' },
         },
-        pagamentos: true,
+        pagamentos: {
+          include: {
+            formaPagamento: true,
+          },
+        },
         eventos: {
           orderBy: { dataEvento: 'desc' },
         },

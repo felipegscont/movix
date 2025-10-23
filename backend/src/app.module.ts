@@ -12,6 +12,7 @@ import { NfeModule } from './modules/nfe/nfe.module';
 import { AuxiliaresModule } from './modules/auxiliares/auxiliares.module';
 import { ExternalApisModule } from './modules/external-apis/external-apis.module';
 import { NaturezaOperacaoModule } from './modules/natureza-operacao/natureza-operacao.module';
+import { FormaPagamentoModule } from './modules/forma-pagamento/forma-pagamento.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -30,6 +31,7 @@ import configuration from './config/configuration';
     AuxiliaresModule,
     ExternalApisModule,
     NaturezaOperacaoModule,
+    FormaPagamentoModule,
   ],
   controllers: [AppController],
   providers: [AppService],

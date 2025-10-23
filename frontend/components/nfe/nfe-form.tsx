@@ -19,7 +19,8 @@ import { IconChevronDown, IconDeviceFloppy, IconX, IconPlus, IconTrash, IconLoad
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import Link from "next/link"
 import { DuplicatasForm } from "./duplicatas-form"
-import { CreateNfeDuplicataData, NfeService } from "@/lib/services/nfe.service"
+import { PagamentosForm } from "./pagamentos-form"
+import { CreateNfeDuplicataData, CreateNfePagamentoData, NfeService } from "@/lib/services/nfe.service"
 import { EmitenteService } from "@/lib/services/emitente.service"
 import { ClienteService } from "@/lib/services/cliente.service"
 import { ProdutoService } from "@/lib/services/produto.service"
@@ -107,7 +108,10 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
   
   // Duplicatas
   const [duplicatas, setDuplicatas] = useState<CreateNfeDuplicataData[]>([])
-  
+
+  // Pagamentos
+  const [pagamentos, setPagamentos] = useState<CreateNfePagamentoData[]>([])
+
   // Informações adicionais
   const [informacoesAdicionais, setInformacoesAdicionais] = useState("")
   
@@ -451,6 +455,7 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
           cofinsAliquota: item.cofinsAliquota,
           cofinsValor: item.cofinsValor,
         })),
+        pagamentos: pagamentos.length > 0 ? pagamentos : undefined,
         duplicatas: duplicatas.length > 0 ? duplicatas : undefined,
       }
 
@@ -517,13 +522,13 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
                   </div>
                 </div>
               ) : (
-                <Alert variant="destructive">
+                <Alert>
                   <IconAlertCircle className="h-4 w-4" />
-                  <AlertTitle>Emitente não configurado</AlertTitle>
+                  <AlertTitle>Emitente será carregado automaticamente</AlertTitle>
                   <AlertDescription>
-                    Você precisa cadastrar um emitente antes de criar NFe.{" "}
+                    O sistema utilizará o emitente ativo configurado.{" "}
                     <Link href="/configuracoes/emitente" className="underline font-medium">
-                      Clique aqui para configurar
+                      Clique aqui para visualizar/editar
                     </Link>
                   </AlertDescription>
                 </Alert>
@@ -881,6 +886,13 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
 
         {/* Aba Cobrança */}
         <TabsContent value="cobranca" className="space-y-4">
+          <PagamentosForm
+            pagamentos={pagamentos}
+            onChange={setPagamentos}
+            valorTotal={valorTotal}
+            disabled={loading}
+          />
+
           <DuplicatasForm
             duplicatas={duplicatas}
             onChange={setDuplicatas}

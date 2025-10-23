@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { seedFiscalTables } from './seeds/fiscal';
+import { seedFormasPagamento } from './seeds/formas-pagamento';
 
 const prisma = new PrismaClient();
 
@@ -55,6 +56,9 @@ async function main() {
   console.log('📋 Naturezas de Operação');
   await seedNaturezas();
 
+  console.log('💳 Formas de Pagamento');
+  await seedFormasPagamento(prisma);
+
   console.log('✅ Seed concluído');
   console.log('');
   console.log('📊 Dados populados:');
@@ -63,6 +67,7 @@ async function main() {
   console.log('   • CSOSN: 10 códigos');
   console.log('   • NCM: ~10.500 códigos (8 dígitos - Tabela completa Siscomex)');
   console.log('   • Naturezas de Operação: 2 padrões');
+  console.log('   • Formas de Pagamento: 26 formas (IT 2024.002 v.1.10)');
   console.log('');
   console.log('ℹ️  Estados e Municípios são populados automaticamente via API IBGE');
   console.log('ℹ️  NCMs atualizados da tabela oficial do Siscomex (Receita Federal)');
