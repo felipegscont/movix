@@ -99,13 +99,20 @@ export function CSOSNCombobox({
           className={cn("w-full justify-between", className)}
           disabled={disabled}
         >
-          {selectedCSOSN ? (
-            <span className="truncate">
-              {selectedCSOSN.codigo} - {selectedCSOSN.descricao}
-            </span>
-          ) : (
-            <span className="text-muted-foreground">{placeholder}</span>
-          )}
+          <span className="truncate flex-1 text-left">
+            {selectedCSOSN ? (
+              <>
+                <span className="font-medium">{selectedCSOSN.codigo}</span>
+                <span className="text-muted-foreground ml-2">
+                  {selectedCSOSN.descricao.length > 40
+                    ? selectedCSOSN.descricao.substring(0, 40) + "..."
+                    : selectedCSOSN.descricao}
+                </span>
+              </>
+            ) : (
+              <span className="text-muted-foreground">{placeholder}</span>
+            )}
+          </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>

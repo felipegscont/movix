@@ -111,13 +111,20 @@ export function CFOPCombobox({
           className={cn("w-full justify-between", className)}
           disabled={disabled}
         >
-          {selectedCFOP ? (
-            <span className="truncate">
-              {selectedCFOP.codigo} - {selectedCFOP.descricao}
-            </span>
-          ) : (
-            <span className="text-muted-foreground">{placeholder}</span>
-          )}
+          <span className="truncate flex-1 text-left">
+            {selectedCFOP ? (
+              <>
+                <span className="font-medium">{selectedCFOP.codigo}</span>
+                <span className="text-muted-foreground ml-2">
+                  {selectedCFOP.descricao.length > 40
+                    ? selectedCFOP.descricao.substring(0, 40) + "..."
+                    : selectedCFOP.descricao}
+                </span>
+              </>
+            ) : (
+              <span className="text-muted-foreground">{placeholder}</span>
+            )}
+          </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>

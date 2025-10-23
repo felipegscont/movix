@@ -295,7 +295,7 @@ export function ClienteFormDialog({
                                         <Input placeholder="000.000.000.000" {...field} />
                                       </FormControl>
                                       <FormDescription>
-                                        Inscrição estadual da empresa (se aplicável)
+                                        Preenchido automaticamente pela consulta de CNPJ quando disponível
                                       </FormDescription>
                                       <FormMessage />
                                     </FormItem>

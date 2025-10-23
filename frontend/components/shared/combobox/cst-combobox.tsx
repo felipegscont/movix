@@ -102,13 +102,20 @@ export function CSTCombobox({
           className={cn("w-full justify-between", className)}
           disabled={disabled}
         >
-          {selectedCST ? (
-            <span className="truncate">
-              {selectedCST.codigo} - {selectedCST.descricao}
-            </span>
-          ) : (
-            <span className="text-muted-foreground">{placeholder}</span>
-          )}
+          <span className="truncate flex-1 text-left">
+            {selectedCST ? (
+              <>
+                <span className="font-medium">{selectedCST.codigo}</span>
+                <span className="text-muted-foreground ml-2">
+                  {selectedCST.descricao.length > 40
+                    ? selectedCST.descricao.substring(0, 40) + "..."
+                    : selectedCST.descricao}
+                </span>
+              </>
+            ) : (
+              <span className="text-muted-foreground">{placeholder}</span>
+            )}
+          </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>

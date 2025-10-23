@@ -80,13 +80,20 @@ export function NCMCombobox({
           className={cn("w-full justify-between", className)}
           disabled={disabled}
         >
-          {selectedNCM ? (
-            <span className="truncate">
-              {selectedNCM.codigo} - {selectedNCM.descricao}
-            </span>
-          ) : (
-            <span className="text-muted-foreground">{placeholder}</span>
-          )}
+          <span className="truncate flex-1 text-left">
+            {selectedNCM ? (
+              <>
+                <span className="font-medium">{selectedNCM.codigo}</span>
+                <span className="text-muted-foreground ml-2">
+                  {selectedNCM.descricao.length > 40
+                    ? selectedNCM.descricao.substring(0, 40) + "..."
+                    : selectedNCM.descricao}
+                </span>
+              </>
+            ) : (
+              <span className="text-muted-foreground">{placeholder}</span>
+            )}
+          </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
