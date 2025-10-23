@@ -56,9 +56,12 @@ export class DatabaseInitService implements OnModuleInit {
         this.logger.log('   • CSOSN: 10 códigos');
         this.logger.log('   • NCM: ~10.500 códigos (8 dígitos - Tabela oficial Siscomex/Receita Federal)');
         this.logger.log('   • Naturezas de Operação: 2 padrões');
+        this.logger.log('   • Formas de Pagamento: 26 formas (IT 2024.002 v.1.10)');
+        this.logger.log('   • Emitente: 1 placeholder (configure em Configurações > Emitente)');
         this.logger.log('');
         this.logger.log('ℹ️  Estados e Municípios serão populados automaticamente via API IBGE');
         this.logger.log('ℹ️  NCMs atualizados da tabela oficial do Siscomex (Receita Federal)');
+        this.logger.log('ℹ️  Todos os dados são carregados de arquivos JSON em prisma/seeds/data/');
         this.logger.log('');
       } else {
         this.logger.log('✅ Banco de dados já inicializado');

@@ -1,0 +1,29 @@
+[
+  {
+    "codigo": "VENDA",
+    "descricao": "Venda de mercadoria",
+    "cfopDentroEstado": "5102",
+    "cfopForaEstado": "6102",
+    "cfopExterior": null,
+    "tipoOperacao": 1,
+    "finalidade": 1,
+    "consumidorFinal": 1,
+    "presencaComprador": 1,
+    "informacoesAdicionaisPadrao": null,
+    "ativo": true
+  },
+  {
+    "codigo": "VENDA_PROD",
+    "descricao": "Venda de produção do estabelecimento",
+    "cfopDentroEstado": "5101",
+    "cfopForaEstado": "6101",
+    "cfopExterior": null,
+    "tipoOperacao": 1,
+    "finalidade": 1,
+    "consumidorFinal": 1,
+    "presencaComprador": 1,
+    "informacoesAdicionaisPadrao": null,
+    "ativo": true
+  }
+]
+

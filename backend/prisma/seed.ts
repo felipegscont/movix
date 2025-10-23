@@ -1,51 +1,10 @@
 import { PrismaClient } from '@prisma/client';
 import { seedFiscalTables } from './seeds/fiscal';
 import { seedFormasPagamento } from './seeds/formas-pagamento';
+import { seedEmitentePlaceholder } from './seeds/emitente-placeholder';
+import { seedNaturezasOperacao } from './seeds/naturezas-operacao';
 
 const prisma = new PrismaClient();
-
-async function seedNaturezas() {
-  const cfop5102 = await prisma.cFOP.findUnique({ where: { codigo: '5102' } });
-  const cfop6102 = await prisma.cFOP.findUnique({ where: { codigo: '6102' } });
-  const cfop5101 = await prisma.cFOP.findUnique({ where: { codigo: '5101' } });
-  const cfop6101 = await prisma.cFOP.findUnique({ where: { codigo: '6101' } });
-
-  if (!cfop5102 || !cfop6102 || !cfop5101 || !cfop6101) {
-    console.log('⚠️  CFOPs não encontrados, pulando naturezas de operação');
-    return;
-  }
-
-  const naturezas = [
-    {
-      codigo: 'VENDA',
-      descricao: 'Venda de mercadoria',
-      cfopDentroEstadoId: cfop5102.id,
-      cfopForaEstadoId: cfop6102.id,
-      tipoOperacao: 1,
-      finalidade: 1,
-      consumidorFinal: 1,
-      presencaComprador: 1,
-    },
-    {
-      codigo: 'VENDA_PROD',
-      descricao: 'Venda de produção do estabelecimento',
-      cfopDentroEstadoId: cfop5101.id,
-      cfopForaEstadoId: cfop6101.id,
-      tipoOperacao: 1,
-      finalidade: 1,
-      consumidorFinal: 1,
-      presencaComprador: 1,
-    },
-  ];
-
-  for (const natureza of naturezas) {
-    await prisma.naturezaOperacao.upsert({
-      where: { codigo: natureza.codigo },
-      update: {},
-      create: natureza,
-    });
-  }
-}
 
 async function main() {
   console.log('🌱 Seed iniciado');
@@ -54,10 +13,13 @@ async function main() {
   await seedFiscalTables(prisma);
 
   console.log('📋 Naturezas de Operação');
-  await seedNaturezas();
+  await seedNaturezasOperacao(prisma);
 
   console.log('💳 Formas de Pagamento');
   await seedFormasPagamento(prisma);
+
+  console.log('🏢 Emitente Placeholder');
+  await seedEmitentePlaceholder(prisma);
 
   console.log('✅ Seed concluído');
   console.log('');
@@ -68,9 +30,11 @@ async function main() {
   console.log('   • NCM: ~10.500 códigos (8 dígitos - Tabela completa Siscomex)');
   console.log('   • Naturezas de Operação: 2 padrões');
   console.log('   • Formas de Pagamento: 26 formas (IT 2024.002 v.1.10)');
+  console.log('   • Emitente: 1 placeholder (configure em Configurações > Emitente)');
   console.log('');
   console.log('ℹ️  Estados e Municípios são populados automaticamente via API IBGE');
   console.log('ℹ️  NCMs atualizados da tabela oficial do Siscomex (Receita Federal)');
+  console.log('ℹ️  Todos os dados são carregados de arquivos JSON em prisma/seeds/data/');
 }
 
 main()

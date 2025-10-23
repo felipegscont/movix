@@ -14,22 +14,61 @@ seeds/
 │   ├── ncm-loader.ts    # Carregador de NCM (API Siscomex)
 │   ├── ncm-data.ts      # NCMs comuns (fallback)
 │   └── seeder.ts        # Lógica principal de seed
-├── data/
+├── data/                # 📊 Dados em JSON (padrão do sistema)
 │   ├── cfop.json        # Cache de CFOPs
-│   └── ncm.json         # Cache de NCMs (gerado automaticamente)
+│   ├── ncm.json         # Cache de NCMs (gerado automaticamente)
+│   ├── cst.json         # CST (ICMS, PIS, COFINS, IPI)
+│   ├── csosn.json       # CSOSN (Simples Nacional)
+│   ├── formas-pagamento.json      # 26 formas de pagamento NFe
+│   ├── naturezas-operacao.json    # Naturezas de operação
+│   └── emitente-placeholder.json  # Emitente modelo
+├── formas-pagamento.ts  # 💳 Seed de formas de pagamento
+├── naturezas-operacao.ts # 📋 Seed de naturezas de operação
+├── emitente-placeholder.ts # 🏢 Seed de emitente placeholder
 └── README.md            # Este arquivo
 ```
 
 ## 🚀 Execução
 
-### Automática (Recomendado)
-O seed é executado **automaticamente** na primeira inicialização do sistema via `DatabaseInitService`.
+### ✅ Automática (Padrão do Prisma)
 
-### Manual
+O seed é executado **AUTOMATICAMENTE** pelo Prisma em 3 situações:
+
+1. **`prisma migrate reset`** - Sempre executa seed após reset
+2. **`prisma migrate dev`** - Executa seed se criar banco novo
+3. **`DatabaseInitService`** - Execução na primeira inicialização do sistema
+
+**Não é necessário executar manualmente!**
+
+### 🔧 Manual (Desenvolvimento/Testes)
+
 ```bash
 cd backend
-npm run prisma:seed
+npx prisma db seed
 ```
+
+**Quando usar**:
+- Resetar dados de desenvolvimento
+- Testar novos seeds
+- Popular banco após `prisma migrate reset --skip-seed`
+
+### 🔄 Idempotência Garantida
+
+Todos os seeds usam **`upsert`** do Prisma:
+
+```typescript
+await prisma.formaPagamento.upsert({
+  where: { codigo: '01' },
+  update: {},  // Não atualiza se já existir
+  create: { ... }  // Cria apenas se não existir
+})
+```
+
+**Benefícios**:
+- ✅ Pode executar múltiplas vezes sem duplicar dados
+- ✅ Não precisa de tabela de controle
+- ✅ Prisma gerencia automaticamente
+- ✅ Seguro para produção
 
 ## 📊 Dados Populados
 
@@ -37,14 +76,16 @@ npm run prisma:seed
 
 | Tabela | Quantidade | Fonte | Atualização |
 |--------|-----------|-------|-------------|
-| **CFOP** | ~500 | GitHub Gist | Cache local |
-| **CST ICMS** | 11 | Hardcoded | Manual |
-| **CST PIS** | 33 | Hardcoded | Manual |
-| **CST COFINS** | 33 | Hardcoded | Manual |
-| **CST IPI** | 14 | Hardcoded | Manual |
-| **CSOSN** | 10 | Hardcoded | Manual |
-| **NCM** | ~10.500 | Siscomex (8 dígitos) | Cache local |
-| **Naturezas** | 2 | Hardcoded | Manual |
+| **CFOP** | ~500 | GitHub Gist | Automática (cache local) |
+| **CST ICMS** | 11 | JSON | Automática |
+| **CST PIS** | 33 | JSON | Automática |
+| **CST COFINS** | 33 | JSON | Automática |
+| **CST IPI** | 14 | JSON | Automática |
+| **CSOSN** | 10 | JSON | Automática |
+| **NCM** | ~10.500 | Siscomex (8 dígitos) | Automática (cache local) |
+| **Naturezas** | 2 | JSON | Automática |
+| **Formas Pagamento** | 26 | JSON | Automática |
+| **Emitente** | 1 | JSON (placeholder) | Automática (se não existir) |
 
 **Total**: ~11.100 registros
 
@@ -234,6 +275,26 @@ npm run prisma:migrate:reset
 - **NCM**: ~10.000 registros em ~5s (com cache)
 - **Total**: ~1 minuto (primeira execução)
 - **Total**: ~10 segundos (com cache)
+
+## 🆕 Novos Seeds (Padrão JSON)
+
+### Formas de Pagamento
+- **Arquivo**: `data/formas-pagamento.json`
+- **Quantidade**: 26 formas
+- **Versão**: IT 2024.002 v.1.10 (29/09/2025)
+- **Inclui**: Código 91 - Pagamento Posterior (novo)
+
+### Naturezas de Operação
+- **Arquivo**: `data/naturezas-operacao.json`
+- **Quantidade**: 2 naturezas padrão
+- **Tipos**: Venda de mercadoria, Venda de produção
+
+### Emitente Placeholder
+- **Arquivo**: `data/emitente-placeholder.json`
+- **CNPJ**: 00.000.000/0000-00
+- **Regra**: Criado apenas se não existir nenhum emitente
+- **Objetivo**: Garantir que sistema sempre tenha 1 emitente configurado
+- **Ação**: Atualizar dados em Configurações > Emitente
 
 ## 📄 Licença
 

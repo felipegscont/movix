@@ -1,0 +1,29 @@
+{
+  "cnpj": "00000000000000",
+  "razaoSocial": "EMPRESA MODELO LTDA",
+  "nomeFantasia": "Empresa Modelo",
+  "inscricaoEstadual": "000000000",
+  "inscricaoMunicipal": null,
+  "cnae": "0000000",
+  "regimeTributario": 1,
+  "logradouro": "Rua Exemplo",
+  "numero": "0",
+  "complemento": null,
+  "bairro": "Centro",
+  "cep": "00000000",
+  "municipio": {
+    "nome": "Goiânia",
+    "estado": "GO"
+  },
+  "telefone": "(00) 0000-0000",
+  "email": "contato@exemplo.com.br",
+  "site": null,
+  "certificadoPath": null,
+  "certificadoPassword": null,
+  "ambienteNfe": 2,
+  "proximoNumeroNfe": 1,
+  "serieNfe": 1,
+  "ativo": true,
+  "_observacoes": "Este é o emitente placeholder do sistema. Será criado apenas se não existir nenhum emitente. Configure os dados reais em: Configurações > Emitente"
+}
+

@@ -155,9 +155,11 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
         setEmitente(emitenteAtivo)
         setSerie(emitenteAtivo?.serieNfe || 1)
       } else {
-        console.error("Erro ao carregar emitente:", results[0].reason)
-        // Emitente não configurado - não é erro fatal, apenas aviso
+        // Emitente não configurado - não é erro fatal
+        // O backend buscará automaticamente o emitente ativo ao criar a NFe
+        console.log("Emitente será carregado automaticamente pelo backend")
         setEmitente(null)
+        setSerie(1) // Série padrão
       }
 
       // Processar clientes
@@ -379,10 +381,7 @@ export function NfeForm({ nfeId, onSuccess }: NfeFormProps) {
     e.preventDefault()
 
     // Validações básicas
-    if (!emitente) {
-      toast.error("Emitente não configurado. Configure um emitente ativo antes de criar NFe.")
-      return
-    }
+    // Nota: Emitente não é validado aqui pois o backend busca automaticamente o emitente ativo
 
     if (!clienteId) {
       toast.error("Selecione um cliente")
