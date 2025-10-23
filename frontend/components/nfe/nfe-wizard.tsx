@@ -1,10 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -25,6 +24,7 @@ import { NfeStepGeral } from "./steps/nfe-step-geral"
 import { NfeStepItens } from "./steps/nfe-step-itens"
 import { NfeStepCobranca } from "./steps/nfe-step-cobranca"
 import { NfeStepRevisao } from "./steps/nfe-step-revisao"
+import { NfeWizardBreadcrumb } from "./nfe-wizard-breadcrumb"
 
 interface NfeWizardProps {
   nfeId?: string
@@ -66,12 +66,28 @@ export function NfeWizard({ nfeId, onSuccess }: NfeWizardProps) {
   const isLastStep = currentStepIndex === WIZARD_STEPS.length - 1
 
   const goToNextStep = () => {
+    // Validar antes de avançar
+    if (!canAdvance()) {
+      const messages = getValidationMessages()
+      if (messages.length > 0) {
+        toast.error(messages[0])
+      }
+      return
+    }
+
     if (!isLastStep) {
       const nextStepKey = WIZARD_STEPS[currentStepIndex + 1].key
-      setCurrentStep(nextStepKey)
+
+      // Marcar step atual como completo
       if (!completedSteps.includes(currentStep)) {
         setCompletedSteps([...completedSteps, currentStep])
       }
+
+      // Ir para próximo step
+      setCurrentStep(nextStepKey)
+
+      // Scroll para o topo
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }
 
@@ -79,29 +95,64 @@ export function NfeWizard({ nfeId, onSuccess }: NfeWizardProps) {
     if (!isFirstStep) {
       const previousStepKey = WIZARD_STEPS[currentStepIndex - 1].key
       setCurrentStep(previousStepKey)
+
+      // Scroll para o topo
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }
 
   const goToStep = (step: WizardStep) => {
     setCurrentStep(step)
+
+    // Scroll para o topo
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
+
+  // Watch dos campos para validação em tempo real
+  const clienteId = form.watch('clienteId')
+  const naturezaOperacao = form.watch('naturezaOperacao')
+  const itens = form.watch('itens')
+
+  // Force re-render quando os campos mudarem
+  const [, forceUpdate] = useState({})
+  useEffect(() => {
+    forceUpdate({})
+  }, [clienteId, naturezaOperacao, itens])
 
   // Validação básica antes de avançar
   const canAdvance = () => {
-    const formValues = form.getValues()
-
     switch (currentStep) {
       case 'geral':
-        return !!formValues.clienteId && !!formValues.naturezaOperacao
+        return !!clienteId && !!naturezaOperacao
       case 'itens':
-        return formValues.itens && formValues.itens.length > 0
+        return itens && itens.length > 0
       case 'cobranca':
         return true // Cobrança é opcional
       case 'revisao':
-        return true
+        // No step de revisão, sempre pode salvar se chegou até aqui
+        return !!clienteId && !!naturezaOperacao && itens?.length > 0
       default:
         return false
     }
+  }
+
+  // Mensagens de validação
+  const getValidationMessages = () => {
+    const messages: string[] = []
+
+    switch (currentStep) {
+      case 'geral':
+        if (!clienteId) messages.push('Selecione um cliente')
+        if (!naturezaOperacao) messages.push('Informe a natureza da operação')
+        break
+      case 'itens':
+        if (!itens || itens.length === 0) {
+          messages.push('Adicione pelo menos um item')
+        }
+        break
+    }
+
+    return messages
   }
 
   // Renderizar step atual
@@ -116,8 +167,11 @@ export function NfeWizard({ nfeId, onSuccess }: NfeWizardProps) {
             addItem={addItem}
             updateItem={updateItem}
             removeItem={removeItem}
+            emitenteRegime={emitente?.regimeTributario}
           />
         )
+      case 'cobranca':
+        return <NfeStepCobranca form={form} />
       case 'cobranca':
         return <NfeStepCobranca form={form} />
       case 'revisao':
@@ -168,73 +222,77 @@ export function NfeWizard({ nfeId, onSuccess }: NfeWizardProps) {
           </CardHeader>
         </Card>
 
-        {/* Navegação do wizard */}
+        {/* Breadcrumb de navegação */}
         <Card>
           <CardContent className="pt-6">
-            <Tabs value={currentStep} className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
-                {WIZARD_STEPS.map((step, index) => {
-                  const isCompleted = completedSteps.includes(step.key)
-                  const isCurrent = currentStep === step.key
-
-                  return (
-                    <TabsTrigger
-                      key={step.key}
-                      value={step.key}
-                      onClick={() => goToStep(step.key)}
-                      className="relative"
-                    >
-                      <div className="flex items-center gap-2">
-                        {isCompleted && !isCurrent && (
-                          <IconCheck className="h-4 w-4 text-green-600" />
-                        )}
-                        <span>{step.label}</span>
-                      </div>
-                    </TabsTrigger>
-                  )
-                })}
-              </TabsList>
-
-              {/* Conteúdo do step atual */}
-              <div className="mt-6">
-                {renderCurrentStep()}
-              </div>
-            </Tabs>
+            <NfeWizardBreadcrumb
+              steps={WIZARD_STEPS}
+              currentStep={currentStep}
+              completedSteps={completedSteps}
+              onStepClick={goToStep}
+            />
           </CardContent>
         </Card>
+
+        {/* Conteúdo do step atual */}
+        <div>
+          {renderCurrentStep()}
+        </div>
 
         {/* Navegação inferior */}
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
+              {/* Botão Anterior */}
               <Button
                 type="button"
                 variant="outline"
                 onClick={goToPreviousStep}
-                disabled={isFirstStep}
+                disabled={isFirstStep || loading}
+                size="lg"
               >
                 <IconChevronLeft className="h-4 w-4 mr-2" />
                 Anterior
               </Button>
 
+              {/* Indicador de progresso */}
+              <div className="text-center">
+                <div className="text-sm text-muted-foreground">
+                  Passo {currentStepIndex + 1} de {WIZARD_STEPS.length}
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  {WIZARD_STEPS[currentStepIndex].label}
+                </div>
+              </div>
+
+              {/* Botão Próximo/Salvar */}
               <div className="flex gap-2">
                 {isLastStep ? (
                   <Button
                     type="submit"
                     disabled={!canAdvance() || loading}
+                    size="lg"
+                    className="min-w-[180px]"
                   >
                     {loading ? (
-                      <IconLoader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <>
+                        <IconLoader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Salvando...
+                      </>
                     ) : (
-                      <IconDeviceFloppy className="h-4 w-4 mr-2" />
+                      <>
+                        <IconDeviceFloppy className="h-4 w-4 mr-2" />
+                        {nfeId ? 'Atualizar NFe' : 'Criar NFe'}
+                      </>
                     )}
-                    {nfeId ? 'Atualizar NFe' : 'Criar NFe'}
                   </Button>
                 ) : (
                   <Button
                     type="button"
                     onClick={goToNextStep}
-                    disabled={!canAdvance()}
+                    disabled={!canAdvance() || loading}
+                    size="lg"
+                    className="min-w-[150px]"
                   >
                     Próximo
                     <IconChevronRight className="h-4 w-4 ml-2" />
@@ -242,6 +300,24 @@ export function NfeWizard({ nfeId, onSuccess }: NfeWizardProps) {
                 )}
               </div>
             </div>
+
+            {/* Mensagem de validação */}
+            {!canAdvance() && !isLastStep && (
+              <div className="mt-4 text-center">
+                <p className="text-sm text-amber-600">
+                  {getValidationMessages()[0]}
+                </p>
+              </div>
+            )}
+
+            {/* Debug info (remover depois) */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="mt-4 text-xs text-muted-foreground text-center">
+                Cliente: {clienteId || 'não selecionado'} |
+                Natureza: {naturezaOperacao || 'não preenchida'} |
+                Pode avançar: {canAdvance() ? 'Sim' : 'Não'}
+              </div>
+            )}
           </CardContent>
         </Card>
       </form>

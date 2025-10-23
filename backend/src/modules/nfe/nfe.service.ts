@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { EmitenteService } from '../emitente/emitente.service';
+import { MatrizFiscalService } from '../matriz-fiscal/matriz-fiscal.service';
 import { NfeIntegrationService } from './nfe-integration.service';
 import { FileStorageService } from '../../common/services/file-storage.service';
 import { CreateNfeDto } from './dto/create-nfe.dto';
@@ -11,6 +12,7 @@ export class NfeService {
   constructor(
     private prisma: PrismaService,
     private emitenteService: EmitenteService,
+    private matrizFiscalService: MatrizFiscalService,
     private nfeIntegrationService: NfeIntegrationService,
     private fileStorageService: FileStorageService,
   ) {}
@@ -567,6 +569,110 @@ export class NfeService {
       valorIPI,
       valorPIS,
       valorCOFINS,
+    };
+  }
+
+  /**
+   * Buscar matriz fiscal aplicável para um item da NFe
+   * Este método será usado pelo frontend ao adicionar itens
+   */
+  async buscarMatrizFiscalParaItem(params: {
+    naturezaOperacaoId: string;
+    clienteId: string;
+    produtoId: string;
+  }) {
+    // Buscar emitente ativo
+    const emitente = await this.emitenteService.getEmitenteAtivo();
+
+    // Buscar cliente com estado
+    const cliente = await this.prisma.cliente.findUnique({
+      where: { id: params.clienteId },
+      include: { estado: true },
+    });
+
+    if (!cliente) {
+      throw new NotFoundException('Cliente não encontrado');
+    }
+
+    // Buscar produto com NCM
+    const produto = await this.prisma.produto.findUnique({
+      where: { id: params.produtoId },
+      include: { ncm: true },
+    });
+
+    if (!produto) {
+      throw new NotFoundException('Produto não encontrado');
+    }
+
+    // Buscar estado do emitente
+    const estadoEmitente = await this.prisma.estado.findUnique({
+      where: { id: emitente.estadoId },
+    });
+
+    if (!estadoEmitente) {
+      throw new NotFoundException('Estado do emitente não encontrado');
+    }
+
+    // Determinar tipo de cliente
+    let tipoCliente: 'contribuinte' | 'nao_contribuinte' | 'exterior';
+    if (cliente.indicadorIE === 1) {
+      tipoCliente = 'contribuinte';
+    } else if (cliente.indicadorIE === 2 || cliente.indicadorIE === 9) {
+      tipoCliente = 'nao_contribuinte';
+    } else {
+      tipoCliente = 'nao_contribuinte'; // Default
+    }
+
+    // Buscar matriz fiscal aplicável
+    const matriz = await this.matrizFiscalService.buscarMatrizAplicavel({
+      naturezaOperacaoId: params.naturezaOperacaoId,
+      ufOrigem: estadoEmitente.uf,
+      ufDestino: cliente.estado.uf,
+      tipoCliente,
+      ncmId: produto.ncmId,
+      regimeTributario: emitente.regimeTributario,
+    });
+
+    // Se não encontrou matriz, retornar dados do produto como fallback
+    if (!matriz) {
+      return {
+        fonte: 'produto',
+        cfopId: produto.cfopId,
+        icmsCstId: produto.icmsCstId,
+        icmsCsosnId: produto.icmsCsosnId,
+        icmsAliquota: produto.icmsAliquota,
+        icmsReducao: produto.icmsReducao,
+        pisCstId: produto.pisCstId,
+        pisAliquota: produto.pisAliquota,
+        cofinsCstId: produto.cofinsCstId,
+        cofinsAliquota: produto.cofinsAliquota,
+        ipiCstId: produto.ipiCstId,
+        ipiAliquota: produto.ipiAliquota,
+      };
+    }
+
+    // Retornar dados da matriz
+    return {
+      fonte: 'matriz',
+      matrizId: matriz.id,
+      matrizCodigo: matriz.codigo,
+      matrizDescricao: matriz.descricao,
+      cfopId: matriz.cfopId,
+      icmsCstId: matriz.icmsCstId,
+      icmsCsosnId: matriz.icmsCsosnId,
+      icmsAliquota: matriz.icmsAliquota,
+      icmsReducao: matriz.icmsReducao,
+      icmsModalidadeBC: matriz.icmsModalidadeBC,
+      icmsStAliquota: matriz.icmsStAliquota,
+      icmsStReducao: matriz.icmsStReducao,
+      icmsStModalidadeBC: matriz.icmsStModalidadeBC,
+      icmsStMva: matriz.icmsStMva,
+      pisCstId: matriz.pisCstId,
+      pisAliquota: matriz.pisAliquota,
+      cofinsCstId: matriz.cofinsCstId,
+      cofinsAliquota: matriz.cofinsAliquota,
+      ipiCstId: matriz.ipiCstId,
+      ipiAliquota: matriz.ipiAliquota,
     };
   }
 }

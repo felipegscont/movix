@@ -40,6 +40,7 @@ import { ProdutoService } from "@/lib/services/produto.service"
 import { AuxiliarService, type NCM, type CEST } from "@/lib/services/auxiliar.service"
 import { FornecedorService, type Fornecedor } from "@/lib/services/fornecedor.service"
 import { NCMCombobox } from "@/components/shared/combobox/ncm-combobox"
+import { CFOPCombobox } from "@/components/shared/combobox/cfop-combobox"
 import { CSTCombobox } from "@/components/shared/combobox/cst-combobox"
 import { CSOSNCombobox } from "@/components/shared/combobox/csosn-combobox"
 
@@ -58,6 +59,7 @@ const produtoFormSchema = z.object({
   descricaoComplementar: z.string().optional(),
   ncmId: z.string().min(1, "NCM é obrigatório"),
   cestId: z.string().optional(),
+  cfopId: z.string().optional(),
   unidade: z.string().min(1, "Unidade é obrigatória"),
   unidadeTributavel: z.string().optional(),
   valorUnitario: z.number().min(0, "Valor deve ser positivo"),
@@ -121,6 +123,7 @@ export function ProdutoFormDialog({
       descricaoComplementar: "",
       ncmId: "",
       cestId: "",
+      cfopId: "",
       unidade: "UN",
       unidadeTributavel: "",
       valorUnitario: 0,
@@ -216,6 +219,7 @@ export function ProdutoFormDialog({
         descricaoComplementar: produto.descricaoComplementar || "",
         ncmId: produto.ncmId,
         cestId: produto.cestId || "",
+        cfopId: produto.cfopId || "",
         unidade: produto.unidade,
         unidadeTributavel: produto.unidadeTributavel || "",
         valorUnitario: produto.valorUnitario,
@@ -480,6 +484,27 @@ export function ProdutoFormDialog({
                               </Select>
                               <FormDescription>
                                 Código Especificador da ST
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="cfopId"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>CFOP Padrão</FormLabel>
+                              <CFOPCombobox
+                                value={field.value}
+                                onValueChange={field.onChange}
+                                placeholder="Selecione o CFOP (opcional)"
+                              />
+                              <FormDescription>
+                                CFOP padrão para este produto (pode ser sobrescrito pela natureza da operação)
                               </FormDescription>
                               <FormMessage />
                             </FormItem>

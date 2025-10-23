@@ -22,6 +22,10 @@ export class CreateNaturezaOperacaoDto {
   @IsString()
   cfopExteriorId?: string; // CFOP para operações com exterior
 
+  @IsOptional()
+  @IsBoolean()
+  sobrescreverCfopProduto?: boolean; // Se true, usa CFOP da natureza ao invés do produto
+
   // Configurações da NFe
   @IsInt()
   @Min(0)

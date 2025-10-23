@@ -1,10 +1,11 @@
 "use client"
 
 import * as React from "react"
-import { Check, ChevronsUpDown } from "lucide-react"
+import { Check, ChevronsUpDown, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { searchInFields } from "@/lib/utils/search"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
   Command,
   CommandEmpty,
@@ -27,24 +28,27 @@ interface NaturezaOperacao {
 }
 
 interface NaturezaOperacaoComboboxProps {
-  value?: string
-  onValueChange: (value: string | undefined) => void
+  value?: string // Descrição da natureza
+  onValueChange: (value: string | undefined, naturezaId?: string) => void
   placeholder?: string
   disabled?: boolean
   className?: string
+  allowCustom?: boolean // Permitir texto livre
 }
 
 export function NaturezaOperacaoCombobox({
   value,
   onValueChange,
-  placeholder = "Selecione a natureza de operação",
+  placeholder = "Selecione ou digite a natureza de operação",
   disabled = false,
   className,
+  allowCustom = true,
 }: NaturezaOperacaoComboboxProps) {
   const [open, setOpen] = React.useState(false)
   const [naturezas, setNaturezas] = React.useState<NaturezaOperacao[]>([])
   const [loading, setLoading] = React.useState(false)
   const [search, setSearch] = React.useState("")
+  const [customMode, setCustomMode] = React.useState(false)
 
   React.useEffect(() => {
     loadNaturezas()
@@ -53,8 +57,8 @@ export function NaturezaOperacaoCombobox({
   const loadNaturezas = async () => {
     try {
       setLoading(true)
-      const response = await NaturezaOperacaoService.getAll({ page: 1, limit: 1000 })
-      setNaturezas(response.data)
+      const response = await NaturezaOperacaoService.getAtivas()
+      setNaturezas(response)
     } catch (error) {
       console.error("Erro ao carregar naturezas:", error)
     } finally {
@@ -69,7 +73,31 @@ export function NaturezaOperacaoCombobox({
     )
   }, [naturezas, search])
 
-  const selectedNatureza = naturezas.find((n) => n.id === value)
+  // Encontrar natureza selecionada pela descrição
+  const selectedNatureza = naturezas.find((n) => n.descricao === value)
+
+  // Modo customizado: input livre
+  if (customMode && allowCustom) {
+    return (
+      <div className="flex gap-2">
+        <Input
+          value={value || ""}
+          onChange={(e) => onValueChange(e.target.value)}
+          placeholder="Digite a natureza de operação"
+          disabled={disabled}
+          className={className}
+        />
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          onClick={() => setCustomMode(false)}
+        >
+          <ChevronsUpDown className="h-4 w-4" />
+        </Button>
+      </div>
+    )
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -81,9 +109,9 @@ export function NaturezaOperacaoCombobox({
           className={cn("w-full justify-between", className)}
           disabled={disabled || loading}
         >
-          {selectedNatureza ? (
+          {value ? (
             <span className="truncate">
-              {selectedNatureza.codigo} - {selectedNatureza.descricao}
+              {selectedNatureza ? `${selectedNatureza.codigo} - ` : ""}{value}
             </span>
           ) : (
             <span className="text-muted-foreground">{placeholder}</span>
@@ -91,7 +119,7 @@ export function NaturezaOperacaoCombobox({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[400px] p-0" align="start">
+      <PopoverContent className="w-[500px] p-0" align="start">
         <Command shouldFilter={false}>
           <CommandInput
             placeholder="Buscar por código ou descrição..."
@@ -100,7 +128,29 @@ export function NaturezaOperacaoCombobox({
           />
           <CommandList>
             <CommandEmpty>
-              {loading ? "Carregando..." : "Nenhuma natureza encontrada"}
+              {loading ? (
+                "Carregando..."
+              ) : (
+                <div className="p-4 text-center">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Nenhuma natureza encontrada
+                  </p>
+                  {allowCustom && search && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        onValueChange(search)
+                        setOpen(false)
+                      }}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Usar "{search}"
+                    </Button>
+                  )}
+                </div>
+              )}
             </CommandEmpty>
             <CommandGroup>
               {filteredNaturezas.map((natureza) => (
@@ -108,22 +158,36 @@ export function NaturezaOperacaoCombobox({
                   key={natureza.id}
                   value={natureza.id}
                   onSelect={() => {
-                    onValueChange(natureza.id === value ? undefined : natureza.id)
+                    onValueChange(natureza.descricao, natureza.id)
                     setOpen(false)
                   }}
                 >
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      value === natureza.id ? "opacity-100" : "opacity-0"
+                      value === natureza.descricao ? "opacity-100" : "opacity-0"
                     )}
                   />
                   <div className="flex flex-col">
-                    <span className="font-medium">{natureza.codigo} - {natureza.descricao}</span>
+                    <span className="font-medium">{natureza.codigo}</span>
+                    <span className="text-sm text-muted-foreground">{natureza.descricao}</span>
                   </div>
                 </CommandItem>
               ))}
             </CommandGroup>
+            {allowCustom && (
+              <CommandGroup>
+                <CommandItem
+                  onSelect={() => {
+                    setCustomMode(true)
+                    setOpen(false)
+                  }}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  <span>Digitar texto personalizado</span>
+                </CommandItem>
+              </CommandGroup>
+            )}
           </CommandList>
         </Command>
       </PopoverContent>

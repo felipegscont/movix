@@ -83,7 +83,7 @@ export const nfeItemSchema = z.object({
   
   // Classificação Fiscal
   ncmId: z.string().min(1, "NCM é obrigatório"),
-  cfopId: z.string().min(1, "CFOP é obrigatório"),
+  cfopId: z.string().optional(), // CFOP será preenchido automaticamente ou pelo usuário
   
   // Unidades e Quantidades Comerciais
   unidadeComercial: z.string().min(1, "Unidade comercial é obrigatória"),
@@ -156,9 +156,10 @@ export const nfeFormSchema = z.object({
   emitenteId: z.string().optional(), // Será preenchido automaticamente no backend
   clienteId: z.string().min(1, "Cliente é obrigatório"),
   serie: z.coerce.number().int().min(1).default(1),
-  
-  // Natureza da Operação
-  naturezaOperacao: z.string().min(1, "Natureza da operação é obrigatória"),
+
+  // Natureza da Operação (pode ser ID da natureza cadastrada ou texto livre)
+  naturezaOperacao: z.string().min(3, "Natureza da operação é obrigatória (mínimo 3 caracteres)"),
+  naturezaOperacaoId: z.string().optional(), // ID da natureza selecionada (se houver)
   
   // Tipo de Operação
   tipoOperacao: z.coerce.number().int().min(0).max(1).default(1), // 0=Entrada, 1=Saída

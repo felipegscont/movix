@@ -66,9 +66,10 @@ model NCM {
   updatedAt   DateTime @updatedAt
 
   // Relacionamentos
-  produtos    Produto[]
-  nfeItens    NfeItem[]
-  cests       CEST[]
+  produtos        Produto[]
+  nfeItens        NfeItem[]
+  cests           CEST[]
+  matrizesFiscais MatrizFiscal[]
 
   @@map("ncm")
 }
@@ -86,6 +87,8 @@ model CFOP {
 
   // Relacionamentos
   nfeItens              NfeItem[]
+  produtos              Produto[]
+  matrizesFiscais       MatrizFiscal[]
   naturezasDentroEstado NaturezaOperacao[] @relation("NaturezaCFOPDentro")
   naturezasForaEstado   NaturezaOperacao[] @relation("NaturezaCFOPFora")
   naturezasExterior     NaturezaOperacao[] @relation("NaturezaCFOPExterior")
@@ -120,8 +123,9 @@ model CSOSN {
   updatedAt   DateTime @updatedAt
 
   // Relacionamentos
-  nfeItensICMS NfeItemICMS[]
-  produtos     Produto[]
+  nfeItensICMS    NfeItemICMS[]
+  produtos        Produto[]
+  matrizesFiscais MatrizFiscal[]
 
   @@map("csosn")
 }
@@ -147,6 +151,12 @@ model CST {
   produtosPIS    Produto[] @relation("ProdutoPISCST")
   produtosCOFINS Produto[] @relation("ProdutoCOFINSCST")
   produtosIPI    Produto[] @relation("ProdutoIPICST")
+
+  // Relacionamentos com Matrizes Fiscais
+  matrizesICMS   MatrizFiscal[] @relation("MatrizICMSCST")
+  matrizesIPI    MatrizFiscal[] @relation("MatrizIPICST")
+  matrizesPIS    MatrizFiscal[] @relation("MatrizPISCST")
+  matrizesCOFINS MatrizFiscal[] @relation("MatrizCOFINSCST")
 
   @@unique([codigo, tipo])
   @@map("cst")
@@ -326,6 +336,7 @@ model Produto {
   // Classificação Fiscal
   ncmId                 String
   cestId                String?
+  cfopId                String? // CFOP padrão do produto
 
   // Unidades
   unidade               String @db.VarChar(10) // UN, KG, M, etc
@@ -378,6 +389,7 @@ model Produto {
   // Relacionamentos
   ncm                   NCM @relation(fields: [ncmId], references: [id])
   cest                  CEST? @relation(fields: [cestId], references: [id])
+  cfop                  CFOP? @relation(fields: [cfopId], references: [id])
   fornecedor            Fornecedor? @relation(fields: [fornecedorId], references: [id])
   nfeItens              NfeItem[]
 
@@ -401,6 +413,7 @@ model NaturezaOperacao {
   cfopDentroEstadoId    String? // CFOP para operações dentro do estado
   cfopForaEstadoId      String? // CFOP para operações fora do estado
   cfopExteriorId        String? // CFOP para operações com exterior
+  sobrescreverCfopProduto Boolean @default(false) // Se true, usa CFOP da natureza ao invés do produto
 
   // Configurações da NFe
   tipoOperacao          Int @default(1) // 0=Entrada, 1=Saída
@@ -419,6 +432,7 @@ model NaturezaOperacao {
   cfopDentroEstado      CFOP? @relation("NaturezaCFOPDentro", fields: [cfopDentroEstadoId], references: [id])
   cfopForaEstado        CFOP? @relation("NaturezaCFOPFora", fields: [cfopForaEstadoId], references: [id])
   cfopExterior          CFOP? @relation("NaturezaCFOPExterior", fields: [cfopExteriorId], references: [id])
+  matrizesFiscais       MatrizFiscal[]
 
   @@map("naturezas_operacao")
 }
@@ -850,4 +864,96 @@ model LogAcao {
   erro                  String? @db.Text
 
   @@map("log_acoes")
+}
+
+// ================================
+// MATRIZ FISCAL
+// ================================
+
+// Matriz Fiscal - Define automaticamente impostos baseado em regras
+model MatrizFiscal {
+  id                    String   @id @default(cuid())
+
+  // Identificação
+  codigo                String   @unique @db.VarChar(50)
+  descricao             String   @db.VarChar(255)
+
+  // ===== CONDIÇÕES (Quando aplicar) =====
+
+  // Natureza da Operação (opcional - null = qualquer)
+  naturezaOperacaoId    String?
+
+  // UF Origem/Destino (opcional - null = qualquer)
+  ufOrigem              String?  @db.VarChar(2) // "SP", "RJ", etc
+  ufDestino             String?  @db.VarChar(2) // "SP", "RJ", etc
+
+  // Tipo de Cliente (opcional - null = qualquer)
+  // Valores: "contribuinte", "nao_contribuinte", "exterior"
+  tipoCliente           String?  @db.VarChar(20)
+
+  // NCM (opcional - null = qualquer)
+  ncmId                 String?
+
+  // Regime Tributário (opcional - null = qualquer)
+  // 1=Simples Nacional, 2=Lucro Presumido, 3=Lucro Real
+  regimeTributario      Int?
+
+  // ===== RESULTADO (O que aplicar) =====
+
+  // CFOP
+  cfopId                String
+
+  // ICMS
+  icmsCstId             String?
+  icmsCsosnId           String?
+  icmsAliquota          Decimal? @db.Decimal(5, 2)
+  icmsReducao           Decimal? @db.Decimal(5, 2)
+  icmsModalidadeBC      Int?     // 0=Margem, 1=Pauta, 2=Máximo, 3=Operação
+
+  // ICMS ST (Substituição Tributária)
+  icmsStAliquota        Decimal? @db.Decimal(5, 2)
+  icmsStReducao         Decimal? @db.Decimal(5, 2)
+  icmsStModalidadeBC    Int?
+  icmsStMva             Decimal? @db.Decimal(5, 2) // Margem Valor Agregado
+
+  // IPI
+  ipiCstId              String?
+  ipiAliquota           Decimal? @db.Decimal(5, 2)
+
+  // PIS
+  pisCstId              String?
+  pisAliquota           Decimal? @db.Decimal(5, 4)
+
+  // COFINS
+  cofinsCstId           String?
+  cofinsAliquota        Decimal? @db.Decimal(5, 4)
+
+  // ===== CONTROLE =====
+
+  // Prioridade (quanto maior, mais específica)
+  // Exemplo: Regra específica (SP->RJ) = 100, Regra genérica (qualquer) = 10
+  prioridade            Int      @default(0)
+
+  // Ativo/Inativo
+  ativo                 Boolean  @default(true)
+
+  // Auditoria
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  // ===== RELACIONAMENTOS =====
+
+  naturezaOperacao      NaturezaOperacao? @relation(fields: [naturezaOperacaoId], references: [id])
+  cfop                  CFOP              @relation(fields: [cfopId], references: [id])
+  ncm                   NCM?              @relation(fields: [ncmId], references: [id])
+  icmsCst               CST?              @relation("MatrizICMSCST", fields: [icmsCstId], references: [id])
+  icmsCsosn             CSOSN?            @relation(fields: [icmsCsosnId], references: [id])
+  ipiCst                CST?              @relation("MatrizIPICST", fields: [ipiCstId], references: [id])
+  pisCst                CST?              @relation("MatrizPISCST", fields: [pisCstId], references: [id])
+  cofinsCst             CST?              @relation("MatrizCOFINSCST", fields: [cofinsCstId], references: [id])
+
+  @@map("matrizes_fiscais")
+  @@index([naturezaOperacaoId, ufOrigem, ufDestino, tipoCliente])
+  @@index([prioridade])
+  @@index([ativo])
 }

@@ -27,6 +27,10 @@ export class CreateProdutoDto {
   @IsString()
   cestId?: string;
 
+  @IsOptional()
+  @IsString()
+  cfopId?: string;
+
   // Unidades
   @IsString()
   @Length(1, 10)

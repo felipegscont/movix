@@ -113,6 +113,10 @@ const data = {
           title: "Naturezas de Operação",
           url: "/configuracoes/naturezas-operacao",
         },
+        {
+          title: "Matrizes Fiscais",
+          url: "/matrizes-fiscais",
+        },
       ],
     },
   ],

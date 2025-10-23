@@ -186,24 +186,69 @@ export function useNfeForm({ nfeId, onSuccess }: UseNfeFormProps = {}): UseNfeFo
   }
 
   const handleSubmit = async (data: NfeFormData) => {
+    console.log('🚀 handleSubmit chamado!')
+    console.log('📋 Dados recebidos:', data)
+
     try {
       setLoading(true)
+      console.log('⏳ Loading setado para true')
+
+      // Validar dados antes de enviar
+      if (!data.clienteId) {
+        throw new Error('Cliente é obrigatório')
+      }
+
+      if (!data.itens || data.itens.length === 0) {
+        throw new Error('Adicione pelo menos um item')
+      }
+
+      console.log('✅ Validações passaram')
 
       if (nfeId) {
         // Atualizar NFe existente
+        console.log('🔄 Atualizando NFe:', nfeId)
         await NfeService.update(nfeId, data)
         toast.success("NFe atualizada com sucesso!")
+
+        console.log('➡️ Redirecionando para /nfes em 1 segundo...')
+        setTimeout(() => {
+          console.log('🔀 Executando router.push("/nfes")')
+          router.push('/nfes')
+        }, 1000)
       } else {
         // Criar nova NFe
-        await NfeService.create(data)
+        console.log('➕ Criando nova NFe')
+        const result = await NfeService.create(data)
+        console.log('✅ NFe criada:', result)
         toast.success("NFe criada com sucesso!")
+
+        console.log('➡️ Redirecionando para /nfes em 1 segundo...')
+        setTimeout(() => {
+          console.log('🔀 Executando router.push("/nfes")')
+          router.push('/nfes')
+        }, 1000)
       }
 
-      onSuccess?.()
+      // Chamar callback se fornecido
+      if (onSuccess) {
+        console.log('📞 Chamando callback onSuccess')
+        onSuccess()
+      }
     } catch (error: any) {
-      console.error("Erro ao salvar NFe:", error)
-      toast.error(error.message || "Erro ao salvar NFe")
+      console.error("❌ Erro ao salvar NFe:", error)
+
+      // Extrair mensagem de erro mais específica
+      let errorMessage = "Erro ao salvar NFe"
+
+      if (error.message) {
+        errorMessage = error.message
+      } else if (typeof error === 'string') {
+        errorMessage = error
+      }
+
+      toast.error(errorMessage)
     } finally {
+      console.log('🏁 Finalizando, setando loading para false')
       setLoading(false)
     }
   }
@@ -289,7 +334,29 @@ export function useNfeForm({ nfeId, onSuccess }: UseNfeFormProps = {}): UseNfeFo
     loadingEmitente,
     emitente,
     nfe,
-    handleSubmit: form.handleSubmit(handleSubmit),
+    handleSubmit: form.handleSubmit(
+      handleSubmit,
+      (errors) => {
+        console.error('❌ Erros de validação do formulário:', errors)
+
+        // Mostrar erros detalhados
+        Object.keys(errors).forEach(key => {
+          const error = errors[key]
+          console.error(`Campo "${key}":`, error)
+
+          // Se for array (como itens), mostrar cada item
+          if (Array.isArray(error)) {
+            error.forEach((itemError, index) => {
+              if (itemError) {
+                console.error(`  Item ${index}:`, itemError)
+              }
+            })
+          }
+        })
+
+        toast.error('Há erros no formulário. Verifique os campos.')
+      }
+    ),
     loadNfe,
     resetForm,
     addItem,

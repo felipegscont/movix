@@ -159,4 +159,21 @@ export class NfeController {
 
     return this.nfeService.getFileInfo(nfe.chave);
   }
+
+  /**
+   * POST /nfes/buscar-matriz-fiscal
+   * Buscar matriz fiscal aplicável para um item da NFe
+   */
+  @Post('buscar-matriz-fiscal')
+  @HttpCode(HttpStatus.OK)
+  buscarMatrizFiscal(
+    @Body()
+    params: {
+      naturezaOperacaoId: string;
+      clienteId: string;
+      produtoId: string;
+    },
+  ) {
+    return this.nfeService.buscarMatrizFiscalParaItem(params);
+  }
 }

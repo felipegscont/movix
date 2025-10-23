@@ -48,11 +48,23 @@ export class ProdutoService {
       }
     }
 
+    // Verificar CFOP se fornecido
+    if (createProdutoDto.cfopId) {
+      const cfop = await this.prisma.cFOP.findUnique({
+        where: { id: createProdutoDto.cfopId },
+      });
+
+      if (!cfop) {
+        throw new NotFoundException('CFOP não encontrado');
+      }
+    }
+
     return this.prisma.produto.create({
       data: createProdutoDto,
       include: {
         ncm: true,
         cest: true,
+        cfop: true,
         fornecedor: true,
         icmsCst: true,
         icmsCsosn: true,
@@ -85,6 +97,7 @@ export class ProdutoService {
         include: {
           ncm: true,
           cest: true,
+          cfop: true,
           fornecedor: {
             select: {
               id: true,

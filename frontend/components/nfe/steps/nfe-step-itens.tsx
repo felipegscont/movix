@@ -1,27 +1,46 @@
 "use client"
 
+import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { IconPlus, IconEdit, IconTrash, IconAlertCircle } from "@tabler/icons-react"
+import { IconEdit, IconTrash, IconAlertCircle } from "@tabler/icons-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
 import { type NfeItemFormData } from "@/lib/schemas/nfe.schema"
 import { UseFormReturn } from "react-hook-form"
+import { NfeAddItemQuick } from "../nfe-add-item-quick"
+import { NfeEditItemDialog } from "../nfe-edit-item-dialog"
 
 interface NfeStepItensProps {
   form: UseFormReturn<any>
   addItem: (item: NfeItemFormData) => void
   updateItem: (index: number, item: NfeItemFormData) => void
   removeItem: (index: number) => void
+  emitenteRegime?: number
 }
 
-export function NfeStepItens({ form, addItem, updateItem, removeItem }: NfeStepItensProps) {
+export function NfeStepItens({ form, addItem, updateItem, removeItem, emitenteRegime }: NfeStepItensProps) {
   const itens = form.watch('itens') || []
+  const [editingIndex, setEditingIndex] = useState<number | null>(null)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
 
   const handleRemoveItem = (index: number) => {
     if (confirm('Deseja realmente remover este item?')) {
       removeItem(index)
+    }
+  }
+
+  const handleEditItem = (index: number) => {
+    setEditingIndex(index)
+    setEditDialogOpen(true)
+  }
+
+  const handleSaveEdit = (item: NfeItemFormData) => {
+    if (editingIndex !== null) {
+      updateItem(editingIndex, item)
+      setEditingIndex(null)
     }
   }
 
@@ -37,22 +56,22 @@ export function NfeStepItens({ form, addItem, updateItem, removeItem }: NfeStepI
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>Itens da NFe</CardTitle>
-            <CardDescription>
-              Adicione os produtos e serviços da nota fiscal
-            </CardDescription>
-          </div>
-          <Button type="button" onClick={() => alert('Funcionalidade de adicionar item em desenvolvimento')}>
-            <IconPlus className="h-4 w-4 mr-2" />
-            Adicionar Item
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <div className="space-y-6">
+      {/* Formulário de adicionar item */}
+      <NfeAddItemQuick
+        onAddItem={addItem}
+        emitenteRegime={emitenteRegime}
+      />
+
+      {/* Lista de itens */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Itens Adicionados ({itens.length})</CardTitle>
+          <CardDescription>
+            Lista de produtos e serviços da nota fiscal
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
         {form.formState.errors.itens && (
           <Alert variant="destructive">
             <IconAlertCircle className="h-4 w-4" />
@@ -99,17 +118,19 @@ export function NfeStepItens({ form, addItem, updateItem, removeItem }: NfeStepI
                         )}
                       </TableCell>
                       <TableCell>
-                        <div>{item.descricao}</div>
-                        <div className="flex gap-1 mt-1">
-                          {item.pis?.cstId && (
-                            <Badge variant="outline" className="text-xs">
-                              PIS: {item.pis.cstId}
-                            </Badge>
+                        <div className="font-medium">{item.descricao}</div>
+                        <div className="flex gap-2 mt-1 text-xs text-muted-foreground">
+                          {item.icms && (
+                            <span>ICMS: {item.icms.aliquota}%</span>
                           )}
-                          {item.cofins?.cstId && (
-                            <Badge variant="outline" className="text-xs">
-                              COFINS: {item.cofins.cstId}
-                            </Badge>
+                          {item.ipi && item.ipi.aliquota > 0 && (
+                            <span>IPI: {item.ipi.aliquota}%</span>
+                          )}
+                          {item.pis && (
+                            <span>PIS: {item.pis.aliquota}%</span>
+                          )}
+                          {item.cofins && (
+                            <span>COFINS: {item.cofins.aliquota}%</span>
                           )}
                         </div>
                       </TableCell>
@@ -131,7 +152,8 @@ export function NfeStepItens({ form, addItem, updateItem, removeItem }: NfeStepI
                             type="button"
                             variant="ghost"
                             size="icon"
-                            onClick={() => alert('Funcionalidade de editar item em desenvolvimento')}
+                            onClick={() => handleEditItem(index)}
+                            title="Editar item"
                           >
                             <IconEdit className="h-4 w-4" />
                           </Button>
@@ -140,6 +162,7 @@ export function NfeStepItens({ form, addItem, updateItem, removeItem }: NfeStepI
                             variant="ghost"
                             size="icon"
                             onClick={() => handleRemoveItem(index)}
+                            title="Remover item"
                           >
                             <IconTrash className="h-4 w-4" />
                           </Button>
@@ -166,7 +189,16 @@ export function NfeStepItens({ form, addItem, updateItem, removeItem }: NfeStepI
             </div>
           </>
         )}
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      {/* Dialog de edição */}
+      <NfeEditItemDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        item={editingIndex !== null ? itens[editingIndex] : null}
+        onSave={handleSaveEdit}
+      />
+    </div>
   )
 }
