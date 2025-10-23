@@ -38,7 +38,6 @@ import {
 import { IconDotsVertical, IconEdit, IconTrash, IconLoader2, IconSearch } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { MatrizFiscalService, type MatrizFiscal } from "@/lib/services/matriz-fiscal.service"
-import { MatrizFiscalFormDialog } from "./matriz-fiscal-form-dialog"
 
 export function MatrizFiscalDataTable() {
   const router = useRouter()
@@ -54,9 +53,7 @@ export function MatrizFiscalDataTable() {
   const [filterUfDestino, setFilterUfDestino] = useState<string>("")
   const [filterAtivo, setFilterAtivo] = useState<string>("all")
 
-  // Dialog de edição
-  const [editDialogOpen, setEditDialogOpen] = useState(false)
-  const [editingMatriz, setEditingMatriz] = useState<MatrizFiscal | null>(null)
+
 
   const columns: ColumnDef<MatrizFiscal>[] = [
     {
@@ -211,8 +208,7 @@ export function MatrizFiscalDataTable() {
   }, [currentPage, filterUfOrigem, filterUfDestino, filterAtivo])
 
   const handleEdit = (matriz: MatrizFiscal) => {
-    setEditingMatriz(matriz)
-    setEditDialogOpen(true)
+    router.push(`/matrizes-fiscais/${matriz.id}`)
   }
 
   const handleDelete = async (id: string) => {
@@ -230,11 +226,7 @@ export function MatrizFiscalDataTable() {
     }
   }
 
-  const handleEditSuccess = () => {
-    setEditDialogOpen(false)
-    setEditingMatriz(null)
-    loadData()
-  }
+
 
   if (loading) {
     return (
@@ -259,28 +251,34 @@ export function MatrizFiscalDataTable() {
             />
           </div>
         </div>
-        <Select value={filterUfOrigem} onValueChange={setFilterUfOrigem}>
+        <Select value={filterUfOrigem || "todas"} onValueChange={(value) => setFilterUfOrigem(value === "todas" ? "" : value)}>
           <SelectTrigger className="w-[150px]">
             <SelectValue placeholder="UF Origem" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todas</SelectItem>
+            <SelectItem value="todas">Todas</SelectItem>
             <SelectItem value="SP">SP</SelectItem>
             <SelectItem value="RJ">RJ</SelectItem>
             <SelectItem value="MG">MG</SelectItem>
-            {/* Adicionar mais UFs conforme necessário */}
+            <SelectItem value="ES">ES</SelectItem>
+            <SelectItem value="PR">PR</SelectItem>
+            <SelectItem value="SC">SC</SelectItem>
+            <SelectItem value="RS">RS</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={filterUfDestino} onValueChange={setFilterUfDestino}>
+        <Select value={filterUfDestino || "todas"} onValueChange={(value) => setFilterUfDestino(value === "todas" ? "" : value)}>
           <SelectTrigger className="w-[150px]">
             <SelectValue placeholder="UF Destino" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todas</SelectItem>
+            <SelectItem value="todas">Todas</SelectItem>
             <SelectItem value="SP">SP</SelectItem>
             <SelectItem value="RJ">RJ</SelectItem>
             <SelectItem value="MG">MG</SelectItem>
-            {/* Adicionar mais UFs conforme necessário */}
+            <SelectItem value="ES">ES</SelectItem>
+            <SelectItem value="PR">PR</SelectItem>
+            <SelectItem value="SC">SC</SelectItem>
+            <SelectItem value="RS">RS</SelectItem>
           </SelectContent>
         </Select>
         <Select value={filterAtivo} onValueChange={setFilterAtivo}>
@@ -370,13 +368,7 @@ export function MatrizFiscalDataTable() {
         </div>
       </div>
 
-      {/* Dialog de Edição */}
-      <MatrizFiscalFormDialog
-        open={editDialogOpen}
-        onOpenChange={setEditDialogOpen}
-        matriz={editingMatriz}
-        onSuccess={handleEditSuccess}
-      />
+
     </div>
   )
 }

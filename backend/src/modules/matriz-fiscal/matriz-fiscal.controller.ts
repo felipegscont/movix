@@ -35,22 +35,32 @@ export class MatrizFiscalController {
   findAll(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number,
+    @Query('codigo') codigo?: string, // Filtrar por tipo de imposto (ICMS, PIS, etc)
+    @Query('seAplicaA') seAplicaA?: string, // Filtrar por produtos/servicos
+    @Query('modeloNF') modeloNF?: string, // Filtrar por modelo NF
+    @Query('produtoId') produtoId?: string, // Filtrar por produto
+    @Query('ufDestino') ufDestino?: string, // Filtrar por UF
+    @Query('ativo') ativo?: string,
+    // Filtros legados
     @Query('naturezaOperacaoId') naturezaOperacaoId?: string,
     @Query('ufOrigem') ufOrigem?: string,
-    @Query('ufDestino') ufDestino?: string,
     @Query('tipoCliente') tipoCliente?: string,
-    @Query('ativo') ativo?: string,
   ) {
     const skip = (page - 1) * limit;
 
     return this.matrizFiscalService.findAll({
       skip,
       take: limit,
+      codigo,
+      seAplicaA,
+      modeloNF,
+      produtoId,
+      ufDestino,
+      ativo: ativo === 'true' ? true : ativo === 'false' ? false : undefined,
+      // Filtros legados
       naturezaOperacaoId,
       ufOrigem,
-      ufDestino,
       tipoCliente,
-      ativo: ativo === 'true' ? true : ativo === 'false' ? false : undefined,
     });
   }
 

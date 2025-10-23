@@ -11,22 +11,27 @@ export class MatrizFiscalService {
    * Criar nova matriz fiscal
    */
   async create(createMatrizFiscalDto: CreateMatrizFiscalDto) {
-    // Verificar se código já existe
-    const existente = await this.prisma.matrizFiscal.findUnique({
-      where: { codigo: createMatrizFiscalDto.codigo },
+    // Verificar se combinação código + descrição já existe
+    const existente = await this.prisma.matrizFiscal.findFirst({
+      where: {
+        codigo: createMatrizFiscalDto.codigo,
+        descricao: createMatrizFiscalDto.descricao,
+      },
     });
 
     if (existente) {
-      throw new BadRequestException('Código de matriz fiscal já existe');
+      throw new BadRequestException('Matriz fiscal com este nome já existe para este imposto');
     }
 
-    // Verificar CFOP
-    const cfop = await this.prisma.cFOP.findUnique({
-      where: { id: createMatrizFiscalDto.cfopId },
-    });
+    // Verificar CFOP se fornecido
+    if (createMatrizFiscalDto.cfopId) {
+      const cfop = await this.prisma.cFOP.findUnique({
+        where: { id: createMatrizFiscalDto.cfopId },
+      });
 
-    if (!cfop) {
-      throw new NotFoundException('CFOP não encontrado');
+      if (!cfop) {
+        throw new NotFoundException('CFOP não encontrado');
+      }
     }
 
     // Verificar Natureza de Operação se fornecida
@@ -51,13 +56,26 @@ export class MatrizFiscalService {
       }
     }
 
+    // Converter datas se fornecidas
+    const data: any = { ...createMatrizFiscalDto };
+    if (data.dataInicio) {
+      data.dataInicio = new Date(data.dataInicio);
+    }
+    if (data.dataFim) {
+      data.dataFim = new Date(data.dataFim);
+    }
+
     // Criar matriz fiscal
     return this.prisma.matrizFiscal.create({
-      data: createMatrizFiscalDto,
+      data,
       include: {
-        naturezaOperacao: true,
+        produto: true,
         cfop: true,
         ncm: true,
+        cst: true,
+        csosn: true,
+        // Campos legados
+        naturezaOperacao: true,
         icmsCst: true,
         icmsCsosn: true,
         ipiCst: true,
@@ -73,16 +91,47 @@ export class MatrizFiscalService {
   async findAll(params?: {
     skip?: number;
     take?: number;
+    codigo?: string; // Filtrar por tipo de imposto
+    seAplicaA?: string; // Filtrar por produtos/servicos
+    modeloNF?: string; // Filtrar por modelo NF
+    produtoId?: string; // Filtrar por produto
+    ufDestino?: string; // Filtrar por UF
+    ativo?: boolean;
+    // Campos legados
     naturezaOperacaoId?: string;
     ufOrigem?: string;
-    ufDestino?: string;
     tipoCliente?: string;
-    ativo?: boolean;
   }) {
     const { skip = 0, take = 50, ...filters } = params || {};
 
     const where: any = {};
 
+    // Novos filtros
+    if (filters.codigo) {
+      where.codigo = filters.codigo;
+    }
+
+    if (filters.seAplicaA) {
+      where.seAplicaA = filters.seAplicaA;
+    }
+
+    if (filters.modeloNF) {
+      where.modeloNF = filters.modeloNF;
+    }
+
+    if (filters.produtoId) {
+      where.produtoId = filters.produtoId;
+    }
+
+    if (filters.ufDestino) {
+      where.ufDestino = filters.ufDestino;
+    }
+
+    if (filters.ativo !== undefined) {
+      where.ativo = filters.ativo;
+    }
+
+    // Filtros legados
     if (filters.naturezaOperacaoId) {
       where.naturezaOperacaoId = filters.naturezaOperacaoId;
     }
@@ -91,16 +140,8 @@ export class MatrizFiscalService {
       where.ufOrigem = filters.ufOrigem;
     }
 
-    if (filters.ufDestino) {
-      where.ufDestino = filters.ufDestino;
-    }
-
     if (filters.tipoCliente) {
       where.tipoCliente = filters.tipoCliente;
-    }
-
-    if (filters.ativo !== undefined) {
-      where.ativo = filters.ativo;
     }
 
     const [matrizes, total] = await Promise.all([
@@ -109,16 +150,23 @@ export class MatrizFiscalService {
         skip,
         take,
         include: {
-          naturezaOperacao: true,
+          produto: true,
           cfop: true,
           ncm: true,
+          cst: true,
+          csosn: true,
+          // Campos legados
+          naturezaOperacao: true,
           icmsCst: true,
           icmsCsosn: true,
           ipiCst: true,
           pisCst: true,
           cofinsCst: true,
         },
-        orderBy: { prioridade: 'desc' },
+        orderBy: [
+          { prioridade: 'desc' },
+          { createdAt: 'desc' },
+        ],
       }),
       this.prisma.matrizFiscal.count({ where }),
     ]);
@@ -139,9 +187,13 @@ export class MatrizFiscalService {
     const matriz = await this.prisma.matrizFiscal.findUnique({
       where: { id },
       include: {
-        naturezaOperacao: true,
+        produto: true,
         cfop: true,
         ncm: true,
+        cst: true,
+        csosn: true,
+        // Campos legados
+        naturezaOperacao: true,
         icmsCst: true,
         icmsCsosn: true,
         ipiCst: true,
@@ -164,28 +216,43 @@ export class MatrizFiscalService {
     // Verificar se existe
     await this.findOne(id);
 
-    // Verificar código duplicado se estiver sendo alterado
-    if (updateMatrizFiscalDto.codigo) {
+    // Verificar código + descrição duplicado se estiver sendo alterado
+    if (updateMatrizFiscalDto.codigo || updateMatrizFiscalDto.descricao) {
+      const matriz = await this.findOne(id);
       const existente = await this.prisma.matrizFiscal.findFirst({
         where: {
-          codigo: updateMatrizFiscalDto.codigo,
+          codigo: updateMatrizFiscalDto.codigo || matriz.codigo,
+          descricao: updateMatrizFiscalDto.descricao || matriz.descricao,
           id: { not: id },
         },
       });
 
       if (existente) {
-        throw new BadRequestException('Código de matriz fiscal já existe');
+        throw new BadRequestException('Matriz fiscal com este nome já existe para este imposto');
       }
+    }
+
+    // Converter datas se fornecidas
+    const data: any = { ...updateMatrizFiscalDto };
+    if (data.dataInicio) {
+      data.dataInicio = new Date(data.dataInicio);
+    }
+    if (data.dataFim) {
+      data.dataFim = new Date(data.dataFim);
     }
 
     // Atualizar
     return this.prisma.matrizFiscal.update({
       where: { id },
-      data: updateMatrizFiscalDto,
+      data,
       include: {
-        naturezaOperacao: true,
+        produto: true,
         cfop: true,
         ncm: true,
+        cst: true,
+        csosn: true,
+        // Campos legados
+        naturezaOperacao: true,
         icmsCst: true,
         icmsCsosn: true,
         ipiCst: true,

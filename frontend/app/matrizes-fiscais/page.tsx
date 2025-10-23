@@ -1,46 +1,35 @@
 "use client"
 
-import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { SidebarLayout } from "@/components/layout/sidebar-layout"
+import { AppSidebar } from "@/components/layout/app-sidebar"
+import { SidebarInset } from "@/components/ui/sidebar"
+import { SiteHeader } from "@/components/layout/site-header"
 import { MatrizFiscalDataTable } from "@/components/cadastros/matriz-fiscal/matriz-fiscal-data-table"
-import { MatrizFiscalFormDialog } from "@/components/cadastros/matriz-fiscal/matriz-fiscal-form-dialog"
 import { Button } from "@/components/ui/button"
 import { IconPlus } from "@tabler/icons-react"
 
 export default function MatrizesFiscaisPage() {
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [refreshKey, setRefreshKey] = useState(0)
-
-  const handleSuccess = () => {
-    setDialogOpen(false)
-    setRefreshKey(prev => prev + 1) // Força refresh da tabela
-  }
+  const router = useRouter()
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Matrizes Fiscais</h1>
-          <p className="text-muted-foreground">
-            Gerencie as regras de tributação automática
-          </p>
+    <SidebarLayout>
+      <AppSidebar variant="inset" />
+      <SidebarInset>
+        <SiteHeader />
+        <div className="flex flex-1 flex-col gap-4 p-4">
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-semibold">Matrizes Fiscais</h1>
+            <Button size="sm" onClick={() => router.push("/matrizes-fiscais/nova")}>
+              <IconPlus className="mr-2 h-4 w-4" />
+              Nova
+            </Button>
+          </div>
+
+          <MatrizFiscalDataTable />
         </div>
-        <Button onClick={() => setDialogOpen(true)}>
-          <IconPlus className="mr-2 h-4 w-4" />
-          Nova Matriz
-        </Button>
-      </div>
-
-      {/* DataTable */}
-      <MatrizFiscalDataTable key={refreshKey} />
-
-      {/* Dialog de Cadastro */}
-      <MatrizFiscalFormDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        onSuccess={handleSuccess}
-      />
-    </div>
+      </SidebarInset>
+    </SidebarLayout>
   )
 }
 

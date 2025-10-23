@@ -2,7 +2,7 @@ import { Controller, Get, Query, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { IbgeCacheService } from '../external-apis/services/ibge-cache.service';
 
-@Controller()
+@Controller('auxiliares')
 export class AuxiliaresController {
   private readonly logger = new Logger(AuxiliaresController.name);
 

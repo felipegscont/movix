@@ -167,3 +167,53 @@ export const MODALIDADE_FRETE_OPTIONS: StaticOption[] = [
   { value: 9, label: "9 - Sem frete" },
 ]
 
+// Opções para Matriz Fiscal
+export const IMPOSTO_TAXA_OPTIONS: StaticOption[] = [
+  { value: "ICMS", label: "ICMS", description: "Imposto sobre Circulação de Mercadorias e Serviços" },
+  { value: "PIS", label: "PIS", description: "Programa de Integração Social" },
+  { value: "COFINS", label: "COFINS", description: "Contribuição para Financiamento da Seguridade Social" },
+  { value: "IPI", label: "IPI", description: "Imposto sobre Produtos Industrializados" },
+  { value: "ISSQN", label: "ISSQN", description: "Imposto sobre Serviços de Qualquer Natureza" },
+]
+
+export const SE_APLICA_A_OPTIONS: StaticOption[] = [
+  { value: "produtos", label: "Produtos/Mercadorias" },
+  { value: "servicos", label: "Serviços" },
+]
+
+export const MODELO_NF_OPTIONS: StaticOption[] = [
+  { value: "nfe", label: "NF-e", description: "Nota Fiscal Eletrônica" },
+  { value: "nfce", label: "NFC-e", description: "Nota Fiscal de Consumidor Eletrônica" },
+  { value: "cte", label: "CT-e", description: "Conhecimento de Transporte Eletrônico" },
+  { value: "nfse", label: "NFS-e", description: "Nota Fiscal de Serviço Eletrônica" },
+]
+
+export const REGIME_FISCAL_OPTIONS: StaticOption[] = [
+  { value: 1, label: "Simples Nacional" },
+  { value: 2, label: "Lucro Presumido" },
+  { value: 3, label: "Lucro Real" },
+]
+
+export const TIPO_ITEM_OPTIONS: StaticOption[] = [
+  { value: "todos", label: "Todos" },
+  { value: "produto", label: "Produto" },
+  { value: "servico", label: "Serviço" },
+]
+
+export const INDICADOR_IE_OPTIONS: StaticOption[] = [
+  { value: 1, label: "1 - Contribuinte ICMS" },
+  { value: 2, label: "2 - Contribuinte isento" },
+  { value: 9, label: "9 - Não Contribuinte" },
+]
+
+export const TIPO_PESSOA_OPTIONS: StaticOption[] = [
+  { value: "FISICA", label: "Pessoa Física" },
+  { value: "JURIDICA", label: "Pessoa Jurídica" },
+]
+
+export const TIPO_CLIENTE_OPTIONS: StaticOption[] = [
+  { value: "contribuinte", label: "Contribuinte ICMS" },
+  { value: "nao_contribuinte", label: "Não Contribuinte" },
+  { value: "exterior", label: "Exterior" },
+]
+

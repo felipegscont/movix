@@ -125,6 +125,7 @@ model CSOSN {
   // Relacionamentos
   nfeItensICMS    NfeItemICMS[]
   produtos        Produto[]
+  matrizes        MatrizFiscal[] @relation("MatrizCSOSN")
   matrizesFiscais MatrizFiscal[]
 
   @@map("csosn")
@@ -153,6 +154,7 @@ model CST {
   produtosIPI    Produto[] @relation("ProdutoIPICST")
 
   // Relacionamentos com Matrizes Fiscais
+  matrizes       MatrizFiscal[] @relation("MatrizCST")
   matrizesICMS   MatrizFiscal[] @relation("MatrizICMSCST")
   matrizesIPI    MatrizFiscal[] @relation("MatrizIPICST")
   matrizesPIS    MatrizFiscal[] @relation("MatrizPISCST")
@@ -392,6 +394,7 @@ model Produto {
   cfop                  CFOP? @relation(fields: [cfopId], references: [id])
   fornecedor            Fornecedor? @relation(fields: [fornecedorId], references: [id])
   nfeItens              NfeItem[]
+  matrizesFiscais       MatrizFiscal[] // Matrizes que filtram por produto específico
 
   // Relacionamentos de impostos
   icmsCst               CST? @relation("ProdutoICMSCST", fields: [icmsCstId], references: [id])
@@ -874,57 +877,70 @@ model LogAcao {
 model MatrizFiscal {
   id                    String   @id @default(cuid())
 
-  // Identificação
-  codigo                String   @unique @db.VarChar(50)
+  // ===== IDENTIFICAÇÃO =====
+
+  // Tipo de Imposto: ICMS, PIS, COFINS, IPI, ISSQN
+  codigo                String   @db.VarChar(20) // ICMS, PIS, COFINS, IPI, ISSQN
   descricao             String   @db.VarChar(255)
 
-  // ===== CONDIÇÕES (Quando aplicar) =====
+  // Se aplica a: produtos, servicos
+  seAplicaA             String?  @db.VarChar(20) // "produtos", "servicos"
 
-  // Natureza da Operação (opcional - null = qualquer)
-  naturezaOperacaoId    String?
-
-  // UF Origem/Destino (opcional - null = qualquer)
-  ufOrigem              String?  @db.VarChar(2) // "SP", "RJ", etc
-  ufDestino             String?  @db.VarChar(2) // "SP", "RJ", etc
-
-  // Tipo de Cliente (opcional - null = qualquer)
-  // Valores: "contribuinte", "nao_contribuinte", "exterior"
-  tipoCliente           String?  @db.VarChar(20)
-
-  // NCM (opcional - null = qualquer)
-  ncmId                 String?
+  // Modelo da NF: nfe, nfce, cte, nfse
+  modeloNF              String?  @db.VarChar(10) // "nfe", "nfce", "cte", "nfse"
 
   // Regime Tributário (opcional - null = qualquer)
   // 1=Simples Nacional, 2=Lucro Presumido, 3=Lucro Real
   regimeTributario      Int?
 
-  // ===== RESULTADO (O que aplicar) =====
+  // ===== CONDIÇÕES/FILTROS (Quando aplicar) =====
 
-  // CFOP
-  cfopId                String
+  // UF Destino (opcional - null = qualquer)
+  ufDestino             String?  @db.VarChar(2) // "SP", "RJ", etc
 
-  // ICMS
+  // Produto/Serviço específico (opcional - null = qualquer)
+  produtoId             String?
+
+  // CFOP (opcional - null = qualquer)
+  cfopId                String?
+
+  // Tipo de Item (opcional - null = qualquer)
+  // Valores: "produto", "servico"
+  tipoItem              String?  @db.VarChar(20)
+
+  // NCM (opcional - null = qualquer)
+  ncmId                 String?
+
+  // Campos legados (manter compatibilidade)
+  naturezaOperacaoId    String?
+  ufOrigem              String?  @db.VarChar(2)
+  tipoCliente           String?  @db.VarChar(20)
+
+  // ===== DEFINIÇÕES FISCAIS (O que aplicar) =====
+
+  // CST/CSOSN (dinâmico baseado no imposto)
+  cstId                 String? // CST genérico (ICMS, PIS, COFINS, IPI)
+  csosnId               String? // CSOSN (apenas ICMS Simples Nacional)
+
+  // Alíquotas
+  aliquota              Decimal? @db.Decimal(5, 4) // Alíquota principal
+  reducaoBC             Decimal? @db.Decimal(5, 2) // Redução BC (ICMS)
+  fcp                   Decimal? @db.Decimal(5, 4) // FCP (ICMS)
+
+  // Campos legados (manter compatibilidade com sistema antigo)
   icmsCstId             String?
   icmsCsosnId           String?
   icmsAliquota          Decimal? @db.Decimal(5, 2)
   icmsReducao           Decimal? @db.Decimal(5, 2)
-  icmsModalidadeBC      Int?     // 0=Margem, 1=Pauta, 2=Máximo, 3=Operação
-
-  // ICMS ST (Substituição Tributária)
+  icmsModalidadeBC      Int?
   icmsStAliquota        Decimal? @db.Decimal(5, 2)
   icmsStReducao         Decimal? @db.Decimal(5, 2)
   icmsStModalidadeBC    Int?
-  icmsStMva             Decimal? @db.Decimal(5, 2) // Margem Valor Agregado
-
-  // IPI
+  icmsStMva             Decimal? @db.Decimal(5, 2)
   ipiCstId              String?
   ipiAliquota           Decimal? @db.Decimal(5, 2)
-
-  // PIS
   pisCstId              String?
   pisAliquota           Decimal? @db.Decimal(5, 4)
-
-  // COFINS
   cofinsCstId           String?
   cofinsAliquota        Decimal? @db.Decimal(5, 4)
 
@@ -933,6 +949,10 @@ model MatrizFiscal {
   // Prioridade (quanto maior, mais específica)
   // Exemplo: Regra específica (SP->RJ) = 100, Regra genérica (qualquer) = 10
   prioridade            Int      @default(0)
+
+  // Vigência
+  dataInicio            DateTime? // Data início da vigência
+  dataFim               DateTime? // Data fim da vigência (null = sem fim)
 
   // Ativo/Inativo
   ativo                 Boolean  @default(true)
@@ -943,9 +963,14 @@ model MatrizFiscal {
 
   // ===== RELACIONAMENTOS =====
 
-  naturezaOperacao      NaturezaOperacao? @relation(fields: [naturezaOperacaoId], references: [id])
-  cfop                  CFOP              @relation(fields: [cfopId], references: [id])
+  produto               Produto?          @relation(fields: [produtoId], references: [id])
+  cfop                  CFOP?             @relation(fields: [cfopId], references: [id])
   ncm                   NCM?              @relation(fields: [ncmId], references: [id])
+  cst                   CST?              @relation("MatrizCST", fields: [cstId], references: [id])
+  csosn                 CSOSN?            @relation("MatrizCSOSN", fields: [csosnId], references: [id])
+
+  // Relacionamentos legados
+  naturezaOperacao      NaturezaOperacao? @relation(fields: [naturezaOperacaoId], references: [id])
   icmsCst               CST?              @relation("MatrizICMSCST", fields: [icmsCstId], references: [id])
   icmsCsosn             CSOSN?            @relation(fields: [icmsCsosnId], references: [id])
   ipiCst                CST?              @relation("MatrizIPICST", fields: [ipiCstId], references: [id])
@@ -953,7 +978,11 @@ model MatrizFiscal {
   cofinsCst             CST?              @relation("MatrizCOFINSCST", fields: [cofinsCstId], references: [id])
 
   @@map("matrizes_fiscais")
-  @@index([naturezaOperacaoId, ufOrigem, ufDestino, tipoCliente])
+  @@unique([codigo, descricao]) // Combinação única de imposto + nome
+  @@index([codigo, seAplicaA, modeloNF])
+  @@index([produtoId, cfopId, ncmId])
+  @@index([ufDestino, tipoItem])
   @@index([prioridade])
   @@index([ativo])
+  @@index([dataInicio, dataFim])
 }

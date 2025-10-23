@@ -409,18 +409,270 @@ export function MatrizFiscalFormDialog({
                 </div>
               </TabsContent>
 
-              {/* Tab: Impostos - será implementado na próxima parte */}
-              <TabsContent value="impostos" className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  Impostos serão implementados...
-                </p>
+              {/* Tab: Impostos */}
+              <TabsContent value="impostos" className="space-y-6">
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Configure os impostos que serão aplicados automaticamente
+                  </p>
+
+                  {/* ICMS */}
+                  <div className="space-y-4 border rounded-lg p-4">
+                    <h3 className="font-semibold">ICMS</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="icmsCstId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>CST ICMS</FormLabel>
+                            <CSTCombobox
+                              value={field.value}
+                              onValueChange={field.onChange}
+                              tipo="ICMS"
+                            />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="icmsCsosnId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>CSOSN (Simples Nacional)</FormLabel>
+                            <CSOSNCombobox
+                              value={field.value}
+                              onValueChange={field.onChange}
+                            />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="icmsAliquota"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Alíquota ICMS (%)</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                placeholder="18.00"
+                                {...field}
+                                onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="icmsReducao"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Redução BC ICMS (%)</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                placeholder="0.00"
+                                {...field}
+                                onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  {/* PIS */}
+                  <div className="space-y-4 border rounded-lg p-4">
+                    <h3 className="font-semibold">PIS</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="pisCstId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>CST PIS</FormLabel>
+                            <CSTCombobox
+                              value={field.value}
+                              onValueChange={field.onChange}
+                              tipo="PIS"
+                            />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="pisAliquota"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Alíquota PIS (%)</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                placeholder="1.65"
+                                {...field}
+                                onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  {/* COFINS */}
+                  <div className="space-y-4 border rounded-lg p-4">
+                    <h3 className="font-semibold">COFINS</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="cofinsCstId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>CST COFINS</FormLabel>
+                            <CSTCombobox
+                              value={field.value}
+                              onValueChange={field.onChange}
+                              tipo="COFINS"
+                            />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="cofinsAliquota"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Alíquota COFINS (%)</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                placeholder="7.60"
+                                {...field}
+                                onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  {/* IPI */}
+                  <div className="space-y-4 border rounded-lg p-4">
+                    <h3 className="font-semibold">IPI</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="ipiCstId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>CST IPI</FormLabel>
+                            <CSTCombobox
+                              value={field.value}
+                              onValueChange={field.onChange}
+                              tipo="IPI"
+                            />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="ipiAliquota"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Alíquota IPI (%)</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                placeholder="0.00"
+                                {...field}
+                                onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                </div>
               </TabsContent>
 
-              {/* Tab: Controle - será implementado na próxima parte */}
+              {/* Tab: Controle */}
               <TabsContent value="controle" className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  Controle será implementado...
-                </p>
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Configure a prioridade e status da matriz fiscal
+                  </p>
+
+                  <FormField
+                    control={form.control}
+                    name="prioridade"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Prioridade</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="0"
+                            {...field}
+                            onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : 0)}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Quanto maior o número, maior a prioridade. Matrizes mais específicas devem ter prioridade maior.
+                          <br />
+                          Exemplo: Regra específica (SP→RJ) = 500, Regra genérica = 100
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="ativo"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-base">Ativo</FormLabel>
+                          <FormDescription>
+                            Apenas matrizes ativas serão aplicadas automaticamente
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </TabsContent>
             </Tabs>
 
