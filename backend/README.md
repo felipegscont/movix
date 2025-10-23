@@ -4,6 +4,20 @@
 
 Backend NestJS completo com Prisma ORM, PostgreSQL, Redis e DbGate, pronto para desenvolvimento do frontend.
 
+## 🎯 **Inicialização Automática**
+
+O sistema agora possui **inicialização automática do banco de dados**:
+
+- ✅ **Migrations** executadas automaticamente
+- ✅ **Seed** executado automaticamente na primeira inicialização
+- ✅ **CFOP, CST, CSOSN** populados automaticamente (~600 registros)
+- ✅ **Estados e Municípios** populados sob demanda via API IBGE
+- ⚠️ **NCMs** devem ser cadastrados conforme necessidade do negócio
+
+**Basta iniciar o sistema e tudo será configurado automaticamente!**
+
+📖 Para mais detalhes, consulte: [`INICIALIZACAO.md`](./INICIALIZACAO.md)
+
 ## 🏗️ **Arquitetura Implementada**
 
 ### **Stack Tecnológica:**
@@ -63,23 +77,18 @@ docker-compose ps
 
 ### **Desenvolvimento:**
 ```bash
-# Setup completo (primeira vez)
-cd backend && ./setup.sh
-
-# Iniciar aplicação
-npm run start:dev
+# Iniciar aplicação (primeira vez - tudo automático!)
+cd backend
+docker-compose up -d  # Inicia PostgreSQL, Redis, DbGate
+npm install           # Instala dependências
+npm run start:dev     # Inicia aplicação + migrations + seed automático
 
 # Prisma Studio (interface visual)
 npm run prisma:studio
 
-# Gerar cliente Prisma
-npm run prisma:generate
-
-# Executar migrações
-npm run prisma:migrate
-
-# Popular banco com dados
-npm run prisma:seed
+# Comandos manuais (se necessário)
+npm run db:setup      # Setup completo (migrations + seed)
+npm run prisma:seed   # Apenas seed
 ```
 
 ## 📊 **Endpoints Disponíveis**

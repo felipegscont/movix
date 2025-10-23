@@ -54,9 +54,11 @@ model Municipio {
 }
 
 // Nomenclatura Comum do Mercosul
+// NCM completo: 8 dígitos (6 SH + 2 Mercosul)
+// Exemplo: 85011010
 model NCM {
   id          String @id @default(cuid())
-  codigo      String @unique @db.VarChar(8) // Ex: 44152000
+  codigo      String @unique @db.VarChar(8) // Ex: 85011010 (8 dígitos completos)
   descricao   String @db.Text
   unidade     String? @db.VarChar(10)
   ativo       Boolean @default(true)

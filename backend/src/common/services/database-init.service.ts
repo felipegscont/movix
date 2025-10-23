@@ -54,10 +54,11 @@ export class DatabaseInitService implements OnModuleInit {
         this.logger.log('   • CFOP: ~500 códigos');
         this.logger.log('   • CST: ~90 códigos (ICMS, PIS, COFINS, IPI)');
         this.logger.log('   • CSOSN: 10 códigos');
+        this.logger.log('   • NCM: ~10.500 códigos (8 dígitos - Tabela oficial Siscomex/Receita Federal)');
         this.logger.log('   • Naturezas de Operação: 2 padrões');
         this.logger.log('');
         this.logger.log('ℹ️  Estados e Municípios serão populados automaticamente via API IBGE');
-        this.logger.log('ℹ️  NCMs devem ser cadastrados conforme necessidade do negócio');
+        this.logger.log('ℹ️  NCMs atualizados da tabela oficial do Siscomex (Receita Federal)');
         this.logger.log('');
       } else {
         this.logger.log('✅ Banco de dados já inicializado');
@@ -105,38 +106,55 @@ export class DatabaseInitService implements OnModuleInit {
 
   private async runMigrations(): Promise<void> {
     try {
+      const backendPath = path.join(process.cwd());
+
       const { stdout, stderr } = await execAsync('npx prisma migrate deploy', {
-        cwd: process.cwd(),
+        cwd: backendPath,
+        env: { ...process.env },
       });
-      
+
       if (stdout) {
-        this.logger.debug(stdout);
+        const lines = stdout.split('\n').filter(line => line.trim());
+        lines.forEach(line => this.logger.log(`   ${line}`));
       }
-      
+
       if (stderr && !stderr.includes('already applied')) {
         this.logger.warn(stderr);
       }
+
+      this.logger.log('   ✓ Migrations aplicadas');
     } catch (error) {
-      this.logger.error('Erro ao executar migrations:', error.message);
+      this.logger.error('   ✗ Erro ao executar migrations:', error.message);
       throw error;
     }
   }
 
   private async runSeed(): Promise<void> {
     try {
+      const backendPath = path.join(process.cwd());
+
       const { stdout, stderr } = await execAsync('npm run prisma:seed', {
-        cwd: process.cwd(),
+        cwd: backendPath,
+        env: { ...process.env },
+        timeout: 60000, // 60 segundos timeout
       });
-      
+
       if (stdout) {
-        this.logger.debug(stdout);
+        const lines = stdout.split('\n').filter(line => line.trim());
+        lines.forEach(line => {
+          if (line.includes('✅') || line.includes('🌱') || line.includes('🔢') || line.includes('📋')) {
+            this.logger.log(`   ${line}`);
+          }
+        });
       }
-      
-      if (stderr) {
+
+      if (stderr && !stderr.includes('DeprecationWarning')) {
         this.logger.warn(stderr);
       }
+
+      this.logger.log('   ✓ Seed executado com sucesso');
     } catch (error) {
-      this.logger.error('Erro ao executar seed:', error.message);
+      this.logger.error('   ✗ Erro ao executar seed:', error.message);
       throw error;
     }
   }

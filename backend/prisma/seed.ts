@@ -49,7 +49,7 @@ async function seedNaturezas() {
 async function main() {
   console.log('🌱 Seed iniciado');
 
-  console.log('🔢 Tabelas Fiscais (CFOP, CST, CSOSN)');
+  console.log('🔢 Tabelas Fiscais (CFOP, CST, CSOSN, NCM)');
   await seedFiscalTables(prisma);
 
   console.log('📋 Naturezas de Operação');
@@ -57,8 +57,15 @@ async function main() {
 
   console.log('✅ Seed concluído');
   console.log('');
+  console.log('📊 Dados populados:');
+  console.log('   • CFOP: ~500 códigos');
+  console.log('   • CST: ~90 códigos (ICMS, PIS, COFINS, IPI)');
+  console.log('   • CSOSN: 10 códigos');
+  console.log('   • NCM: ~10.500 códigos (8 dígitos - Tabela completa Siscomex)');
+  console.log('   • Naturezas de Operação: 2 padrões');
+  console.log('');
   console.log('ℹ️  Estados e Municípios são populados automaticamente via API IBGE');
-  console.log('ℹ️  NCMs devem ser cadastrados conforme necessidade do negócio');
+  console.log('ℹ️  NCMs atualizados da tabela oficial do Siscomex (Receita Federal)');
 }
 
 main()
