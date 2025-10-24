@@ -54,5 +54,36 @@ export class NaturezaOperacaoController {
   remove(@Param('id') id: string) {
     return this.naturezaOperacaoService.remove(id);
   }
+
+  // Endpoints para gerenciar CFOPs
+  @Post(':id/cfops')
+  addCFOP(
+    @Param('id') id: string,
+    @Body() body: { cfopId: string; padrao?: boolean },
+  ) {
+    return this.naturezaOperacaoService.addCFOP(id, body.cfopId, body.padrao || false);
+  }
+
+  @Delete(':id/cfops/:cfopId')
+  removeCFOP(
+    @Param('id') id: string,
+    @Param('cfopId') cfopId: string,
+  ) {
+    return this.naturezaOperacaoService.removeCFOP(id, cfopId);
+  }
+
+  @Patch(':id/cfops/:cfopId')
+  updateCFOPPadrao(
+    @Param('id') id: string,
+    @Param('cfopId') cfopId: string,
+    @Body() body: { padrao: boolean },
+  ) {
+    return this.naturezaOperacaoService.updateCFOPPadrao(id, cfopId, body.padrao);
+  }
+
+  @Get(':id/cfops')
+  getCFOPs(@Param('id') id: string) {
+    return this.naturezaOperacaoService.getCFOPs(id);
+  }
 }
 
