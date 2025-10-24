@@ -3,8 +3,8 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
 import { EmitenteService } from "@/lib/services/emitente.service"
-import { AuxiliarService } from "@/lib/services/auxiliar.service"
-import { emitenteSchema, type EmitenteFormData, type Estado, type Municipio } from "../types"
+import { AuxiliarService, type Estado, type Municipio } from "@/lib/services/auxiliar.service"
+import { emitenteSchema, type EmitenteFormData } from "../types"
 
 export function useEmitenteForm() {
   const [loading, setLoading] = useState(false)

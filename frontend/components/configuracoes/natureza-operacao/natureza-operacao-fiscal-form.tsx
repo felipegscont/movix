@@ -101,10 +101,10 @@ export function NaturezaOperacaoFiscalForm({
       }
 
       if (naturezaId) {
-        await NaturezaOperacaoService.update(naturezaId, payload)
+        await NaturezaOperacaoService.update(naturezaId, payload as any)
         toast.success("Natureza de operação atualizada com sucesso!")
       } else {
-        await NaturezaOperacaoService.create(payload)
+        await NaturezaOperacaoService.create(payload as any)
         toast.success("Natureza de operação criada com sucesso!")
       }
 

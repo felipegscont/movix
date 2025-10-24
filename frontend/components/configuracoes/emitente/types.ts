@@ -22,7 +22,7 @@ export const emitenteSchema = z.object({
   ambienteNfe: z.number().min(1).max(2),
   serieNfe: z.number().min(1).max(999),
   proximoNumeroNfe: z.number().min(1),
-  ativo: z.boolean().default(true),
+  ativo: z.boolean().optional(),
 })
 
 export type EmitenteFormData = z.infer<typeof emitenteSchema>

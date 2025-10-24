@@ -2,8 +2,8 @@ import { useState } from "react"
 import { UseFormReturn } from "react-hook-form"
 import { toast } from "sonner"
 import { ExternalApiService } from "@/lib/services/external-api.service"
-import { AuxiliarService } from "@/lib/services/auxiliar.service"
-import type { EmitenteFormData, Estado } from "../types"
+import { AuxiliarService, type Estado } from "@/lib/services/auxiliar.service"
+import type { EmitenteFormData } from "../types"
 
 export function useCnpjLookup(
   form: UseFormReturn<EmitenteFormData>,

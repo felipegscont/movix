@@ -219,7 +219,7 @@ export function NfeAddItemQuick({ onAddItem, emitenteRegime = 1 }: NfeAddItemQui
             <Label>Produto *</Label>
             <ProdutoCombobox
               value={produtoId}
-              onValueChange={setProdutoId}
+              onValueChange={(value) => setProdutoId(value || "")}
               disabled={loading}
             />
           </div>

@@ -44,7 +44,7 @@ export function NfeEditItemDialog({
   const [loading, setLoading] = useState(false)
 
   const form = useForm<NfeItemFormData>({
-    resolver: zodResolver(nfeItemSchema),
+    resolver: zodResolver(nfeItemSchema) as any,
     defaultValues: item || undefined,
   })
 

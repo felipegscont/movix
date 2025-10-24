@@ -50,8 +50,8 @@ export function EmitenteFormRefactored() {
     uploadCertificado,
   } = useCertificado()
 
-  const { loading: loadingCnpj, consultarCnpj, formatCNPJ } = useCnpjLookup(form, estados, loadMunicipios)
-  const { loading: loadingCep, consultarCep, formatCEP } = useCepLookup(form, estados, loadMunicipios)
+  const { loading: loadingCnpj, consultarCnpj, formatCNPJ } = useCnpjLookup(form as any, estados, loadMunicipios)
+  const { loading: loadingCep, consultarCep, formatCEP } = useCepLookup(form as any, estados, loadMunicipios)
 
   const [accordionValue, setAccordionValue] = useState<string[]>(
     emitenteId ? ["basicos", "endereco", "contato", "nfe"] : ["basicos"]
@@ -112,7 +112,7 @@ export function EmitenteFormRefactored() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit as any)} className="space-y-6">
         {/* Alerta informativo */}
         {!emitenteId && (
           <Alert>
@@ -151,7 +151,7 @@ export function EmitenteFormRefactored() {
             <AccordionContent className="px-6 pb-6">
               <div className="space-y-4 pt-4">
                 <DadosBasicosSection
-                  form={form}
+                  form={form as any}
                   loadingCnpj={loadingCnpj}
                   onConsultarCnpj={consultarCnpj}
                   formatCNPJ={formatCNPJ}
@@ -179,9 +179,9 @@ export function EmitenteFormRefactored() {
             <AccordionContent className="px-6 pb-6">
               <div className="space-y-4 pt-4">
                 <EnderecoSection
-                  form={form}
-                  estados={estados}
-                  municipios={municipios}
+                  form={form as any}
+                  estados={estados as any}
+                  municipios={municipios as any}
                   loadingEstados={loadingEstados}
                   loadingMunicipios={loadingMunicipios}
                   loadingCep={loadingCep}
@@ -210,7 +210,7 @@ export function EmitenteFormRefactored() {
             </AccordionTrigger>
             <AccordionContent className="px-6 pb-6">
               <div className="space-y-4 pt-4">
-                <ContatoSection form={form} />
+                <ContatoSection form={form as any} />
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -233,7 +233,7 @@ export function EmitenteFormRefactored() {
             </AccordionTrigger>
             <AccordionContent className="px-6 pb-6">
               <div className="space-y-4 pt-4">
-                <NfeSection form={form} />
+                <NfeSection form={form as any} />
                 <CertificadoSection
                   certificado={certificado}
                   certificadoInfoFromDb={certificadoInfoFromDb}
