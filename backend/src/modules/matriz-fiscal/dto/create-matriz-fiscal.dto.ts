@@ -68,6 +68,20 @@ export class CreateMatrizFiscalDto {
   @IsString()
   ncmId?: string;
 
+  // Campos legados (manter compatibilidade)
+  @IsOptional()
+  @IsString()
+  naturezaOperacaoId?: string;
+
+  @IsOptional()
+  @IsString()
+  ufOrigem?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['contribuinte', 'nao_contribuinte', 'exterior'])
+  tipoCliente?: string;
+
   // ===== DEFINIÇÕES FISCAIS (O que aplicar) =====
 
   // CST/CSOSN (dinâmico baseado no imposto)
@@ -100,6 +114,99 @@ export class CreateMatrizFiscalDto {
   @Min(0)
   @Max(100)
   fcp?: number; // FCP (ICMS)
+
+  // ===== CAMPOS LEGADOS (Compatibilidade) =====
+
+  // ICMS
+  @IsOptional()
+  @IsString()
+  icmsCstId?: string;
+
+  @IsOptional()
+  @IsString()
+  icmsCsosnId?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  @Min(0)
+  @Max(100)
+  icmsAliquota?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  @Min(0)
+  @Max(100)
+  icmsReducao?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  icmsModalidadeBC?: number;
+
+  // ICMS ST
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  @Min(0)
+  @Max(100)
+  icmsStAliquota?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  @Min(0)
+  @Max(100)
+  icmsStReducao?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  icmsStModalidadeBC?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  @Min(0)
+  @Max(100)
+  icmsStMva?: number;
+
+  // IPI
+  @IsOptional()
+  @IsString()
+  ipiCstId?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  @Min(0)
+  @Max(100)
+  ipiAliquota?: number;
+
+  // PIS
+  @IsOptional()
+  @IsString()
+  pisCstId?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  @Min(0)
+  @Max(100)
+  pisAliquota?: number;
+
+  // COFINS
+  @IsOptional()
+  @IsString()
+  cofinsCstId?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  @Min(0)
+  @Max(100)
+  cofinsAliquota?: number;
 
   // ===== CONTROLE =====
 
