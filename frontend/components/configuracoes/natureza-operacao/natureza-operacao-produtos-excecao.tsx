@@ -8,6 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { IconPlus, IconTrash, IconSearch } from "@tabler/icons-react"
 import { toast } from "sonner"
+import { truncateProductDescription, truncateCFOPDescription } from "@/lib/utils/text"
+import { CFOPCombobox } from "@/components/shared/combobox/cfop-combobox"
+import { ProdutoCombobox } from "@/components/shared/combobox/produto-combobox"
 
 interface Produto {
   id: string
@@ -38,6 +41,8 @@ export function NaturezaOperacaoProdutosExcecao({
   const [produtosExcecao, setProdutosExcecao] = useState<ProdutoExcecao[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [loading, setLoading] = useState(false)
+  const [selectedProdutoId, setSelectedProdutoId] = useState("")
+  const [selectedCfopId, setSelectedCfopId] = useState("")
 
   // Dados mockados para demonstração
   useEffect(() => {
@@ -73,6 +78,52 @@ export function NaturezaOperacaoProdutosExcecao({
     toast.info("Funcionalidade em desenvolvimento")
   }
 
+  const handleAddExcecao = async () => {
+    if (!selectedProdutoId || !selectedCfopId) {
+      toast.error("Selecione um produto e um CFOP")
+      return
+    }
+
+    try {
+      setLoading(true)
+
+      // Verificar se já existe exceção para este produto
+      const jaExiste = produtosExcecao.some(item => item.produto.id === selectedProdutoId)
+      if (jaExiste) {
+        toast.error("Este produto já possui uma exceção configurada")
+        return
+      }
+
+      // Aqui você faria a chamada para a API para buscar os dados completos
+      // Por enquanto, vou simular
+      const novoProdutoExcecao: ProdutoExcecao = {
+        id: Date.now().toString(),
+        produto: {
+          id: selectedProdutoId,
+          codigo: "NOVO",
+          descricao: "Produto selecionado",
+          unidade: "UN",
+        },
+        cfopEspecifico: {
+          id: selectedCfopId,
+          codigo: "5102",
+          descricao: "CFOP selecionado",
+        },
+      }
+
+      setProdutosExcecao(prev => [...prev, novoProdutoExcecao])
+      setSelectedProdutoId("")
+      setSelectedCfopId("")
+      toast.success("Exceção adicionada com sucesso!")
+
+    } catch (error) {
+      console.error("Erro ao adicionar exceção:", error)
+      toast.error("Erro ao adicionar exceção")
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleRemoveProduto = (id: string) => {
     setProdutosExcecao(prev => prev.filter(item => item.id !== id))
     toast.success("Produto removido das exceções!")
@@ -86,23 +137,56 @@ export function NaturezaOperacaoProdutosExcecao({
 
   return (
     <div className="space-y-6">
-      {/* Informações de exemplo */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <div className="space-y-2">
-          <div>
-            <span className="font-medium text-blue-800">CFOP</span>
-            <div className="text-sm text-blue-700">
-              [5403] Venda de mercadoria adquirida ou recebida de terceiros em operação com mercadoria sujeita ao regime de substituição tributária, na condição de contribuinte substituto
-            </div>
-          </div>
-          <div>
-            <span className="font-medium text-blue-800">Item</span>
-            <div className="text-sm text-blue-700">
-              [19540] PERFENOL COMP
-            </div>
-          </div>
+      {/* Header */}
+      <div className="space-y-4">
+        <div>
+          <h3 className="text-lg font-semibold">Produtos com Exceção</h3>
+          <p className="text-sm text-muted-foreground">
+            Configure produtos que devem usar CFOPs específicos diferentes do padrão da natureza de operação
+          </p>
         </div>
+
+        {/* Formulário para adicionar exceção */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Adicionar Exceção</CardTitle>
+            <CardDescription>
+              Selecione um produto e o CFOP específico que ele deve usar
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Produto:</label>
+                <ProdutoCombobox
+                  value={selectedProdutoId}
+                  onValueChange={(value) => setSelectedProdutoId(value || "")}
+                  placeholder="Selecione um produto..."
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">CFOP Específico:</label>
+                <CFOPCombobox
+                  value={selectedCfopId}
+                  onValueChange={(value) => setSelectedCfopId(value || "")}
+                  placeholder="Selecione um CFOP..."
+                />
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button
+                onClick={handleAddExcecao}
+                disabled={!selectedProdutoId || !selectedCfopId || loading}
+                size="sm"
+              >
+                <IconPlus className="mr-2 h-4 w-4" />
+                Adicionar Exceção
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
+
 
       {/* Seção de busca e adição */}
       <Card>
@@ -171,7 +255,9 @@ export function NaturezaOperacaoProdutosExcecao({
                       {item.produto.codigo}
                     </TableCell>
                     <TableCell>
-                      {item.produto.descricao}
+                      <div title={item.produto.descricao}>
+                        {truncateProductDescription(item.produto.descricao)}
+                      </div>
                     </TableCell>
                     <TableCell>
                       {item.produto.ncm ? (
@@ -187,8 +273,8 @@ export function NaturezaOperacaoProdutosExcecao({
                       {item.cfopEspecifico ? (
                         <div className="space-y-1">
                           <div className="font-medium">{item.cfopEspecifico.codigo}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {item.cfopEspecifico.descricao}
+                          <div className="text-xs text-muted-foreground" title={item.cfopEspecifico.descricao}>
+                            {truncateCFOPDescription(item.cfopEspecifico.descricao)}
                           </div>
                         </div>
                       ) : (

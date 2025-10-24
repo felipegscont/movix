@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { IconPlus, IconTrash } from "@tabler/icons-react"
@@ -11,6 +11,7 @@ import { toast } from "sonner"
 import { CFOPCombobox } from "@/components/shared/combobox/cfop-combobox"
 import { AuxiliarService } from "@/lib/services/auxiliar.service"
 import { NaturezaOperacaoService } from "@/lib/services/natureza-operacao.service"
+import { truncateCFOPDescription } from "@/lib/utils/text"
 
 interface CFOP {
   id: string
@@ -245,7 +246,9 @@ export function NaturezaOperacaoCFOPManager({
                       {item.cfop.codigo}
                     </TableCell>
                     <TableCell>
-                      {item.cfop.descricao}
+                      <div className="max-w-md" title={item.cfop.descricao}>
+                        {truncateCFOPDescription(item.cfop.descricao)}
+                      </div>
                     </TableCell>
                     <TableCell className="text-center">
                       <Checkbox

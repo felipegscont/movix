@@ -4,6 +4,7 @@ import * as React from "react"
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { searchInFields } from "@/lib/utils/search"
+import { truncateComboboxText } from "@/lib/utils/text"
 import { Button } from "@/components/ui/button"
 import {
   Command,
@@ -116,9 +117,7 @@ export function CFOPCombobox({
               <>
                 <span className="font-medium">{selectedCFOP.codigo}</span>
                 <span className="text-muted-foreground ml-2">
-                  {selectedCFOP.descricao.length > 40
-                    ? selectedCFOP.descricao.substring(0, 40) + "..."
-                    : selectedCFOP.descricao}
+                  {truncateComboboxText(selectedCFOP.descricao)}
                 </span>
               </>
             ) : (
@@ -155,10 +154,10 @@ export function CFOPCombobox({
                       value === cfop.id ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  <div className="flex flex-col">
+                  <div className="flex flex-col" title={cfop.descricao}>
                     <span className="font-medium">{cfop.codigo}</span>
                     <span className="text-sm text-muted-foreground truncate">
-                      {cfop.descricao}
+                      {truncateComboboxText(cfop.descricao)}
                     </span>
                   </div>
                 </CommandItem>

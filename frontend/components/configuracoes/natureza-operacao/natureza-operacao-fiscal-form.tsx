@@ -165,13 +165,11 @@ export function NaturezaOperacaoFiscalForm({
           {/* Conteúdo principal */}
           <div className="flex-1 p-6">
             {/* DADOS GERAIS - Layout compacto */}
-            <Card className="mb-6">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg font-bold">DADOS GERAIS</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Primeira linha: Código, Nome */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="mb-6 space-y-4">
+              <h3 className="text-lg font-semibold border-b pb-2">Dados Gerais</h3>
+
+              {/* Primeira linha: Código, Nome */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="codigo"
@@ -201,10 +199,10 @@ export function NaturezaOperacaoFiscalForm({
                   />
 
 
-                </div>
+              </div>
 
-                {/* Segunda linha: Tipo, Checkboxes */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+              {/* Segunda linha: Tipo, Checkboxes */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                   <FormField
                     control={form.control}
                     name="tipo"
@@ -234,16 +232,14 @@ export function NaturezaOperacaoFiscalForm({
                     control={form.control}
                     name="ativa"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                      <FormItem className="flex flex-row items-center justify-between space-y-0">
+                        <FormLabel className="text-sm font-medium">Ativa</FormLabel>
                         <FormControl>
-                          <input
-                            type="checkbox"
+                          <Switch
                             checked={field.value}
-                            onChange={field.onChange}
-                            className="h-4 w-4"
+                            onCheckedChange={field.onChange}
                           />
                         </FormControl>
-                        <FormLabel className="text-sm font-medium">Ativa?</FormLabel>
                       </FormItem>
                     )}
                   />
@@ -252,16 +248,14 @@ export function NaturezaOperacaoFiscalForm({
                     control={form.control}
                     name="dentroEstado"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                      <FormItem className="flex flex-row items-center justify-between space-y-0">
+                        <FormLabel className="text-sm font-medium">Dentro do Estado</FormLabel>
                         <FormControl>
-                          <input
-                            type="checkbox"
+                          <Switch
                             checked={field.value}
-                            onChange={field.onChange}
-                            className="h-4 w-4"
+                            onCheckedChange={field.onChange}
                           />
                         </FormControl>
-                        <FormLabel className="text-sm font-medium">Dentro do Estado?</FormLabel>
                       </FormItem>
                     )}
                   />
@@ -270,22 +264,19 @@ export function NaturezaOperacaoFiscalForm({
                     control={form.control}
                     name="propria"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                      <FormItem className="flex flex-row items-center justify-between space-y-0">
+                        <FormLabel className="text-sm font-medium">Própria</FormLabel>
                         <FormControl>
-                          <input
-                            type="checkbox"
+                          <Switch
                             checked={field.value}
-                            onChange={field.onChange}
-                            className="h-4 w-4"
+                            onCheckedChange={field.onChange}
                           />
                         </FormControl>
-                        <FormLabel className="text-sm font-medium">Própria?</FormLabel>
                       </FormItem>
                     )}
                   />
-                </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Abas */}
             <Card>
@@ -324,7 +315,7 @@ export function NaturezaOperacaoFiscalForm({
           </div>
 
           {/* Rodapé */}
-          <div className="flex items-center justify-end p-6 border-t bg-gray-50 gap-4">
+          <div className="flex items-center justify-end p-6 border-t gap-4">
             {onCancel && (
               <Button type="button" variant="outline" onClick={onCancel}>
                 Cancelar
@@ -333,10 +324,10 @@ export function NaturezaOperacaoFiscalForm({
             <Button
               type="submit"
               disabled={loading}
-              className="bg-green-600 hover:bg-green-700 px-8"
             >
-              <IconDeviceFloppy className="mr-2 h-4 w-4" />
-              SALVAR
+              {loading && <IconDeviceFloppy className="mr-2 h-4 w-4 animate-spin" />}
+              {!loading && <IconDeviceFloppy className="mr-2 h-4 w-4" />}
+              {naturezaId ? "Atualizar" : "Criar"}
             </Button>
           </div>
         </form>

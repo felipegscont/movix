@@ -63,7 +63,6 @@ import {
   IconChevronRight,
   IconChevronsLeft,
   IconChevronsRight,
-  IconSettings,
 } from "@tabler/icons-react"
 import { NaturezaOperacao, NaturezaOperacaoService } from "@/lib/services/natureza-operacao.service"
 import { toast } from "sonner"
@@ -243,12 +242,6 @@ export function NaturezaOperacaoDataTable({ onEdit }: NaturezaOperacaoDataTableP
                 <IconEdit className="mr-2 h-4 w-4" />
                 Editar
               </DropdownMenuItem>
-              {onOpenFiscalView && (
-                <DropdownMenuItem onClick={() => onOpenFiscalView(natureza.id)}>
-                  <IconSettings className="mr-2 h-4 w-4" />
-                  Interface Fiscal
-                </DropdownMenuItem>
-              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => handleDeleteClick(natureza.id)}
