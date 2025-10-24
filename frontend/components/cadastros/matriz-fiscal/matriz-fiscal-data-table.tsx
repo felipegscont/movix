@@ -49,7 +49,7 @@ export function MatrizFiscalDataTable() {
 
   // Filtros
   const [searchCodigo, setSearchCodigo] = useState("")
-  const [filterUfOrigem, setFilterUfOrigem] = useState<string>("")
+  const [filterImposto, setFilterImposto] = useState<string>("")
   const [filterUfDestino, setFilterUfDestino] = useState<string>("")
   const [filterAtivo, setFilterAtivo] = useState<string>("all")
 
@@ -58,25 +58,50 @@ export function MatrizFiscalDataTable() {
   const columns: ColumnDef<MatrizFiscal>[] = [
     {
       accessorKey: "codigo",
-      header: "Código",
+      header: "Imposto",
       cell: ({ row }) => (
-        <div className="font-medium">{row.getValue("codigo")}</div>
+        <Badge variant="default" className="font-medium">
+          {row.getValue("codigo")}
+        </Badge>
       ),
     },
     {
       accessorKey: "descricao",
       header: "Descrição",
       cell: ({ row }) => (
-        <div className="max-w-[300px] truncate">{row.getValue("descricao")}</div>
+        <div className="max-w-[200px] truncate font-medium">
+          {row.getValue("descricao")}
+        </div>
       ),
     },
     {
-      accessorKey: "ufOrigem",
-      header: "UF Origem",
+      accessorKey: "seAplicaA",
+      header: "Aplica-se a",
       cell: ({ row }) => {
-        const uf = row.getValue("ufOrigem") as string | null
-        return uf ? (
-          <Badge variant="outline">{uf}</Badge>
+        const seAplicaA = row.getValue("seAplicaA") as string | null
+        return seAplicaA ? (
+          <Badge variant="outline" className="capitalize">
+            {seAplicaA}
+          </Badge>
+        ) : (
+          <span className="text-muted-foreground text-xs">-</span>
+        )
+      },
+    },
+    {
+      accessorKey: "regimeTributario",
+      header: "Regime",
+      cell: ({ row }) => {
+        const regime = row.getValue("regimeTributario") as number | null
+        const regimeMap: Record<number, string> = {
+          1: "Simples",
+          2: "Presumido",
+          3: "Real"
+        }
+        return regime ? (
+          <Badge variant="secondary" className="text-xs">
+            {regimeMap[regime] || regime}
+          </Badge>
         ) : (
           <span className="text-muted-foreground text-xs">Qualquer</span>
         )
@@ -102,20 +127,46 @@ export function MatrizFiscalDataTable() {
         return cfop ? (
           <div className="text-sm">
             <div className="font-medium">{cfop.codigo}</div>
-            <div className="text-xs text-muted-foreground truncate max-w-[150px]">
-              {cfop.descricao}
-            </div>
           </div>
         ) : (
-          "-"
+          <span className="text-muted-foreground text-xs">-</span>
         )
       },
     },
     {
+      header: "CST/CSOSN",
+      cell: ({ row }) => {
+        const cst = row.original.cst
+        const csosn = row.original.csosn
+
+        if (csosn) {
+          return (
+            <Badge variant="secondary" className="text-xs">
+              CSOSN {csosn.codigo}
+            </Badge>
+          )
+        }
+
+        if (cst) {
+          return (
+            <Badge variant="secondary" className="text-xs">
+              CST {cst.codigo}
+            </Badge>
+          )
+        }
+
+        return <span className="text-muted-foreground text-xs">-</span>
+      },
+    },
+    {
       accessorKey: "prioridade",
-      header: "Prioridade",
+      header: "Prior.",
       cell: ({ row }) => (
-        <Badge variant="secondary">{row.getValue("prioridade")}</Badge>
+        <div className="text-center">
+          <Badge variant="outline" className="text-xs">
+            {row.getValue("prioridade")}
+          </Badge>
+        </div>
       ),
     },
     {
@@ -124,7 +175,7 @@ export function MatrizFiscalDataTable() {
       cell: ({ row }) => {
         const ativo = row.getValue("ativo") as boolean
         return (
-          <Badge variant={ativo ? "default" : "secondary"}>
+          <Badge variant={ativo ? "default" : "secondary"} className="text-xs">
             {ativo ? "Ativo" : "Inativo"}
           </Badge>
         )

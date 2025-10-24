@@ -195,7 +195,6 @@ export const REGIME_FISCAL_OPTIONS: StaticOption[] = [
 ]
 
 export const TIPO_ITEM_OPTIONS: StaticOption[] = [
-  { value: "todos", label: "Todos" },
   { value: "produto", label: "Produto" },
   { value: "servico", label: "Serviço" },
 ]

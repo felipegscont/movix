@@ -64,9 +64,7 @@ export function ProdutoCombobox({
 
   const filteredProdutos = React.useMemo(() => {
     if (!search) return produtos
-    return produtos.filter((produto) =>
-      searchInFields(search, [produto.codigo, produto.descricao])
-    )
+    return searchInFields(produtos, search, ['codigo', 'descricao'])
   }, [produtos, search])
 
   const selectedProduto = produtos.find((p) => p.id === value)

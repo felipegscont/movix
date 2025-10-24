@@ -70,9 +70,7 @@ export function FormaPagamentoCombobox({
   const filteredFormas = React.useMemo(() => {
     if (!search) return formasPagamento
 
-    return formasPagamento.filter((forma) =>
-      searchInFields(search, [forma.codigo, forma.descricao])
-    )
+    return searchInFields(formasPagamento, search, ['codigo', 'descricao'])
   }, [formasPagamento, search])
 
   // Encontrar forma selecionada

@@ -68,9 +68,7 @@ export function ClienteCombobox({
   const filteredClientes = React.useMemo(() => {
     if (!search) return clientes
 
-    return clientes.filter((cliente) =>
-      searchInFields(search, [cliente.nome, cliente.documento])
-    )
+    return searchInFields(clientes, search, ['nome', 'documento'])
   }, [clientes, search])
 
   // Encontrar cliente selecionado

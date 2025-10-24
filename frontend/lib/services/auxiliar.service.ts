@@ -54,7 +54,7 @@ export class AuxiliarService {
       params.append('search', search);
     }
 
-    const response = await fetch(`${API_BASE_URL}/estados?${params}`);
+    const response = await fetch(`${API_BASE_URL}/auxiliares/estados?${params}`);
     if (!response.ok) {
       throw new Error('Erro ao buscar estados');
     }
@@ -71,7 +71,7 @@ export class AuxiliarService {
       params.append('search', search);
     }
 
-    const response = await fetch(`${API_BASE_URL}/municipios?${params}`);
+    const response = await fetch(`${API_BASE_URL}/auxiliares/municipios?${params}`);
     if (!response.ok) {
       throw new Error('Erro ao buscar municípios');
     }
@@ -93,7 +93,7 @@ export class AuxiliarService {
       params.append('search', search);
     }
 
-    const response = await fetch(`${API_BASE_URL}/ncms?${params}`);
+    const response = await fetch(`${API_BASE_URL}/auxiliares/ncms?${params}`);
     if (!response.ok) {
       throw new Error('Erro ao buscar NCMs');
     }
@@ -115,7 +115,7 @@ export class AuxiliarService {
       params.append('tipo', tipo);
     }
 
-    const response = await fetch(`${API_BASE_URL}/cfops?${params}`);
+    const response = await fetch(`${API_BASE_URL}/auxiliares/cfops?${params}`);
     if (!response.ok) {
       throw new Error('Erro ao buscar CFOPs');
     }
@@ -134,7 +134,7 @@ export class AuxiliarService {
       params.append('tipo', tipo);
     }
 
-    const response = await fetch(`${API_BASE_URL}/csts?${params}`);
+    const response = await fetch(`${API_BASE_URL}/auxiliares/csts?${params}`);
     if (!response.ok) {
       throw new Error('Erro ao buscar CSTs');
     }
@@ -144,9 +144,9 @@ export class AuxiliarService {
 
   static async getCESTs(): Promise<CEST[]> {
     try {
-      const response = await fetch(`${API_BASE_URL}/cests`);
+      const response = await fetch(`${API_BASE_URL}/auxiliares/cests`);
       if (!response.ok) {
-        console.warn('Endpoint /cests não encontrado, retornando lista vazia');
+        console.warn('Endpoint /auxiliares/cests não encontrado, retornando lista vazia');
         return [];
       }
       const data = await response.json();
@@ -159,9 +159,9 @@ export class AuxiliarService {
 
   static async getCSOSNs(): Promise<CSOSN[]> {
     try {
-      const response = await fetch(`${API_BASE_URL}/csosns`);
+      const response = await fetch(`${API_BASE_URL}/auxiliares/csosns`);
       if (!response.ok) {
-        console.warn('Endpoint /csosns não encontrado, retornando lista vazia');
+        console.warn('Endpoint /auxiliares/csosns não encontrado, retornando lista vazia');
         return [];
       }
       const data = await response.json();

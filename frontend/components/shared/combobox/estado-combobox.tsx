@@ -35,6 +35,7 @@ interface EstadoComboboxProps {
   placeholder?: string
   disabled?: boolean
   className?: string
+  returnUf?: boolean // Se true, retorna UF ao invés de ID
 }
 
 export function EstadoCombobox({
@@ -43,6 +44,7 @@ export function EstadoCombobox({
   placeholder = "Selecione o estado",
   disabled = false,
   className,
+  returnUf = false,
 }: EstadoComboboxProps) {
   const [open, setOpen] = React.useState(false)
   const [estados, setEstados] = React.useState<Estado[]>([])
@@ -68,12 +70,20 @@ export function EstadoCombobox({
   const filteredEstados = React.useMemo(() => {
     if (!search) return estados
 
-    return estados.filter((estado) =>
-      searchInFields(search, [estado.uf, estado.nome])
-    )
+    return searchInFields(estados, search, ['uf', 'nome'])
   }, [estados, search])
 
-  const selectedEstado = estados.find((estado) => estado.id === value)
+  // Se returnUf=true mas value parece ser um ID (tem mais de 3 caracteres), limpar
+  React.useEffect(() => {
+    if (returnUf && value && value.length > 3) {
+      console.warn('EstadoCombobox: valor parece ser ID mas returnUf=true, limpando:', value)
+      onValueChange(undefined)
+    }
+  }, [returnUf, value, onValueChange])
+
+  const selectedEstado = estados.find((estado) =>
+    returnUf ? estado.uf === value : estado.id === value
+  )
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -115,7 +125,7 @@ export function EstadoCombobox({
               {filteredEstados.map((estado) => (
                 <CommandItem
                   key={estado.id}
-                  value={estado.id}
+                  value={returnUf ? estado.uf : estado.id}
                   onSelect={(currentValue) => {
                     onValueChange(currentValue === value ? undefined : currentValue)
                     setOpen(false)

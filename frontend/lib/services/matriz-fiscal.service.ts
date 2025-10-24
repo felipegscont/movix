@@ -166,12 +166,30 @@ export const MatrizFiscalService = {
    * Criar nova matriz fiscal
    */
   async create(data: CreateMatrizFiscalDto): Promise<MatrizFiscal> {
+    console.log('Enviando dados para criar matriz fiscal:', JSON.stringify(data, null, 2))
     const response = await fetch(`${API_BASE_URL}/matrizes-fiscais`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     })
-    if (!response.ok) throw new Error('Erro ao criar matriz fiscal')
+
+    if (!response.ok) {
+      const contentType = response.headers.get('content-type')
+      let errorMessage = `Erro ${response.status}: ${response.statusText}`
+
+      if (contentType?.includes('application/json')) {
+        const error = await response.json().catch(() => ({}))
+        console.error('Erro ao criar matriz fiscal (JSON):', error)
+        errorMessage = error.message || error.error || errorMessage
+      } else {
+        const text = await response.text().catch(() => '')
+        console.error('Erro ao criar matriz fiscal (Text):', text)
+        if (text) errorMessage = text
+      }
+
+      throw new Error(errorMessage)
+    }
+
     return response.json()
   },
 
@@ -179,12 +197,30 @@ export const MatrizFiscalService = {
    * Atualizar matriz fiscal
    */
   async update(id: string, data: Partial<CreateMatrizFiscalDto>): Promise<MatrizFiscal> {
+    console.log('Enviando dados para atualizar matriz fiscal:', data)
     const response = await fetch(`${API_BASE_URL}/matrizes-fiscais/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     })
-    if (!response.ok) throw new Error('Erro ao atualizar matriz fiscal')
+
+    if (!response.ok) {
+      const contentType = response.headers.get('content-type')
+      let errorMessage = `Erro ${response.status}: ${response.statusText}`
+
+      if (contentType?.includes('application/json')) {
+        const error = await response.json().catch(() => ({}))
+        console.error('Erro ao atualizar matriz fiscal (JSON):', error)
+        errorMessage = error.message || error.error || errorMessage
+      } else {
+        const text = await response.text().catch(() => '')
+        console.error('Erro ao atualizar matriz fiscal (Text):', text)
+        if (text) errorMessage = text
+      }
+
+      throw new Error(errorMessage)
+    }
+
     return response.json()
   },
 

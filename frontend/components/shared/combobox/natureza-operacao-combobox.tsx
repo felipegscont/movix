@@ -68,9 +68,7 @@ export function NaturezaOperacaoCombobox({
 
   const filteredNaturezas = React.useMemo(() => {
     if (!search) return naturezas
-    return naturezas.filter((natureza) =>
-      searchInFields(search, [natureza.codigo, natureza.descricao])
-    )
+    return searchInFields(naturezas, search, ['codigo', 'descricao'])
   }, [naturezas, search])
 
   // Encontrar natureza selecionada pela descrição

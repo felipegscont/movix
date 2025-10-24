@@ -58,7 +58,7 @@ const matrizFiscalSchema = z.object({
   ufDestino: z.string().optional(),
   produtoId: z.string().optional(),
   cfopId: z.string().optional(),
-  tipoItem: z.string().optional(),
+  tipoItem: z.enum(["produto", "servico"]).optional().or(z.literal("").transform(() => undefined)),
   ncmId: z.string().optional(),
 
   // Definições Fiscais - CST/CSOSN (dinâmico baseado no imposto)
@@ -169,11 +169,28 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
     try {
       setLoading(true)
 
+      console.log('Dados do formulário (antes da limpeza):', data)
+
+      // Limpar campos vazios e valores inválidos
+      const cleanData = Object.fromEntries(
+        Object.entries(data)
+          .map(([key, value]) => {
+            // Converter "" para undefined
+            if (value === "") return [key, undefined]
+            // Remover "todos" do tipoItem
+            if (key === "tipoItem" && value === "todos") return [key, undefined]
+            return [key, value]
+          })
+          .filter(([_, value]) => value !== undefined) // Remover campos undefined
+      ) as MatrizFiscalFormData
+
+      console.log('Dados limpos (depois da limpeza):', cleanData)
+
       if (matrizId) {
-        await MatrizFiscalService.update(matrizId, data)
+        await MatrizFiscalService.update(matrizId, cleanData)
         toast.success("Matriz fiscal atualizada com sucesso!")
       } else {
-        await MatrizFiscalService.create(data)
+        await MatrizFiscalService.create(cleanData)
         toast.success("Matriz fiscal criada com sucesso!")
       }
 
@@ -397,6 +414,7 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
                               onValueChange={field.onChange}
                               placeholder="Selecione o estado"
                               className="h-9"
+                              returnUf={true}
                             />
                           </FormControl>
                           <FormMessage />

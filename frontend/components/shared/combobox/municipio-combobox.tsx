@@ -73,9 +73,7 @@ export function MunicipioCombobox({
   const filteredMunicipios = React.useMemo(() => {
     if (!search) return municipios
 
-    return municipios.filter((municipio) =>
-      searchInFields(search, [municipio.nome, municipio.codigoIBGE])
-    )
+    return searchInFields(municipios, search, ['nome', 'codigoIBGE'])
   }, [municipios, search])
 
   const selectedMunicipio = municipios.find((municipio) => municipio.id === value)
