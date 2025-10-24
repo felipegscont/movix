@@ -21,21 +21,13 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { IconDotsVertical, IconEdit, IconTrash, IconLoader2, IconSearch } from "@tabler/icons-react"
+import { IconEdit, IconTrash, IconLoader2, IconSearch } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { MatrizFiscalService, type MatrizFiscal } from "@/lib/services/matriz-fiscal.service"
 
@@ -183,33 +175,31 @@ export function MatrizFiscalDataTable() {
     },
     {
       id: "actions",
+      header: "Ações",
       cell: ({ row }) => {
         const matriz = row.original
 
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Abrir menu</span>
-                <IconDotsVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Ações</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => handleEdit(matriz)}>
-                <IconEdit className="mr-2 h-4 w-4" />
-                Editar
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleDelete(matriz.id)}
-                className="text-destructive"
-              >
-                <IconTrash className="mr-2 h-4 w-4" />
-                Excluir
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleEdit(matriz)}
+              className="h-8 px-3 text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300"
+            >
+              <IconEdit className="h-4 w-4 mr-1" />
+              Editar
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleDelete(matriz.id)}
+              className="h-8 px-3 text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 hover:border-red-300"
+            >
+              <IconTrash className="h-4 w-4 mr-1" />
+              Excluir
+            </Button>
+          </div>
         )
       },
     },
@@ -230,18 +220,22 @@ export function MatrizFiscalDataTable() {
       const response = await MatrizFiscalService.getAll({
         page: currentPage,
         limit: pageSize,
-        ufOrigem: filterUfOrigem || undefined,
         ufDestino: filterUfDestino || undefined,
         ativo: filterAtivo === "all" ? undefined : filterAtivo === "true",
       })
 
-      // Filtrar por código localmente (busca simples)
+      // Filtrar localmente por código/descrição e imposto
       let filteredData = response.data
+
       if (searchCodigo) {
         filteredData = filteredData.filter((m) =>
           m.codigo.toLowerCase().includes(searchCodigo.toLowerCase()) ||
           m.descricao.toLowerCase().includes(searchCodigo.toLowerCase())
         )
+      }
+
+      if (filterImposto) {
+        filteredData = filteredData.filter((m) => m.codigo === filterImposto)
       }
 
       setData(filteredData)
@@ -256,7 +250,7 @@ export function MatrizFiscalDataTable() {
 
   useEffect(() => {
     loadData()
-  }, [currentPage, filterUfOrigem, filterUfDestino, filterAtivo])
+  }, [currentPage, filterImposto, filterUfDestino, filterAtivo])
 
   const handleEdit = (matriz: MatrizFiscal) => {
     router.push(`/matrizes-fiscais/${matriz.id}`)
@@ -302,19 +296,17 @@ export function MatrizFiscalDataTable() {
             />
           </div>
         </div>
-        <Select value={filterUfOrigem || "todas"} onValueChange={(value) => setFilterUfOrigem(value === "todas" ? "" : value)}>
+        <Select value={filterImposto || "todos"} onValueChange={(value) => setFilterImposto(value === "todos" ? "" : value)}>
           <SelectTrigger className="w-[150px]">
-            <SelectValue placeholder="UF Origem" />
+            <SelectValue placeholder="Imposto" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="todas">Todas</SelectItem>
-            <SelectItem value="SP">SP</SelectItem>
-            <SelectItem value="RJ">RJ</SelectItem>
-            <SelectItem value="MG">MG</SelectItem>
-            <SelectItem value="ES">ES</SelectItem>
-            <SelectItem value="PR">PR</SelectItem>
-            <SelectItem value="SC">SC</SelectItem>
-            <SelectItem value="RS">RS</SelectItem>
+            <SelectItem value="todos">Todos</SelectItem>
+            <SelectItem value="ICMS">ICMS</SelectItem>
+            <SelectItem value="PIS">PIS</SelectItem>
+            <SelectItem value="COFINS">COFINS</SelectItem>
+            <SelectItem value="IPI">IPI</SelectItem>
+            <SelectItem value="ISSQN">ISSQN</SelectItem>
           </SelectContent>
         </Select>
         <Select value={filterUfDestino || "todas"} onValueChange={(value) => setFilterUfDestino(value === "todas" ? "" : value)}>
@@ -330,10 +322,13 @@ export function MatrizFiscalDataTable() {
             <SelectItem value="PR">PR</SelectItem>
             <SelectItem value="SC">SC</SelectItem>
             <SelectItem value="RS">RS</SelectItem>
+            <SelectItem value="MA">MA</SelectItem>
+            <SelectItem value="BA">BA</SelectItem>
+            <SelectItem value="CE">CE</SelectItem>
           </SelectContent>
         </Select>
         <Select value={filterAtivo} onValueChange={setFilterAtivo}>
-          <SelectTrigger className="w-[150px]">
+          <SelectTrigger className="w-[120px]">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>

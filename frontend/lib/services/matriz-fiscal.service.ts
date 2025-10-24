@@ -2,55 +2,73 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
 
 export interface MatrizFiscal {
   id: string
-  codigo: string
+
+  // Identificação
+  codigo: string // ICMS, PIS, COFINS, IPI, ISSQN
   descricao: string
-  
-  // Condições
+  seAplicaA?: string // produtos, servicos
+  modeloNF?: string // nfe, nfce, cte, nfse
+  regimeTributario?: number // 1=Simples, 2=Presumido, 3=Real
+
+  // Condições/Filtros
+  ufDestino?: string
+  produtoId?: string
+  cfopId?: string
+  tipoItem?: string // produto, servico
+  ncmId?: string
+
+  // Campos legados (compatibilidade)
   naturezaOperacaoId?: string
   ufOrigem?: string
-  ufDestino?: string
   tipoCliente?: 'contribuinte' | 'nao_contribuinte' | 'exterior'
-  ncmId?: string
-  regimeTributario?: number
-  
-  // Resultado
-  cfopId: string
-  
-  // ICMS
+
+  // Definições Fiscais (novos campos unificados)
+  cstId?: string // CST genérico
+  csosnId?: string // CSOSN (Simples Nacional)
+  aliquota?: number
+  reducaoBC?: number
+  fcp?: number
+
+  // Campos legados ICMS
   icmsCstId?: string
   icmsCsosnId?: string
   icmsAliquota?: number
   icmsReducao?: number
   icmsModalidadeBC?: number
-  
+
   // ICMS ST
   icmsStAliquota?: number
   icmsStReducao?: number
   icmsStModalidadeBC?: number
   icmsStMva?: number
-  
+
   // IPI
   ipiCstId?: string
   ipiAliquota?: number
-  
+
   // PIS
   pisCstId?: string
   pisAliquota?: number
-  
+
   // COFINS
   cofinsCstId?: string
   cofinsAliquota?: number
-  
+
   // Controle
   prioridade: number
+  dataInicio?: string
+  dataFim?: string
   ativo: boolean
   createdAt: string
   updatedAt: string
-  
+
   // Relacionamentos
-  naturezaOperacao?: any
+  produto?: any
   cfop?: any
   ncm?: any
+  cst?: any
+  csosn?: any
+  naturezaOperacao?: any
   icmsCst?: any
   icmsCsosn?: any
   ipiCst?: any
