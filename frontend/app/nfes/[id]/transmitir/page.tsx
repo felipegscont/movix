@@ -7,7 +7,7 @@ import { AppSidebar } from "@/components/layout/app-sidebar"
 import { SiteHeader } from "@/components/layout/site-header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { IconArrowLeft, IconSend, IconX, IconLoader2, IconCheckCircle, IconAlertCircle } from "@tabler/icons-react"
+import { IconArrowLeft, IconSend, IconX, IconLoader2, IconCircleCheck, IconAlertCircle } from "@tabler/icons-react"
 import { NfeBreadcrumb } from "@/components/nfe/nfe-breadcrumb"
 import { useNfeWorkflow } from "@/hooks/nfe/use-nfe-workflow"
 import { NfeService, Nfe } from "@/lib/services/nfe.service"
@@ -207,7 +207,7 @@ export default function TransmitirNfePage({ params }: { params: { id: string } }
 
                   {transmissionStatus === 'success' && (
                     <Alert>
-                      <IconCheckCircle className="h-4 w-4 text-green-600" />
+                      <IconCircleCheck className="h-4 w-4 text-green-600" />
                       <AlertTitle>Sucesso!</AlertTitle>
                       <AlertDescription>{transmissionMessage}</AlertDescription>
                     </Alert>

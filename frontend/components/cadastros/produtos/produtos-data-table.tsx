@@ -244,10 +244,10 @@ const columns: ColumnDef<Produto>[] = [
   const loadData = async () => {
     try {
       setLoading(true)
-      const response = await ProdutoService.getAll(
-        pagination.pageIndex + 1,
-        pagination.pageSize
-      )
+      const response = await ProdutoService.getAll({
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize
+      })
       setData(response.data)
     } catch (error) {
       console.error('Erro ao carregar produtos:', error)
@@ -261,8 +261,7 @@ const columns: ColumnDef<Produto>[] = [
           unidade: 'UN',
           valorUnitario: 125.50,
           estoqueAtual: 10,
-          origem: 0,
-          cstIcms: '00',
+          origem: '0',
           ativo: true,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),

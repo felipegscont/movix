@@ -92,7 +92,7 @@ export default function NfesPage() {
                   <Skeleton className="h-64 w-full" />
                 </div>
               ) : (
-                <NfeDataTable data={nfes} onRefresh={loadNfes} />
+                <NfeDataTable nfes={nfes} onRefresh={loadNfes} />
               )}
             </div>
           </div>

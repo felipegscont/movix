@@ -82,8 +82,8 @@ const matrizFiscalSchema = z.object({
   cofinsAliquota: z.number().min(0).max(100).optional(),
 
   // Controle
-  prioridade: z.number().min(0).default(0),
-  ativo: z.boolean().default(true),
+  prioridade: z.number().min(0).optional(),
+  ativo: z.boolean().optional(),
 })
 
 type MatrizFiscalFormData = z.infer<typeof matrizFiscalSchema>

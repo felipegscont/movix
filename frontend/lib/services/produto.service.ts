@@ -8,6 +8,7 @@ export interface Produto {
   descricaoComplementar?: string;
   ncmId: string;
   cestId?: string;
+  cfopId?: string;
   unidade: string;
   unidadeTributavel?: string;
   valorUnitario: number;
@@ -85,6 +86,7 @@ export interface CreateProdutoData {
   descricaoComplementar?: string;
   ncmId: string;
   cestId?: string;
+  cfopId?: string;
   unidade: string;
   unidadeTributavel?: string;
   valorUnitario: number;

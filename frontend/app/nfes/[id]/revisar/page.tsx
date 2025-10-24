@@ -15,7 +15,7 @@ import { NfeService, Nfe } from "@/lib/services/nfe.service"
 import { toast } from "sonner"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { IconAlertCircle, IconCheckCircle } from "@tabler/icons-react"
+import { IconAlertCircle, IconCircleCheck } from "@tabler/icons-react"
 
 export default function RevisarNfePage({ params }: { params: { id: string } }) {
   const router = useRouter()
@@ -168,7 +168,7 @@ export default function RevisarNfePage({ params }: { params: { id: string } }) {
                 </Alert>
               ) : (
                 <Alert>
-                  <IconCheckCircle className="h-4 w-4" />
+                  <IconCircleCheck className="h-4 w-4" />
                   <AlertTitle>NFe válida</AlertTitle>
                   <AlertDescription>
                     Todos os dados estão corretos. Você pode prosseguir para a transmissão.

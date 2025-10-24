@@ -48,7 +48,7 @@ const matrizFiscalSchema = z.object({
   // Dados Gerais
   codigo: z.string().min(1, "Código é obrigatório"),
   descricao: z.string().min(1, "Nome é obrigatório"),
-  seAplicaA: z.enum(["produtos", "servicos"]).default("produtos"),
+  seAplicaA: z.enum(["produtos", "servicos"]).optional(),
   modeloNF: z.string().optional(),
   regimeTributario: z.number().optional(),
   dataInicio: z.string().optional(),
@@ -58,7 +58,7 @@ const matrizFiscalSchema = z.object({
   ufDestino: z.string().optional(),
   produtoId: z.string().optional(),
   cfopId: z.string().optional(),
-  tipoItem: z.enum(["produto", "servico"]).optional().or(z.literal("").transform(() => undefined)),
+  tipoItem: z.enum(["produto", "servico"]).optional(),
   ncmId: z.string().optional(),
 
   // Definições Fiscais - CST/CSOSN (dinâmico baseado no imposto)
@@ -71,8 +71,8 @@ const matrizFiscalSchema = z.object({
   fcp: z.number().min(0).max(100).optional(),
 
   // Controle
-  prioridade: z.number().min(0).default(0),
-  ativo: z.boolean().default(true),
+  prioridade: z.number().min(0).optional(),
+  ativo: z.boolean().optional(),
 })
 
 type MatrizFiscalFormData = z.infer<typeof matrizFiscalSchema>
@@ -131,28 +131,21 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
       form.reset({
         codigo: matriz.codigo,
         descricao: matriz.descricao,
-        naturezaOperacaoId: matriz.naturezaOperacaoId || undefined,
-        ufOrigem: matriz.ufOrigem || undefined,
-        ufDestino: matriz.ufDestino || undefined,
-        tipoCliente: matriz.tipoCliente || undefined,
-        ncmId: matriz.ncmId || undefined,
+        seAplicaA: matriz.seAplicaA as "produtos" | "servicos" | undefined,
+        modeloNF: matriz.modeloNF || undefined,
         regimeTributario: matriz.regimeTributario || undefined,
-        cfopId: matriz.cfopId,
-        icmsCstId: matriz.icmsCstId || undefined,
-        icmsCsosnId: matriz.icmsCsosnId || undefined,
-        icmsAliquota: matriz.icmsAliquota || undefined,
-        icmsReducao: matriz.icmsReducao || undefined,
-        icmsModalidadeBC: matriz.icmsModalidadeBC || undefined,
-        icmsStAliquota: matriz.icmsStAliquota || undefined,
-        icmsStReducao: matriz.icmsStReducao || undefined,
-        icmsStModalidadeBC: matriz.icmsStModalidadeBC || undefined,
-        icmsStMva: matriz.icmsStMva || undefined,
-        ipiCstId: matriz.ipiCstId || undefined,
-        ipiAliquota: matriz.ipiAliquota || undefined,
-        pisCstId: matriz.pisCstId || undefined,
-        pisAliquota: matriz.pisAliquota || undefined,
-        cofinsCstId: matriz.cofinsCstId || undefined,
-        cofinsAliquota: matriz.cofinsAliquota || undefined,
+        dataInicio: matriz.dataInicio || undefined,
+        dataFim: matriz.dataFim || undefined,
+        ufDestino: matriz.ufDestino || undefined,
+        produtoId: matriz.produtoId || undefined,
+        cfopId: matriz.cfopId || undefined,
+        tipoItem: matriz.tipoItem as "produto" | "servico" | undefined,
+        ncmId: matriz.ncmId || undefined,
+        cstId: matriz.cstId || undefined,
+        csosnId: matriz.csosnId || undefined,
+        aliquota: matriz.aliquota || undefined,
+        reducaoBC: matriz.reducaoBC || undefined,
+        fcp: matriz.fcp || undefined,
         prioridade: matriz.prioridade,
         ativo: matriz.ativo,
       })
@@ -187,10 +180,10 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
       console.log('Dados limpos (depois da limpeza):', cleanData)
 
       if (matrizId) {
-        await MatrizFiscalService.update(matrizId, cleanData)
+        await MatrizFiscalService.update(matrizId, cleanData as any)
         toast.success("Matriz fiscal atualizada com sucesso!")
       } else {
-        await MatrizFiscalService.create(cleanData)
+        await MatrizFiscalService.create(cleanData as any)
         toast.success("Matriz fiscal criada com sucesso!")
       }
 
