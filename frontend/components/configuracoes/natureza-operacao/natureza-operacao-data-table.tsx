@@ -64,12 +64,16 @@ import {
   IconChevronRight,
   IconChevronsLeft,
   IconChevronsRight,
+  IconSettings,
 } from "@tabler/icons-react"
 import { NaturezaOperacao, NaturezaOperacaoService } from "@/lib/services/natureza-operacao.service"
-import { NaturezaOperacaoFormDialog } from "./natureza-operacao-form-dialog"
 import { toast } from "sonner"
 
-export function NaturezaOperacaoDataTable() {
+interface NaturezaOperacaoDataTableProps {
+  onOpenFiscalView?: (naturezaId: string) => void
+}
+
+export function NaturezaOperacaoDataTable({ onOpenFiscalView }: NaturezaOperacaoDataTableProps = {}) {
   const [data, setData] = useState<NaturezaOperacao[]>([])
   const [loading, setLoading] = useState(true)
   const [rowSelection, setRowSelection] = useState({})
@@ -80,8 +84,7 @@ export function NaturezaOperacaoDataTable() {
     pageIndex: 0,
     pageSize: 10,
   })
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [selectedNaturezaId, setSelectedNaturezaId] = useState<string | undefined>()
+
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
@@ -104,19 +107,14 @@ export function NaturezaOperacaoDataTable() {
   }
 
   const handleEdit = (id: string) => {
-    setSelectedNaturezaId(id)
-    setDialogOpen(true)
+    onOpenFiscalView?.(id)
   }
 
   const handleNew = () => {
-    setSelectedNaturezaId(undefined)
-    setDialogOpen(true)
+    onOpenFiscalView?.()
   }
 
-  const handleSuccess = () => {
-    loadData()
-    setDialogOpen(false)
-  }
+
 
   const handleDeleteClick = (id: string) => {
     setDeleteId(id)
@@ -145,15 +143,7 @@ export function NaturezaOperacaoDataTable() {
     return tipo === 0 ? "Entrada" : "Saída"
   }
 
-  const getFinalidadeLabel = (finalidade: number) => {
-    const labels: Record<number, string> = {
-      1: "Normal",
-      2: "Complementar",
-      3: "Ajuste",
-      4: "Devolução",
-    }
-    return labels[finalidade] || "Desconhecido"
-  }
+
 
   const columns: ColumnDef<NaturezaOperacao>[] = [
     {
@@ -188,56 +178,50 @@ export function NaturezaOperacaoDataTable() {
       cell: ({ row }) => <div className="font-medium">{row.original.codigo}</div>,
     },
     {
-      accessorKey: "descricao",
-      header: "Descrição",
-      cell: ({ row }) => <div>{row.original.descricao}</div>,
+      accessorKey: "nome",
+      header: "Nome",
+      cell: ({ row }) => <div>{row.original.nome}</div>,
     },
     {
-      accessorKey: "tipoOperacao",
+      accessorKey: "tipo",
       header: "Tipo",
       cell: ({ row }) => (
-        <Badge variant={row.original.tipoOperacao === 1 ? "default" : "secondary"}>
-          {getTipoOperacaoLabel(row.original.tipoOperacao)}
+        <Badge variant={row.original.tipo === 1 ? "default" : "secondary"}>
+          {getTipoOperacaoLabel(row.original.tipo)}
         </Badge>
       ),
     },
     {
-      accessorKey: "finalidade",
-      header: "Finalidade",
-      cell: ({ row }) => (
-        <Badge variant="outline">
-          {getFinalidadeLabel(row.original.finalidade)}
-        </Badge>
-      ),
-    },
-    {
-      id: "cfopDentro",
-      header: "CFOP Dentro",
-      cell: ({ row }) => (
-        row.original.cfopDentroEstado ? (
-          <span className="text-sm">{row.original.cfopDentroEstado.codigo}</span>
-        ) : (
-          <span className="text-sm text-muted-foreground">-</span>
+      id: "cfops",
+      header: "CFOPs",
+      cell: ({ row }) => {
+        const cfopsCount = row.original.cfops?.length || 0
+        const cfopPadrao = row.original.cfops?.find(c => c.padrao)
+
+        return (
+          <div className="text-sm">
+            {cfopsCount > 0 ? (
+              <div>
+                <span className="font-medium">{cfopsCount} CFOP{cfopsCount > 1 ? 's' : ''}</span>
+                {cfopPadrao && (
+                  <div className="text-xs text-muted-foreground">
+                    Padrão: {cfopPadrao.cfop.codigo}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <span className="text-muted-foreground">Nenhum</span>
+            )}
+          </div>
         )
-      ),
+      },
     },
     {
-      id: "cfopFora",
-      header: "CFOP Fora",
-      cell: ({ row }) => (
-        row.original.cfopForaEstado ? (
-          <span className="text-sm">{row.original.cfopForaEstado.codigo}</span>
-        ) : (
-          <span className="text-sm text-muted-foreground">-</span>
-        )
-      ),
-    },
-    {
-      accessorKey: "ativo",
+      accessorKey: "ativa",
       header: "Status",
       cell: ({ row }) => (
-        <Badge variant={row.original.ativo ? "success" : "secondary"}>
-          {row.original.ativo ? "Ativo" : "Inativo"}
+        <Badge variant={row.original.ativa ? "default" : "secondary"}>
+          {row.original.ativa ? "Ativa" : "Inativa"}
         </Badge>
       ),
     },
@@ -264,6 +248,12 @@ export function NaturezaOperacaoDataTable() {
                 <IconEdit className="mr-2 h-4 w-4" />
                 Editar
               </DropdownMenuItem>
+              {onOpenFiscalView && (
+                <DropdownMenuItem onClick={() => onOpenFiscalView(natureza.id)}>
+                  <IconSettings className="mr-2 h-4 w-4" />
+                  Interface Fiscal
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => handleDeleteClick(natureza.id)}
@@ -306,13 +296,7 @@ export function NaturezaOperacaoDataTable() {
   return (
     <div className="space-y-4 px-4 lg:px-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Naturezas de Operação</h2>
-          <p className="text-muted-foreground">
-            Configure naturezas de operação para facilitar a emissão de notas fiscais
-          </p>
-        </div>
+      <div className="flex items-center justify-end">
         <Button onClick={handleNew}>
           <IconPlus className="mr-2 h-4 w-4" />
           Nova Natureza
@@ -491,12 +475,7 @@ export function NaturezaOperacaoDataTable() {
         </div>
       </div>
 
-      <NaturezaOperacaoFormDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        naturezaId={selectedNaturezaId}
-        onSuccess={handleSuccess}
-      />
+
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>

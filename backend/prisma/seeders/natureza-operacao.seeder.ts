@@ -1,33 +1,56 @@
 import { PrismaClient } from '@prisma/client'
 
+interface CFOPData {
+  cfopId: string
+  descricao: string
+  padrao: boolean
+}
+
 interface NaturezaOperacaoData {
   codigo: string
-  descricao: string
-  cfopDentroEstado: string
-  cfopForaEstado: string
-  tipoOperacao: number
-  finalidade: number
-  ativo: boolean
+  nome: string
+  cfops: CFOPData[]
+  tipo: number
+  ativa: boolean
+  propria: boolean
+  dentroEstado: boolean
 }
 
 const NATUREZAS: NaturezaOperacaoData[] = [
   {
     codigo: 'VENDA',
-    descricao: 'Venda de Mercadoria',
-    cfopDentroEstado: '5102', // Venda dentro do estado
-    cfopForaEstado: '6102',   // Venda fora do estado
-    tipoOperacao: 1,          // Saída
-    finalidade: 1,            // Normal
-    ativo: true,
+    nome: 'Venda de Mercadoria',
+    cfops: [
+      {
+        cfopId: '5403',
+        descricao: 'Venda de mercadoria adquirida ou recebida de terceiros em operação com mercadoria sujeita ao regime de substituição tributária, na condição de contribuinte substituto',
+        padrao: false
+      },
+      {
+        cfopId: '5102',
+        descricao: 'Venda de mercadoria adquirida ou recebida de terceiros',
+        padrao: false
+      }
+    ],
+    tipo: 1,            // Saída
+    ativa: true,
+    propria: true,
+    dentroEstado: true,
   },
   {
     codigo: 'DEVOLUCAO',
-    descricao: 'Devolução de Mercadoria',
-    cfopDentroEstado: '5202', // Devolução dentro do estado
-    cfopForaEstado: '6202',   // Devolução fora do estado
-    tipoOperacao: 1,          // Saída
-    finalidade: 4,            // Devolução
-    ativo: true,
+    nome: 'Devolução de Mercadoria',
+    cfops: [
+      {
+        cfopId: '5202',
+        descricao: 'Devolução de venda de mercadoria adquirida ou recebida de terceiros',
+        padrao: true
+      }
+    ],
+    tipo: 1,            // Saída
+    ativa: true,
+    propria: true,
+    dentroEstado: true,
   },
 ]
 
@@ -36,38 +59,23 @@ export async function seedNaturezasOperacao(prisma: PrismaClient): Promise<void>
   let updated = 0
 
   for (const natureza of NATUREZAS) {
-    // Buscar CFOPs
-    const cfopDentro = await prisma.cFOP.findUnique({
-      where: { codigo: natureza.cfopDentroEstado },
-    })
-
-    const cfopFora = await prisma.cFOP.findUnique({
-      where: { codigo: natureza.cfopForaEstado },
-    })
-
-    if (!cfopDentro || !cfopFora) {
-      console.log(`   ⚠️  CFOPs não encontrados para natureza ${natureza.codigo}, pulando...`)
-      continue
-    }
-
+    // Criar ou atualizar a natureza de operação
     const result = await prisma.naturezaOperacao.upsert({
       where: { codigo: natureza.codigo },
       update: {
-        descricao: natureza.descricao,
-        cfopDentroEstadoId: cfopDentro.id,
-        cfopForaEstadoId: cfopFora.id,
-        tipoOperacao: natureza.tipoOperacao,
-        finalidade: natureza.finalidade,
-        ativo: natureza.ativo,
+        nome: natureza.nome,
+        tipo: natureza.tipo,
+        ativa: natureza.ativa,
+        propria: natureza.propria,
+        dentroEstado: natureza.dentroEstado,
       },
       create: {
         codigo: natureza.codigo,
-        descricao: natureza.descricao,
-        cfopDentroEstadoId: cfopDentro.id,
-        cfopForaEstadoId: cfopFora.id,
-        tipoOperacao: natureza.tipoOperacao,
-        finalidade: natureza.finalidade,
-        ativo: natureza.ativo,
+        nome: natureza.nome,
+        tipo: natureza.tipo,
+        ativa: natureza.ativa,
+        propria: natureza.propria,
+        dentroEstado: natureza.dentroEstado,
       },
     })
 
@@ -75,6 +83,31 @@ export async function seedNaturezasOperacao(prisma: PrismaClient): Promise<void>
       created++
     } else {
       updated++
+    }
+
+    // Limpar CFOPs existentes e recriar
+    await prisma.naturezaOperacaoCFOP.deleteMany({
+      where: { naturezaOperacaoId: result.id }
+    })
+
+    // Adicionar CFOPs
+    for (const cfopData of natureza.cfops) {
+      const cfop = await prisma.cFOP.findFirst({
+        where: { codigo: cfopData.cfopId },
+      })
+
+      if (!cfop) {
+        console.log(`   ⚠️  CFOP ${cfopData.cfopId} não encontrado para ${natureza.codigo}, pulando...`)
+        continue
+      }
+
+      await prisma.naturezaOperacaoCFOP.create({
+        data: {
+          naturezaOperacaoId: result.id,
+          cfopId: cfop.id,
+          padrao: cfopData.padrao,
+        }
+      })
     }
   }
 

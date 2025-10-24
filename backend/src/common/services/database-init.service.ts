@@ -129,7 +129,7 @@ export class DatabaseInitService implements OnModuleInit {
         lines.forEach(line => this.logger.log(`   ${line}`));
       }
 
-      if (stderr && !stderr.includes('already applied')) {
+      if (stderr && !stderr.includes('already applied') && !stderr.includes('deprecated')) {
         this.logger.warn(stderr);
       }
 
@@ -159,7 +159,7 @@ export class DatabaseInitService implements OnModuleInit {
         });
       }
 
-      if (stderr && !stderr.includes('DeprecationWarning')) {
+      if (stderr && !stderr.includes('DeprecationWarning') && !stderr.includes('deprecated') && !stderr.includes('package.json#prisma')) {
         this.logger.warn(stderr);
       }
 

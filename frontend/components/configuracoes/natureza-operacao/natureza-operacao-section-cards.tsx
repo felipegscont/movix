@@ -27,9 +27,9 @@ export function NaturezaOperacaoSectionCards() {
   }
 
   const total = naturezas.length
-  const ativas = naturezas.filter(n => n.ativo).length
-  const saida = naturezas.filter(n => n.tipoOperacao === 1).length
-  const entrada = naturezas.filter(n => n.tipoOperacao === 0).length
+  const ativas = naturezas.filter(n => n.ativa).length
+  const saida = naturezas.filter(n => n.tipo === 1).length
+  const entrada = naturezas.filter(n => n.tipo === 0).length
 
   const cards = [
     {

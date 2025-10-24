@@ -89,9 +89,7 @@ model CFOP {
   nfeItens              NfeItem[]
   produtos              Produto[]
   matrizesFiscais       MatrizFiscal[]
-  naturezasDentroEstado NaturezaOperacao[] @relation("NaturezaCFOPDentro")
-  naturezasForaEstado   NaturezaOperacao[] @relation("NaturezaCFOPFora")
-  naturezasExterior     NaturezaOperacao[] @relation("NaturezaCFOPExterior")
+  naturezasOperacao     NaturezaOperacaoCFOP[]
 
   @@map("cfop")
 }
@@ -406,38 +404,51 @@ model Produto {
   @@map("produtos")
 }
 
-// Natureza de Operação (Configuração)
+// Natureza de Operação (Configuração) - Modelo Simplificado
 model NaturezaOperacao {
   id                    String @id @default(cuid())
   codigo                String @unique @db.VarChar(10) // Ex: VENDA, DEVOL, etc
-  descricao             String @db.VarChar(200) // Ex: Venda de mercadoria
+  nome                  String @db.VarChar(200) // Nome que aparece na NF
 
-  // CFOP Padrão
-  cfopDentroEstadoId    String? // CFOP para operações dentro do estado
-  cfopForaEstadoId      String? // CFOP para operações fora do estado
-  cfopExteriorId        String? // CFOP para operações com exterior
-  sobrescreverCfopProduto Boolean @default(false) // Se true, usa CFOP da natureza ao invés do produto
+  // Dados gerais
+  tipo                  Int @default(1) // 0=Entrada, 1=Saída
+  ativa                 Boolean @default(true)
+  dentroEstado          Boolean @default(false) @map("dentro_estado")
+  propria               Boolean @default(false)
 
-  // Configurações da NFe
-  tipoOperacao          Int @default(1) // 0=Entrada, 1=Saída
-  finalidade            Int @default(1) // 1=Normal, 2=Complementar, 3=Ajuste, 4=Devolução
-  consumidorFinal       Int @default(1) // 0=Não, 1=Sim
-  presencaComprador     Int @default(1) // 0=Não se aplica, 1=Presencial, etc
+  // Produtos com exceção CFOP (JSONB)
+  produtosExcecao       Json? // Ex: [{"cfopId": "5102", "descricaoCfop": "Venda...", "produtoId": "51401", "descricaoProduto": "DIPIRONA...", "padrao": false}]
 
-  // Informações Adicionais Padrão
-  informacoesAdicionaisPadrao String? @db.Text
+  // Informações adicionais
+  informacoesAdicionais String? @map("informacoes_adicionais") @db.Text
 
-  ativo                 Boolean @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt @default(now())
+
+  // Relacionamentos
+  cfops                 NaturezaOperacaoCFOP[]
+  matrizesFiscais       MatrizFiscal[]
+
+  @@map("naturezas_operacao")
+}
+
+// Tabela de relacionamento entre Natureza de Operação e CFOP
+model NaturezaOperacaoCFOP {
+  id                    String @id @default(cuid())
+  naturezaOperacaoId    String
+  cfopId                String
+  padrao                Boolean @default(false) // Flag para marcar CFOP padrão
+
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 
   // Relacionamentos
-  cfopDentroEstado      CFOP? @relation("NaturezaCFOPDentro", fields: [cfopDentroEstadoId], references: [id])
-  cfopForaEstado        CFOP? @relation("NaturezaCFOPFora", fields: [cfopForaEstadoId], references: [id])
-  cfopExterior          CFOP? @relation("NaturezaCFOPExterior", fields: [cfopExteriorId], references: [id])
-  matrizesFiscais       MatrizFiscal[]
+  naturezaOperacao      NaturezaOperacao @relation(fields: [naturezaOperacaoId], references: [id], onDelete: Cascade)
+  cfop                  CFOP @relation(fields: [cfopId], references: [id])
 
-  @@map("naturezas_operacao")
+  // Índices
+  @@unique([naturezaOperacaoId, cfopId]) // Evita duplicação
+  @@map("natureza_operacao_cfops")
 }
 
 // ================================

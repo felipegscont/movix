@@ -1,49 +1,53 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
 
-export interface NaturezaOperacao {
+export interface CFOP {
   id: string
   codigo: string
   descricao: string
-  cfopDentroEstadoId?: string
-  cfopForaEstadoId?: string
-  cfopExteriorId?: string
-  tipoOperacao: number // 0=Entrada, 1=Saída
-  finalidade: number // 1=Normal, 2=Complementar, 3=Ajuste, 4=Devolução
-  consumidorFinal: number // 0=Não, 1=Sim
-  presencaComprador: number // 0=Não se aplica, 1=Presencial, etc
-  informacoesAdicionaisPadrao?: string
-  ativo: boolean
+}
+
+export interface NaturezaOperacaoCFOP {
+  id: string
+  naturezaOperacaoId: string
+  cfopId: string
+  padrao: boolean
+  cfop: CFOP
   createdAt: string
   updatedAt: string
-  cfopDentroEstado?: {
-    id: string
-    codigo: string
-    descricao: string
-  }
-  cfopForaEstado?: {
-    id: string
-    codigo: string
-    descricao: string
-  }
-  cfopExterior?: {
-    id: string
-    codigo: string
-    descricao: string
-  }
+}
+
+export interface ProdutoExcecao {
+  cfopId: string
+  descricaoCfop: string
+  produtoId: string
+  descricaoProduto: string
+  padrao: boolean
+}
+
+export interface NaturezaOperacao {
+  id: string
+  codigo: string
+  nome: string
+  tipo: number // 0=Entrada, 1=Saída
+  ativa: boolean
+  dentroEstado: boolean
+  propria: boolean
+  produtosExcecao?: ProdutoExcecao[]
+  informacoesAdicionais?: string
+  createdAt: string
+  updatedAt: string
+  cfops?: NaturezaOperacaoCFOP[]
 }
 
 export interface CreateNaturezaOperacaoData {
   codigo: string
-  descricao: string
-  cfopDentroEstadoId?: string
-  cfopForaEstadoId?: string
-  cfopExteriorId?: string
-  tipoOperacao: number
-  finalidade: number
-  consumidorFinal: number
-  presencaComprador: number
-  informacoesAdicionaisPadrao?: string
-  ativo?: boolean
+  nome: string
+  tipo: number
+  ativa?: boolean
+  dentroEstado?: boolean
+  propria?: boolean
+  produtosExcecao?: ProdutoExcecao[]
+  informacoesAdicionais?: string
 }
 
 export interface UpdateNaturezaOperacaoData extends Partial<CreateNaturezaOperacaoData> {}
@@ -171,6 +175,80 @@ export class NaturezaOperacaoService {
       }
     } catch (error: any) {
       console.error('Erro ao excluir natureza de operação:', error)
+      throw error
+    }
+  }
+
+  // Métodos para gerenciar CFOPs
+  static async addCFOP(naturezaId: string, cfopId: string, padrao: boolean = false): Promise<NaturezaOperacaoCFOP> {
+    try {
+      const response = await fetch(`${API_BASE_URL}${this.BASE_PATH}/${naturezaId}/cfops`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ cfopId, padrao }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || 'Erro ao adicionar CFOP')
+      }
+
+      return response.json()
+    } catch (error: any) {
+      console.error('Erro ao adicionar CFOP:', error)
+      throw error
+    }
+  }
+
+  static async removeCFOP(naturezaId: string, cfopId: string): Promise<void> {
+    try {
+      const response = await fetch(`${API_BASE_URL}${this.BASE_PATH}/${naturezaId}/cfops/${cfopId}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || 'Erro ao remover CFOP')
+      }
+    } catch (error: any) {
+      console.error('Erro ao remover CFOP:', error)
+      throw error
+    }
+  }
+
+  static async updateCFOPPadrao(naturezaId: string, cfopId: string, padrao: boolean): Promise<NaturezaOperacaoCFOP> {
+    try {
+      const response = await fetch(`${API_BASE_URL}${this.BASE_PATH}/${naturezaId}/cfops/${cfopId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ padrao }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || 'Erro ao atualizar CFOP padrão')
+      }
+
+      return response.json()
+    } catch (error: any) {
+      console.error('Erro ao atualizar CFOP padrão:', error)
+      throw error
+    }
+  }
+
+  static async getCFOPs(naturezaId: string): Promise<NaturezaOperacaoCFOP[]> {
+    try {
+      const response = await fetch(`${API_BASE_URL}${this.BASE_PATH}/${naturezaId}/cfops`)
+      if (!response.ok) {
+        throw new Error('Erro ao buscar CFOPs da natureza de operação')
+      }
+      return response.json()
+    } catch (error: any) {
+      console.error('Erro ao buscar CFOPs:', error)
       throw error
     }
   }
