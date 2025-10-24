@@ -18,13 +18,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { AuxiliarService } from "@/lib/services/auxiliar.service"
-
-interface Municipio {
-  id: string
-  nome: string
-  codigoIBGE: string
-}
+import { AuxiliarService, type Municipio } from "@/lib/services/auxiliar.service"
 
 interface MunicipioComboboxProps {
   value?: string
@@ -73,7 +67,7 @@ export function MunicipioCombobox({
   const filteredMunicipios = React.useMemo(() => {
     if (!search) return municipios
 
-    return searchInFields(municipios, search, ['nome', 'codigoIBGE'])
+    return searchInFields(municipios, search, ['nome', 'codigoIbge'])
   }, [municipios, search])
 
   const selectedMunicipio = municipios.find((municipio) => municipio.id === value)

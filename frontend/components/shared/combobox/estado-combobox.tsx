@@ -18,16 +18,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { AuxiliarService } from "@/lib/services/auxiliar.service"
-
-interface Estado {
-  id: string
-  codigo: string
-  uf: string
-  nome: string
-  regiao: string
-  ativo: boolean
-}
+import { AuxiliarService, type Estado } from "@/lib/services/auxiliar.service"
 
 interface EstadoComboboxProps {
   value?: string

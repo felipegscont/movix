@@ -19,13 +19,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { NaturezaOperacaoService } from "@/lib/services/natureza-operacao.service"
-
-interface NaturezaOperacao {
-  id: string
-  codigo: string
-  descricao: string
-}
+import { NaturezaOperacaoService, type NaturezaOperacao } from "@/lib/services/natureza-operacao.service"
 
 interface NaturezaOperacaoComboboxProps {
   value?: string // Descrição da natureza
@@ -68,11 +62,11 @@ export function NaturezaOperacaoCombobox({
 
   const filteredNaturezas = React.useMemo(() => {
     if (!search) return naturezas
-    return searchInFields(naturezas, search, ['codigo', 'descricao'])
+    return searchInFields(naturezas, search, ['codigo', 'nome'])
   }, [naturezas, search])
 
   // Encontrar natureza selecionada pela descrição
-  const selectedNatureza = naturezas.find((n) => n.descricao === value)
+  const selectedNatureza = naturezas.find((n) => n.nome === value)
 
   // Modo customizado: input livre
   if (customMode && allowCustom) {
@@ -156,19 +150,19 @@ export function NaturezaOperacaoCombobox({
                   key={natureza.id}
                   value={natureza.id}
                   onSelect={() => {
-                    onValueChange(natureza.descricao, natureza.id)
+                    onValueChange(natureza.nome, natureza.id)
                     setOpen(false)
                   }}
                 >
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      value === natureza.descricao ? "opacity-100" : "opacity-0"
+                      value === natureza.nome ? "opacity-100" : "opacity-0"
                     )}
                   />
                   <div className="flex flex-col">
                     <span className="font-medium">{natureza.codigo}</span>
-                    <span className="text-sm text-muted-foreground">{natureza.descricao}</span>
+                    <span className="text-sm text-muted-foreground">{natureza.nome}</span>
                   </div>
                 </CommandItem>
               ))}
