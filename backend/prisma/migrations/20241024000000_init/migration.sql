@@ -123,6 +123,31 @@ CREATE TABLE "emitentes" (
 );
 
 -- CreateTable
+CREATE TABLE "certificados_digitais" (
+    "id" TEXT NOT NULL,
+    "emitenteId" TEXT NOT NULL,
+    "arquivoPath" VARCHAR(500) NOT NULL,
+    "arquivoNome" VARCHAR(255) NOT NULL,
+    "arquivoTamanho" INTEGER NOT NULL,
+    "senha" VARCHAR(100) NOT NULL,
+    "cnpjCertificado" VARCHAR(14),
+    "razaoSocialCertificado" VARCHAR(200),
+    "titular" VARCHAR(200),
+    "emissor" VARCHAR(200),
+    "numeroSerie" VARCHAR(100),
+    "validoDe" TIMESTAMP(3) NOT NULL,
+    "validoAte" TIMESTAMP(3) NOT NULL,
+    "diasParaVencimento" INTEGER NOT NULL,
+    "expirado" BOOLEAN NOT NULL DEFAULT false,
+    "proximoVencimento" BOOLEAN NOT NULL DEFAULT false,
+    "ativo" BOOLEAN NOT NULL DEFAULT true,
+    "dataUpload" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "ultimaValidacao" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "certificados_digitais_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "clientes" (
     "id" TEXT NOT NULL,
     "tipo" VARCHAR(10) NOT NULL,
@@ -131,6 +156,7 @@ CREATE TABLE "clientes" (
     "nomeFantasia" VARCHAR(200),
     "inscricaoEstadual" VARCHAR(20),
     "inscricaoMunicipal" VARCHAR(20),
+    "inscricaoSuframa" VARCHAR(15),
     "logradouro" VARCHAR(200) NOT NULL,
     "numero" VARCHAR(20) NOT NULL,
     "complemento" VARCHAR(100),
@@ -184,6 +210,7 @@ CREATE TABLE "produtos" (
     "descricaoComplementar" TEXT,
     "ncmId" TEXT NOT NULL,
     "cestId" TEXT,
+    "cfopId" TEXT,
     "unidade" VARCHAR(10) NOT NULL,
     "unidadeTributavel" VARCHAR(10),
     "valorUnitario" DECIMAL(15,4) NOT NULL,
@@ -197,12 +224,43 @@ CREATE TABLE "produtos" (
     "largura" DECIMAL(10,4),
     "profundidade" DECIMAL(10,4),
     "origem" VARCHAR(1) NOT NULL,
+    "icmsCstId" TEXT,
+    "icmsCsosnId" TEXT,
+    "icmsAliquota" DECIMAL(5,2) NOT NULL DEFAULT 0,
+    "icmsReducao" DECIMAL(5,2),
+    "pisCstId" TEXT,
+    "pisAliquota" DECIMAL(5,4) NOT NULL DEFAULT 0,
+    "cofinsCstId" TEXT,
+    "cofinsAliquota" DECIMAL(5,4) NOT NULL DEFAULT 0,
+    "ipiCstId" TEXT,
+    "ipiAliquota" DECIMAL(5,2),
     "fornecedorId" TEXT,
     "ativo" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "produtos_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "naturezas_operacao" (
+    "id" TEXT NOT NULL,
+    "codigo" VARCHAR(10) NOT NULL,
+    "descricao" VARCHAR(200) NOT NULL,
+    "cfopDentroEstadoId" TEXT,
+    "cfopForaEstadoId" TEXT,
+    "cfopExteriorId" TEXT,
+    "sobrescreverCfopProduto" BOOLEAN NOT NULL DEFAULT false,
+    "tipoOperacao" INTEGER NOT NULL DEFAULT 1,
+    "finalidade" INTEGER NOT NULL DEFAULT 1,
+    "consumidorFinal" INTEGER NOT NULL DEFAULT 1,
+    "presencaComprador" INTEGER NOT NULL DEFAULT 1,
+    "informacoesAdicionaisPadrao" TEXT,
+    "ativo" BOOLEAN NOT NULL DEFAULT true,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "naturezas_operacao_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -233,11 +291,15 @@ CREATE TABLE "nfes" (
     "valorTotal" DECIMAL(15,2) NOT NULL,
     "baseCalculoICMS" DECIMAL(15,2) NOT NULL DEFAULT 0,
     "valorICMS" DECIMAL(15,2) NOT NULL DEFAULT 0,
+    "valorICMSDesonerado" DECIMAL(15,2) NOT NULL DEFAULT 0,
+    "valorFCP" DECIMAL(15,2) NOT NULL DEFAULT 0,
     "baseCalculoICMSST" DECIMAL(15,2) NOT NULL DEFAULT 0,
     "valorICMSST" DECIMAL(15,2) NOT NULL DEFAULT 0,
     "valorIPI" DECIMAL(15,2) NOT NULL DEFAULT 0,
     "valorPIS" DECIMAL(15,2) NOT NULL DEFAULT 0,
     "valorCOFINS" DECIMAL(15,2) NOT NULL DEFAULT 0,
+    "valorII" DECIMAL(15,2) NOT NULL DEFAULT 0,
+    "valorOutrasDespesas" DECIMAL(15,2) NOT NULL DEFAULT 0,
     "modalidadeFrete" INTEGER NOT NULL DEFAULT 9,
     "status" TEXT NOT NULL DEFAULT 'DIGITACAO',
     "protocolo" VARCHAR(20),
@@ -362,16 +424,60 @@ CREATE TABLE "nfe_itens_cofins" (
 );
 
 -- CreateTable
+CREATE TABLE "formas_pagamento" (
+    "id" TEXT NOT NULL,
+    "codigo" VARCHAR(2) NOT NULL,
+    "descricao" VARCHAR(200) NOT NULL,
+    "requerCard" BOOLEAN NOT NULL DEFAULT false,
+    "vigenciaInicio" TIMESTAMP(3),
+    "observacoes" TEXT,
+    "ativo" BOOLEAN NOT NULL DEFAULT true,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "formas_pagamento_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "nfe_cobrancas" (
+    "id" TEXT NOT NULL,
+    "nfeId" TEXT NOT NULL,
+    "numeroFatura" VARCHAR(20),
+    "valorOriginal" DECIMAL(15,2) NOT NULL,
+    "valorDesconto" DECIMAL(15,2) NOT NULL DEFAULT 0,
+    "valorLiquido" DECIMAL(15,2) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "nfe_cobrancas_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "nfe_duplicatas" (
+    "id" TEXT NOT NULL,
+    "nfeId" TEXT NOT NULL,
+    "numero" VARCHAR(20) NOT NULL,
+    "dataVencimento" TIMESTAMP(3) NOT NULL,
+    "valor" DECIMAL(15,2) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "nfe_duplicatas_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "nfe_pagamentos" (
     "id" TEXT NOT NULL,
     "nfeId" TEXT NOT NULL,
-    "formaPagamento" VARCHAR(2) NOT NULL,
+    "indicadorPagamento" INTEGER NOT NULL DEFAULT 0,
+    "formaPagamentoId" TEXT NOT NULL,
+    "descricaoPagamento" VARCHAR(200),
     "valor" DECIMAL(15,2) NOT NULL,
-    "tipoIntegracao" VARCHAR(1),
+    "dataPagamento" TIMESTAMP(3),
+    "tipoIntegracao" INTEGER,
     "cnpjCredenciadora" VARCHAR(14),
     "bandeira" VARCHAR(2),
     "numeroAutorizacao" VARCHAR(20),
-    "valorTroco" DECIMAL(15,2),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -417,6 +523,52 @@ CREATE TABLE "log_acoes" (
     CONSTRAINT "log_acoes_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "matrizes_fiscais" (
+    "id" TEXT NOT NULL,
+    "codigo" VARCHAR(20) NOT NULL,
+    "descricao" VARCHAR(255) NOT NULL,
+    "seAplicaA" VARCHAR(20),
+    "modeloNF" VARCHAR(10),
+    "regimeTributario" INTEGER,
+    "ufDestino" VARCHAR(2),
+    "produtoId" TEXT,
+    "cfopId" TEXT,
+    "tipoItem" VARCHAR(20),
+    "ncmId" TEXT,
+    "naturezaOperacaoId" TEXT,
+    "ufOrigem" VARCHAR(2),
+    "tipoCliente" VARCHAR(20),
+    "cstId" TEXT,
+    "csosnId" TEXT,
+    "aliquota" DECIMAL(5,4),
+    "reducaoBC" DECIMAL(5,2),
+    "fcp" DECIMAL(5,4),
+    "icmsCstId" TEXT,
+    "icmsCsosnId" TEXT,
+    "icmsAliquota" DECIMAL(5,2),
+    "icmsReducao" DECIMAL(5,2),
+    "icmsModalidadeBC" INTEGER,
+    "icmsStAliquota" DECIMAL(5,2),
+    "icmsStReducao" DECIMAL(5,2),
+    "icmsStModalidadeBC" INTEGER,
+    "icmsStMva" DECIMAL(5,2),
+    "ipiCstId" TEXT,
+    "ipiAliquota" DECIMAL(5,2),
+    "pisCstId" TEXT,
+    "pisAliquota" DECIMAL(5,4),
+    "cofinsCstId" TEXT,
+    "cofinsAliquota" DECIMAL(5,4),
+    "prioridade" INTEGER NOT NULL DEFAULT 0,
+    "dataInicio" TIMESTAMP(3),
+    "dataFim" TIMESTAMP(3),
+    "ativo" BOOLEAN NOT NULL DEFAULT true,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "matrizes_fiscais_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "estados_codigo_key" ON "estados"("codigo");
 
@@ -439,10 +591,16 @@ CREATE UNIQUE INDEX "cest_codigo_key" ON "cest"("codigo");
 CREATE UNIQUE INDEX "csosn_codigo_key" ON "csosn"("codigo");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "cst_codigo_key" ON "cst"("codigo");
+CREATE UNIQUE INDEX "cst_codigo_tipo_key" ON "cst"("codigo", "tipo");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "emitentes_cnpj_key" ON "emitentes"("cnpj");
+
+-- CreateIndex
+CREATE INDEX "certificados_digitais_emitenteId_idx" ON "certificados_digitais"("emitenteId");
+
+-- CreateIndex
+CREATE INDEX "certificados_digitais_validoAte_idx" ON "certificados_digitais"("validoAte");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "clientes_documento_key" ON "clientes"("documento");
@@ -452,6 +610,9 @@ CREATE UNIQUE INDEX "fornecedores_documento_key" ON "fornecedores"("documento");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "produtos_codigo_key" ON "produtos"("codigo");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "naturezas_operacao_codigo_key" ON "naturezas_operacao"("codigo");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "nfes_chave_key" ON "nfes"("chave");
@@ -474,6 +635,33 @@ CREATE UNIQUE INDEX "nfe_itens_pis_nfeItemId_key" ON "nfe_itens_pis"("nfeItemId"
 -- CreateIndex
 CREATE UNIQUE INDEX "nfe_itens_cofins_nfeItemId_key" ON "nfe_itens_cofins"("nfeItemId");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "formas_pagamento_codigo_key" ON "formas_pagamento"("codigo");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "nfe_cobrancas_nfeId_key" ON "nfe_cobrancas"("nfeId");
+
+-- CreateIndex
+CREATE INDEX "matrizes_fiscais_codigo_seAplicaA_modeloNF_idx" ON "matrizes_fiscais"("codigo", "seAplicaA", "modeloNF");
+
+-- CreateIndex
+CREATE INDEX "matrizes_fiscais_produtoId_cfopId_ncmId_idx" ON "matrizes_fiscais"("produtoId", "cfopId", "ncmId");
+
+-- CreateIndex
+CREATE INDEX "matrizes_fiscais_ufDestino_tipoItem_idx" ON "matrizes_fiscais"("ufDestino", "tipoItem");
+
+-- CreateIndex
+CREATE INDEX "matrizes_fiscais_prioridade_idx" ON "matrizes_fiscais"("prioridade");
+
+-- CreateIndex
+CREATE INDEX "matrizes_fiscais_ativo_idx" ON "matrizes_fiscais"("ativo");
+
+-- CreateIndex
+CREATE INDEX "matrizes_fiscais_dataInicio_dataFim_idx" ON "matrizes_fiscais"("dataInicio", "dataFim");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "matrizes_fiscais_codigo_descricao_key" ON "matrizes_fiscais"("codigo", "descricao");
+
 -- AddForeignKey
 ALTER TABLE "municipios" ADD CONSTRAINT "municipios_estadoId_fkey" FOREIGN KEY ("estadoId") REFERENCES "estados"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -485,6 +673,9 @@ ALTER TABLE "emitentes" ADD CONSTRAINT "emitentes_municipioId_fkey" FOREIGN KEY 
 
 -- AddForeignKey
 ALTER TABLE "emitentes" ADD CONSTRAINT "emitentes_estadoId_fkey" FOREIGN KEY ("estadoId") REFERENCES "estados"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "certificados_digitais" ADD CONSTRAINT "certificados_digitais_emitenteId_fkey" FOREIGN KEY ("emitenteId") REFERENCES "emitentes"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "clientes" ADD CONSTRAINT "clientes_municipioId_fkey" FOREIGN KEY ("municipioId") REFERENCES "municipios"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -505,7 +696,34 @@ ALTER TABLE "produtos" ADD CONSTRAINT "produtos_ncmId_fkey" FOREIGN KEY ("ncmId"
 ALTER TABLE "produtos" ADD CONSTRAINT "produtos_cestId_fkey" FOREIGN KEY ("cestId") REFERENCES "cest"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "produtos" ADD CONSTRAINT "produtos_cfopId_fkey" FOREIGN KEY ("cfopId") REFERENCES "cfop"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "produtos" ADD CONSTRAINT "produtos_fornecedorId_fkey" FOREIGN KEY ("fornecedorId") REFERENCES "fornecedores"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "produtos" ADD CONSTRAINT "produtos_icmsCstId_fkey" FOREIGN KEY ("icmsCstId") REFERENCES "cst"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "produtos" ADD CONSTRAINT "produtos_icmsCsosnId_fkey" FOREIGN KEY ("icmsCsosnId") REFERENCES "csosn"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "produtos" ADD CONSTRAINT "produtos_pisCstId_fkey" FOREIGN KEY ("pisCstId") REFERENCES "cst"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "produtos" ADD CONSTRAINT "produtos_cofinsCstId_fkey" FOREIGN KEY ("cofinsCstId") REFERENCES "cst"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "produtos" ADD CONSTRAINT "produtos_ipiCstId_fkey" FOREIGN KEY ("ipiCstId") REFERENCES "cst"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "naturezas_operacao" ADD CONSTRAINT "naturezas_operacao_cfopDentroEstadoId_fkey" FOREIGN KEY ("cfopDentroEstadoId") REFERENCES "cfop"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "naturezas_operacao" ADD CONSTRAINT "naturezas_operacao_cfopForaEstadoId_fkey" FOREIGN KEY ("cfopForaEstadoId") REFERENCES "cfop"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "naturezas_operacao" ADD CONSTRAINT "naturezas_operacao_cfopExteriorId_fkey" FOREIGN KEY ("cfopExteriorId") REFERENCES "cfop"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "nfes" ADD CONSTRAINT "nfes_emitenteId_fkey" FOREIGN KEY ("emitenteId") REFERENCES "emitentes"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -553,7 +771,50 @@ ALTER TABLE "nfe_itens_cofins" ADD CONSTRAINT "nfe_itens_cofins_nfeItemId_fkey" 
 ALTER TABLE "nfe_itens_cofins" ADD CONSTRAINT "nfe_itens_cofins_cstId_fkey" FOREIGN KEY ("cstId") REFERENCES "cst"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "nfe_cobrancas" ADD CONSTRAINT "nfe_cobrancas_nfeId_fkey" FOREIGN KEY ("nfeId") REFERENCES "nfes"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "nfe_duplicatas" ADD CONSTRAINT "nfe_duplicatas_nfeId_fkey" FOREIGN KEY ("nfeId") REFERENCES "nfes"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "nfe_pagamentos" ADD CONSTRAINT "nfe_pagamentos_nfeId_fkey" FOREIGN KEY ("nfeId") REFERENCES "nfes"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "nfe_pagamentos" ADD CONSTRAINT "nfe_pagamentos_formaPagamentoId_fkey" FOREIGN KEY ("formaPagamentoId") REFERENCES "formas_pagamento"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "nfe_eventos" ADD CONSTRAINT "nfe_eventos_nfeId_fkey" FOREIGN KEY ("nfeId") REFERENCES "nfes"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "matrizes_fiscais" ADD CONSTRAINT "matrizes_fiscais_produtoId_fkey" FOREIGN KEY ("produtoId") REFERENCES "produtos"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "matrizes_fiscais" ADD CONSTRAINT "matrizes_fiscais_cfopId_fkey" FOREIGN KEY ("cfopId") REFERENCES "cfop"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "matrizes_fiscais" ADD CONSTRAINT "matrizes_fiscais_ncmId_fkey" FOREIGN KEY ("ncmId") REFERENCES "ncm"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "matrizes_fiscais" ADD CONSTRAINT "matrizes_fiscais_cstId_fkey" FOREIGN KEY ("cstId") REFERENCES "cst"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "matrizes_fiscais" ADD CONSTRAINT "matrizes_fiscais_csosnId_fkey" FOREIGN KEY ("csosnId") REFERENCES "csosn"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "matrizes_fiscais" ADD CONSTRAINT "matrizes_fiscais_naturezaOperacaoId_fkey" FOREIGN KEY ("naturezaOperacaoId") REFERENCES "naturezas_operacao"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "matrizes_fiscais" ADD CONSTRAINT "matrizes_fiscais_icmsCstId_fkey" FOREIGN KEY ("icmsCstId") REFERENCES "cst"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "matrizes_fiscais" ADD CONSTRAINT "matrizes_fiscais_icmsCsosnId_fkey" FOREIGN KEY ("icmsCsosnId") REFERENCES "csosn"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "matrizes_fiscais" ADD CONSTRAINT "matrizes_fiscais_ipiCstId_fkey" FOREIGN KEY ("ipiCstId") REFERENCES "cst"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "matrizes_fiscais" ADD CONSTRAINT "matrizes_fiscais_pisCstId_fkey" FOREIGN KEY ("pisCstId") REFERENCES "cst"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "matrizes_fiscais" ADD CONSTRAINT "matrizes_fiscais_cofinsCstId_fkey" FOREIGN KEY ("cofinsCstId") REFERENCES "cst"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
