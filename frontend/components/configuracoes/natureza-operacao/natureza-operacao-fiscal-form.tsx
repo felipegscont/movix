@@ -12,7 +12,7 @@ import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { IconDeviceFloppy, IconList, IconLayoutGrid, IconPlus } from "@tabler/icons-react"
+import { IconDeviceFloppy, IconList, IconLayoutGrid, IconPlus, IconArrowLeft } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { NaturezaOperacaoService, NaturezaOperacao } from "@/lib/services/natureza-operacao.service"
 import { NaturezaOperacaoCFOPManager } from "./natureza-operacao-cfop-manager"
@@ -124,11 +124,23 @@ export function NaturezaOperacaoFiscalForm({
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center justify-between p-6 border-b">
-        <div>
-          <h1 className="text-2xl font-bold">CONFIGURAÇÕES / FISCAL / NATUREZA DE OPERAÇÃO</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {naturezaId ? "Editar Natureza de Operação" : "Adicionar Nova Natureza de Operação"}
-          </p>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onCancel}
+            className="h-8 w-8 p-0"
+          >
+            <IconArrowLeft className="h-4 w-4" />
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold">
+              {naturezaId ? "Editar" : "Nova"} Natureza de Operação
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Configure natureza de operação e CFOPs
+            </p>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <Button

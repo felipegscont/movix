@@ -58,7 +58,6 @@ import {
   IconDotsVertical,
   IconEdit,
   IconTrash,
-  IconPlus,
   IconLayoutColumns,
   IconChevronLeft,
   IconChevronRight,
@@ -70,10 +69,10 @@ import { NaturezaOperacao, NaturezaOperacaoService } from "@/lib/services/nature
 import { toast } from "sonner"
 
 interface NaturezaOperacaoDataTableProps {
-  onOpenFiscalView?: (naturezaId: string) => void
+  onEdit?: (naturezaId: string) => void
 }
 
-export function NaturezaOperacaoDataTable({ onOpenFiscalView }: NaturezaOperacaoDataTableProps = {}) {
+export function NaturezaOperacaoDataTable({ onEdit }: NaturezaOperacaoDataTableProps = {}) {
   const [data, setData] = useState<NaturezaOperacao[]>([])
   const [loading, setLoading] = useState(true)
   const [rowSelection, setRowSelection] = useState({})
@@ -107,11 +106,7 @@ export function NaturezaOperacaoDataTable({ onOpenFiscalView }: NaturezaOperacao
   }
 
   const handleEdit = (id: string) => {
-    onOpenFiscalView?.(id)
-  }
-
-  const handleNew = () => {
-    onOpenFiscalView?.()
+    onEdit?.(id)
   }
 
 
@@ -294,15 +289,7 @@ export function NaturezaOperacaoDataTable({ onOpenFiscalView }: NaturezaOperacao
   })
 
   return (
-    <div className="space-y-4 px-4 lg:px-6">
-      {/* Header */}
-      <div className="flex items-center justify-end">
-        <Button onClick={handleNew}>
-          <IconPlus className="mr-2 h-4 w-4" />
-          Nova Natureza
-        </Button>
-      </div>
-
+    <div className="space-y-4">
       {/* Toolbar */}
       <div className="flex items-center justify-between">
         <div className="flex flex-1 items-center space-x-2">
