@@ -31,14 +31,14 @@ function loadNCMs(): NCMData[] {
     throw new Error('Formato de arquivo NCM inválido')
   }
 
-  // Filtrar apenas NCMs de 8 dígitos
+  // Filtrar apenas NCMs de 8 dígitos (removendo pontos)
   const ncms = ncmsRaw
     .filter((item: any) => {
-      const codigo = item.Codigo || item.codigo
+      const codigo = (item.Codigo || item.codigo || '').replace(/\./g, '')
       return codigo && codigo.length === 8
     })
     .map((item: any) => ({
-      codigo: item.Codigo || item.codigo,
+      codigo: (item.Codigo || item.codigo).replace(/\./g, ''),
       descricao: item.Descricao || item.descricao,
       unidade: item.UnidadeMedida || item.unidade || 'UN',
     }))

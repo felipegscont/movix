@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Check, ChevronsUpDown } from "lucide-react"
+import { Check, ChevronsUpDown, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { searchInFields } from "@/lib/utils/search"
 import { Button } from "@/components/ui/button"
@@ -19,6 +19,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { ProdutoService } from "@/lib/services/produto.service"
+import { ProdutoFormDialog } from "@/components/cadastros/produtos/produto-form-dialog"
 
 interface Produto {
   id: string
@@ -45,6 +46,7 @@ export function ProdutoCombobox({
   const [produtos, setProdutos] = React.useState<Produto[]>([])
   const [loading, setLoading] = React.useState(false)
   const [search, setSearch] = React.useState("")
+  const [showCreateDialog, setShowCreateDialog] = React.useState(false)
 
   React.useEffect(() => {
     loadProdutos()
