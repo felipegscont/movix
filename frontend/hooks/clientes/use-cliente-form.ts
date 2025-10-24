@@ -91,7 +91,7 @@ const formatPhone = (value: string) => {
 
 interface UseClienteFormProps {
   clienteId?: string
-  onSuccess?: () => void
+  onSuccess?: (cliente?: any) => void
 }
 
 interface UseClienteFormReturn {
@@ -434,15 +434,16 @@ export function useClienteForm({ clienteId, onSuccess }: UseClienteFormProps): U
         cep: data.cep?.replace(/\D/g, '') || '',
       }
 
+      let cliente
       if (clienteId) {
-        await ClienteService.update(clienteId, cleanedData)
+        cliente = await ClienteService.update(clienteId, cleanedData)
         toast.success("Cliente atualizado com sucesso!")
       } else {
-        await ClienteService.create(cleanedData)
+        cliente = await ClienteService.create(cleanedData)
         toast.success("Cliente criado com sucesso!")
       }
 
-      onSuccess?.()
+      onSuccess?.(cliente)
       return true // Sucesso
     } catch (error: any) {
       // Trata erros específicos com alert dialog

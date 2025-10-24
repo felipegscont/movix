@@ -22,26 +22,26 @@ interface UseNfeFormProps {
 interface UseNfeFormReturn {
   // Form
   form: any
-  
+
   // Loading states
   loading: boolean
   loadingNfe: boolean
   loadingEmitente: boolean
-  
+
   // Data
   emitente: any
   nfe: any
-  
+
   // Actions
   handleSubmit: (data: NfeFormData) => Promise<void>
   loadNfe: () => Promise<void>
   resetForm: () => void
-  
+
   // Item management
   addItem: (item: NfeItemFormData) => void
   updateItem: (index: number, item: NfeItemFormData) => void
   removeItem: (index: number) => void
-  
+
   // Calculations
   calculateItemTotal: (item: Partial<NfeItemFormData>) => number
   calculateNfeTotal: () => number
@@ -54,6 +54,15 @@ interface UseNfeFormReturn {
     valorPIS: number
     valorCOFINS: number
   }
+
+  // Alert dialog
+  alertDialog: {
+    open: boolean
+    title: string
+    description: string
+    errors: string[]
+    onClose: () => void
+  }
 }
 
 export function useNfeForm({ nfeId, onSuccess }: UseNfeFormProps = {}): UseNfeFormReturn {
@@ -63,6 +72,12 @@ export function useNfeForm({ nfeId, onSuccess }: UseNfeFormProps = {}): UseNfeFo
   const [loadingEmitente, setLoadingEmitente] = useState(true)
   const [emitente, setEmitente] = useState<any>(null)
   const [nfe, setNfe] = useState<any>(null)
+  const [alertDialog, setAlertDialog] = useState({
+    open: false,
+    title: "",
+    description: "",
+    errors: [] as string[]
+  })
 
   // Inicializar form com React Hook Form + Zod
   const form = useForm<NfeFormData>({
@@ -204,10 +219,114 @@ export function useNfeForm({ nfeId, onSuccess }: UseNfeFormProps = {}): UseNfeFo
 
       console.log('✅ Validações passaram')
 
+      // Transformar dados do formulário para o formato do backend
+      const backendData = {
+        clienteId: data.clienteId,
+        serie: data.serie,
+        naturezaOperacao: data.naturezaOperacao,
+        tipoOperacao: data.tipoOperacao,
+        consumidorFinal: data.consumidorFinal,
+        presencaComprador: data.presencaComprador,
+        dataEmissao: data.dataEmissao,
+        dataSaida: data.dataSaida,
+        modalidadeFrete: data.modalidadeFrete,
+        valorFrete: data.valorFrete,
+        valorSeguro: data.valorSeguro,
+        valorDesconto: data.valorDesconto,
+        valorOutros: data.valorOutros,
+        informacoesAdicionais: data.informacoesAdicionais,
+        informacoesFisco: data.informacoesFisco,
+        itens: data.itens.map((item, index) => {
+          // Validar campos obrigatórios
+          if (!item.pisCstId) {
+            throw new Error(`Item ${index + 1}: CST PIS é obrigatório`)
+          }
+          if (!item.cofinsCstId) {
+            throw new Error(`Item ${index + 1}: CST COFINS é obrigatório`)
+          }
+
+          return {
+            produtoId: item.produtoId,
+            numeroItem: index + 1, // Converter para inteiro começando em 1
+            cfopId: item.cfopId,
+            quantidadeComercial: item.quantidadeComercial,
+            valorUnitario: item.valorUnitario,
+            valorDesconto: item.valorDesconto || 0,
+            valorFrete: item.valorFrete || 0,
+            valorSeguro: item.valorSeguro || 0,
+            valorOutros: item.valorOutros || 0,
+            informacoesAdicionais: item.informacoesAdicionais,
+            // Tributação ICMS
+            icmsCstId: item.icmsCstId,
+            icmsCsosnId: item.icmsCsosnId,
+            icmsBaseCalculo: item.icmsBaseCalculo || 0,
+            icmsAliquota: item.icmsAliquota || 0,
+            icmsValor: item.icmsValor || 0,
+            // Tributação PIS
+            pisCstId: item.pisCstId,
+            pisBaseCalculo: item.pisBaseCalculo || 0,
+            pisAliquota: item.pisAliquota || 0,
+            pisValor: item.pisValor || 0,
+            // Tributação COFINS
+            cofinsCstId: item.cofinsCstId,
+            cofinsBaseCalculo: item.cofinsBaseCalculo || 0,
+            cofinsAliquota: item.cofinsAliquota || 0,
+            cofinsValor: item.cofinsValor || 0,
+          }
+        }),
+        duplicatas: data.duplicatas?.map(dup => ({
+          numero: dup.numero,
+          dataVencimento: dup.dataVencimento,
+          valor: dup.valor,
+        })),
+        cobranca: data.cobranca ? {
+          numeroFatura: data.cobranca.numeroFatura,
+          valorOriginal: data.cobranca.valorOriginal,
+          valorDesconto: data.cobranca.valorDesconto || 0,
+          valorLiquido: data.cobranca.valorLiquido,
+        } : undefined,
+        pagamentos: data.pagamentos?.map(pag => ({
+          indicadorPagamento: pag.indicadorPagamento,
+          formaPagamento: pag.formaPagamentoCodigo || pag.formaPagamento, // Código da forma de pagamento (string)
+          descricaoPagamento: pag.descricaoPagamento,
+          valor: pag.valor,
+          dataPagamento: pag.dataPagamento,
+          tipoIntegracao: pag.tipoIntegracao,
+          cnpjCredenciadora: pag.cnpjCredenciadora,
+          bandeira: pag.bandeira,
+          numeroAutorizacao: pag.numeroAutorizacao,
+        })),
+      }
+
+      // Buscar códigos das formas de pagamento
+      if (backendData.pagamentos && backendData.pagamentos.length > 0) {
+        const formasPagamento = await NfeService.getFormasPagamento()
+
+        backendData.pagamentos = backendData.pagamentos.map(pag => {
+          // Se já tem o código, usa ele
+          if (pag.formaPagamento && pag.formaPagamento.length === 2) {
+            return pag
+          }
+
+          // Buscar o código pelo ID (formaPagamentoId do formulário)
+          const formaPagamentoId = (data.pagamentos?.find(p => p.valor === pag.valor))?.formaPagamentoId
+          if (formaPagamentoId) {
+            const forma = formasPagamento.find((f: any) => f.id === formaPagamentoId)
+            if (forma) {
+              return { ...pag, formaPagamento: forma.codigo }
+            }
+          }
+
+          return pag
+        })
+      }
+
+      console.log('📦 Dados transformados para backend:', backendData)
+
       if (nfeId) {
         // Atualizar NFe existente
         console.log('🔄 Atualizando NFe:', nfeId)
-        await NfeService.update(nfeId, data)
+        await NfeService.update(nfeId, backendData)
         toast.success("NFe atualizada com sucesso!")
 
         console.log('➡️ Redirecionando para /nfes em 1 segundo...')
@@ -218,7 +337,7 @@ export function useNfeForm({ nfeId, onSuccess }: UseNfeFormProps = {}): UseNfeFo
       } else {
         // Criar nova NFe
         console.log('➕ Criando nova NFe')
-        const result = await NfeService.create(data)
+        const result = await NfeService.create(backendData)
         console.log('✅ NFe criada:', result)
         toast.success("NFe criada com sucesso!")
 
@@ -239,14 +358,29 @@ export function useNfeForm({ nfeId, onSuccess }: UseNfeFormProps = {}): UseNfeFo
 
       // Extrair mensagem de erro mais específica
       let errorMessage = "Erro ao salvar NFe"
+      let errorsList: string[] = []
 
       if (error.message) {
         errorMessage = error.message
+
+        // Parsear erros de validação
+        if (errorMessage.includes(',')) {
+          errorsList = errorMessage.split(',').map((err: string) => err.trim())
+        } else {
+          errorsList = [errorMessage]
+        }
       } else if (typeof error === 'string') {
         errorMessage = error
+        errorsList = [error]
       }
 
-      toast.error(errorMessage)
+      // Mostrar AlertDialog com os erros
+      setAlertDialog({
+        open: true,
+        title: "Erro ao Salvar NFe",
+        description: "Foram encontrados os seguintes problemas que precisam ser corrigidos:",
+        errors: errorsList
+      })
     } finally {
       console.log('🏁 Finalizando, setando loading para false')
       setLoading(false)
@@ -327,6 +461,10 @@ export function useNfeForm({ nfeId, onSuccess }: UseNfeFormProps = {}): UseNfeFo
     return calculateTotals().valorTotal
   }, [calculateTotals])
 
+  const closeAlertDialog = useCallback(() => {
+    setAlertDialog(prev => ({ ...prev, open: false, errors: [] }))
+  }, [])
+
   return {
     form,
     loading,
@@ -365,6 +503,10 @@ export function useNfeForm({ nfeId, onSuccess }: UseNfeFormProps = {}): UseNfeFo
     calculateItemTotal,
     calculateNfeTotal,
     calculateTotals,
+    alertDialog: {
+      ...alertDialog,
+      onClose: closeAlertDialog
+    },
   }
 }
 

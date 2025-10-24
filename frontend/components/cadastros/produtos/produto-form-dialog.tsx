@@ -99,7 +99,7 @@ interface ProdutoFormDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   produtoId?: string
-  onSuccess?: () => void
+  onSuccess?: (produto?: any) => void
 }
 
 export function ProdutoFormDialog({
@@ -277,15 +277,16 @@ export function ProdutoFormDialog({
         return acc
       }, {} as any)
 
+      let produto
       if (produtoId) {
-        await ProdutoService.update(produtoId, cleanedValues)
+        produto = await ProdutoService.update(produtoId, cleanedValues)
         toast.success("Produto atualizado com sucesso!")
       } else {
-        await ProdutoService.create(cleanedValues)
+        produto = await ProdutoService.create(cleanedValues)
         toast.success("Produto criado com sucesso!")
       }
 
-      onSuccess?.()
+      onSuccess?.(produto)
       onOpenChange(false)
     } catch (error: any) {
       console.error("Erro ao salvar produto:", error)

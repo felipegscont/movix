@@ -9,6 +9,15 @@ import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Form } from "@/components/ui/form"
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import {
   IconChevronLeft,
   IconChevronRight,
   IconDeviceFloppy,
@@ -56,6 +65,7 @@ export function NfeWizard({ nfeId, onSuccess }: NfeWizardProps) {
     updateItem,
     removeItem,
     calculateTotals,
+    alertDialog,
   } = useNfeForm({ nfeId, onSuccess })
 
   const totals = calculateTotals()
@@ -190,6 +200,7 @@ export function NfeWizard({ nfeId, onSuccess }: NfeWizardProps) {
   }
 
   return (
+    <>
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         {/* Header com progresso */}
@@ -322,5 +333,38 @@ export function NfeWizard({ nfeId, onSuccess }: NfeWizardProps) {
         </Card>
       </form>
     </Form>
+
+    {/* Alert Dialog para erros de validação */}
+    <AlertDialog open={alertDialog.open} onOpenChange={alertDialog.onClose}>
+      <AlertDialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+            <IconAlertCircle className="h-5 w-5" />
+            {alertDialog.title}
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-left">
+            {alertDialog.description}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+
+        {alertDialog.errors.length > 0 && (
+          <div className="mt-4 space-y-2">
+            <div className="text-sm font-medium">Erros encontrados:</div>
+            <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground max-h-[400px] overflow-y-auto">
+              {alertDialog.errors.map((error, index) => (
+                <li key={index} className="break-words">{error}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <AlertDialogFooter>
+          <AlertDialogAction onClick={alertDialog.onClose}>
+            Entendi
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  </>
   )
 }

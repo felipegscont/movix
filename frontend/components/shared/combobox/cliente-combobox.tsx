@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Check, ChevronsUpDown } from "lucide-react"
+import { Check, ChevronsUpDown, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { searchInFields } from "@/lib/utils/search"
 import { Button } from "@/components/ui/button"
@@ -19,6 +19,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { ClienteService } from "@/lib/services/cliente.service"
+import { ClienteFormDialog } from "@/components/cadastros/clientes/cliente-form-dialog"
 
 interface Cliente {
   id: string
@@ -46,6 +47,7 @@ export function ClienteCombobox({
   const [clientes, setClientes] = React.useState<Cliente[]>([])
   const [loading, setLoading] = React.useState(false)
   const [search, setSearch] = React.useState("")
+  const [showCreateDialog, setShowCreateDialog] = React.useState(false)
 
   // Carregar clientes
   React.useEffect(() => {
@@ -74,64 +76,110 @@ export function ClienteCombobox({
   // Encontrar cliente selecionado
   const selectedCliente = clientes.find((c) => c.id === value)
 
+  const handleCreateSuccess = (novoCliente: any) => {
+    loadClientes()
+    onValueChange(novoCliente.id)
+    setShowCreateDialog(false)
+    setOpen(false)
+  }
+
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className={cn("w-full justify-between", className)}
-          disabled={disabled || loading}
-        >
-          {selectedCliente ? (
-            <span className="truncate">
-              {selectedCliente.nome} - {selectedCliente.documento}
-            </span>
-          ) : (
-            <span className="text-muted-foreground">{placeholder}</span>
-          )}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[400px] p-0" align="start">
-        <Command shouldFilter={false}>
-          <CommandInput
-            placeholder="Buscar por nome ou documento..."
-            value={search}
-            onValueChange={setSearch}
-          />
-          <CommandList>
-            <CommandEmpty>
-              {loading ? "Carregando..." : "Nenhum cliente encontrado"}
-            </CommandEmpty>
-            <CommandGroup>
-              {filteredClientes.map((cliente) => (
-                <CommandItem
-                  key={cliente.id}
-                  value={cliente.id}
-                  onSelect={() => {
-                    onValueChange(cliente.id === value ? undefined : cliente.id)
-                    setOpen(false)
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      value === cliente.id ? "opacity-100" : "opacity-0"
+    <>
+      <div className="flex gap-2">
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={open}
+              className={cn("w-full justify-between", className)}
+              disabled={disabled || loading}
+            >
+              {selectedCliente ? (
+                <span className="truncate">
+                  {selectedCliente.nome} - {selectedCliente.documento}
+                </span>
+              ) : (
+                <span className="text-muted-foreground">{placeholder}</span>
+              )}
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[400px] p-0" align="start">
+            <Command shouldFilter={false}>
+              <CommandInput
+                placeholder="Buscar por nome ou documento..."
+                value={search}
+                onValueChange={setSearch}
+              />
+              <CommandList>
+                <CommandEmpty>
+                  <div className="py-6 text-center text-sm">
+                    {loading ? (
+                      "Carregando..."
+                    ) : (
+                      <div className="space-y-2">
+                        <p>Nenhum cliente encontrado</p>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setShowCreateDialog(true)
+                            setOpen(false)
+                          }}
+                        >
+                          <Plus className="mr-2 h-4 w-4" />
+                          Cadastrar novo cliente
+                        </Button>
+                      </div>
                     )}
-                  />
-                  <div className="flex flex-col">
-                    <span className="font-medium">{cliente.nome}</span>
-                    <span className="text-sm text-muted-foreground">{cliente.documento}</span>
                   </div>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+                </CommandEmpty>
+                <CommandGroup>
+                  {filteredClientes.map((cliente) => (
+                    <CommandItem
+                      key={cliente.id}
+                      value={cliente.id}
+                      onSelect={() => {
+                        onValueChange(cliente.id === value ? undefined : cliente.id)
+                        setOpen(false)
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          value === cliente.id ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      <div className="flex flex-col">
+                        <span className="font-medium">{cliente.nome}</span>
+                        <span className="text-sm text-muted-foreground">{cliente.documento}</span>
+                      </div>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          onClick={() => setShowCreateDialog(true)}
+          disabled={disabled}
+          title="Cadastrar novo cliente"
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
+      </div>
+
+      <ClienteFormDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+        onSuccess={handleCreateSuccess}
+      />
+    </>
   )
 }
 

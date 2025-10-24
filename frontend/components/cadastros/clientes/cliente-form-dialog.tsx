@@ -53,7 +53,7 @@ interface ClienteFormDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   clienteId?: string
-  onSuccess?: () => void
+  onSuccess?: (cliente?: any) => void
 }
 
 export function ClienteFormDialog({

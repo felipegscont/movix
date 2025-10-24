@@ -249,6 +249,8 @@ export class NfeService {
   }
 
   static async create(data: CreateNfeData): Promise<Nfe> {
+    console.log('📤 Enviando para backend:', JSON.stringify(data, null, 2))
+
     const response = await fetch(`${API_BASE_URL}/nfes`, {
       method: 'POST',
       headers: {
@@ -256,12 +258,13 @@ export class NfeService {
       },
       body: JSON.stringify(data),
     });
-    
+
     if (!response.ok) {
-      const error = await response.json();
+      const error = await response.json().catch(() => ({ message: 'Internal server error' }));
+      console.error('❌ Erro do backend:', error)
       throw new Error(error.message || 'Erro ao criar NFe');
     }
-    
+
     return response.json();
   }
 
