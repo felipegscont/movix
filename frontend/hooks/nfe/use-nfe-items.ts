@@ -38,11 +38,11 @@ export function useNfeItems(initialItems: NfeItemFormData[] = []) {
   const calculateTotals = useCallback(() => {
     const subtotal = items.reduce((sum, item) => sum + item.valorTotal, 0)
     const totalQuantidade = items.reduce((sum, item) => sum + item.quantidadeComercial, 0)
-    
+
     const totalImpostos = {
-      icms: items.reduce((sum, item) => sum + (item.icmsValor || 0), 0),
-      pis: items.reduce((sum, item) => sum + (item.pisValor || 0), 0),
-      cofins: items.reduce((sum, item) => sum + (item.cofinsValor || 0), 0)
+      icms: items.reduce((sum, item) => sum + (item.icms?.valor || 0), 0),
+      pis: items.reduce((sum, item) => sum + (item.pis?.valor || 0), 0),
+      cofins: items.reduce((sum, item) => sum + (item.cofins?.valor || 0), 0)
     }
 
     return {

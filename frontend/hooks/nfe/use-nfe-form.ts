@@ -33,7 +33,7 @@ interface UseNfeFormReturn {
   nfe: any
 
   // Actions
-  handleSubmit: (data: NfeFormData) => Promise<void>
+  handleSubmit: any
   loadNfe: () => Promise<void>
   resetForm: () => void
 
@@ -325,7 +325,7 @@ export function useNfeForm({ nfeId, onSuccess }: UseNfeFormProps = {}): UseNfeFo
       if (nfeId) {
         // Atualizar NFe existente
         console.log('🔄 Atualizando NFe:', nfeId)
-        await NfeService.update(nfeId, backendData)
+        await NfeService.update(nfeId, backendData as any)
         toast.success("NFe atualizada com sucesso!")
 
         console.log('➡️ Redirecionando para /nfes em 1 segundo...')
@@ -336,7 +336,7 @@ export function useNfeForm({ nfeId, onSuccess }: UseNfeFormProps = {}): UseNfeFo
       } else {
         // Criar nova NFe
         console.log('➕ Criando nova NFe')
-        const result = await NfeService.create(backendData)
+        const result = await NfeService.create(backendData as any)
         console.log('✅ NFe criada:', result)
         toast.success("NFe criada com sucesso!")
 
@@ -478,12 +478,12 @@ export function useNfeForm({ nfeId, onSuccess }: UseNfeFormProps = {}): UseNfeFo
 
         // Mostrar erros detalhados
         Object.keys(errors).forEach(key => {
-          const error = errors[key]
+          const error = (errors as any)[key]
           console.error(`Campo "${key}":`, error)
 
           // Se for array (como itens), mostrar cada item
           if (Array.isArray(error)) {
-            error.forEach((itemError, index) => {
+            error.forEach((itemError: any, index: number) => {
               if (itemError) {
                 console.error(`  Item ${index}:`, itemError)
               }
