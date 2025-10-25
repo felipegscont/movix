@@ -467,10 +467,42 @@ export function useNfeForm({ nfeId, onSuccess }: UseNfeFormProps = {}): UseNfeFo
       (errors) => {
         console.error('❌ Erros de validação do formulário:', errors)
 
-        // Coletar mensagens de erro
-        const errorMessages: string[] = []
+        // Função recursiva para extrair mensagens de erro
+        const extractErrorMessages = (obj: any, prefix = ''): string[] => {
+          const messages: string[] = []
 
-        // Mostrar erros detalhados
+          if (!obj) return messages
+
+          if (obj.message) {
+            messages.push(`${prefix}: ${obj.message}`)
+          }
+
+          Object.keys(obj).forEach(key => {
+            const value = obj[key]
+            const newPrefix = prefix ? `${prefix}.${key}` : key
+
+            if (value && typeof value === 'object') {
+              if (Array.isArray(value)) {
+                value.forEach((item, index) => {
+                  if (item && typeof item === 'object') {
+                    messages.push(...extractErrorMessages(item, `${newPrefix}[${index}]`))
+                  }
+                })
+              } else if (value.message) {
+                messages.push(`${newPrefix}: ${value.message}`)
+              } else {
+                messages.push(...extractErrorMessages(value, newPrefix))
+              }
+            }
+          })
+
+          return messages
+        }
+
+        // Coletar mensagens de erro
+        const errorMessages = extractErrorMessages(errors)
+
+        // Mostrar erros detalhados no console
         Object.keys(errors).forEach(key => {
           const error = (errors as any)[key]
           console.error(`Campo "${key}":`, error)
@@ -480,17 +512,8 @@ export function useNfeForm({ nfeId, onSuccess }: UseNfeFormProps = {}): UseNfeFo
             error.forEach((itemError: any, index: number) => {
               if (itemError) {
                 console.error(`  Item ${index}:`, itemError)
-                // Extrair mensagens de erro do item
-                Object.keys(itemError).forEach(field => {
-                  const fieldError = itemError[field]
-                  if (fieldError?.message) {
-                    errorMessages.push(`Item ${index + 1} - ${field}: ${fieldError.message}`)
-                  }
-                })
               }
             })
-          } else if (error?.message) {
-            errorMessages.push(`${key}: ${error.message}`)
           }
         })
 

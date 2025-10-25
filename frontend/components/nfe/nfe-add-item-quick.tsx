@@ -90,6 +90,21 @@ export function NfeAddItemQuick({ onAddItem, emitenteRegime = 1 }: NfeAddItemQui
       return
     }
 
+    if (!produto.cfopId) {
+      toast.error("O produto não possui CFOP cadastrado. Configure o CFOP no cadastro do produto.")
+      return
+    }
+
+    if (!produto.pisCstId) {
+      toast.error("O produto não possui CST de PIS cadastrado. Configure no cadastro do produto.")
+      return
+    }
+
+    if (!produto.cofinsCstId) {
+      toast.error("O produto não possui CST de COFINS cadastrado. Configure no cadastro do produto.")
+      return
+    }
+
     // Montar item com dados editados (NÃO altera cadastro do produto)
     const item: NfeItemFormData = {
       produtoId: produto.id,
@@ -97,7 +112,7 @@ export function NfeAddItemQuick({ onAddItem, emitenteRegime = 1 }: NfeAddItemQui
       codigoBarras: produto.codigoBarras || undefined,
       descricao: produto.descricao,
       ncmId: produto.ncmId,
-      cfopId: produto.cfopId, // Opcional - será preenchido se disponível
+      cfopId: produto.cfopId!, // Já validado acima
       unidadeComercial: produto.unidade,
       quantidadeComercial: quantidade,
       valorUnitario: valorUnitario, // Valor editado pelo usuário

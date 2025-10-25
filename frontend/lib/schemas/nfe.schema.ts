@@ -6,36 +6,36 @@ import * as z from "zod"
 
 // Schema para ICMS
 export const nfeItemICMSSchema = z.object({
-  origem: z.string().min(1, "Origem é obrigatória"),
-  cstId: z.string().optional(),
-  csosnId: z.string().optional(),
-  modalidadeBC: z.string().optional(),
+  origem: z.string().optional().nullable(),
+  cstId: z.string().optional().nullable(),
+  csosnId: z.string().optional().nullable(),
+  modalidadeBC: z.string().optional().nullable(),
   baseCalculo: z.coerce.number().min(0).default(0),
   aliquota: z.coerce.number().min(0).max(100).default(0),
   valor: z.coerce.number().min(0).default(0),
-  percentualReducaoBC: z.coerce.number().min(0).max(100).optional(),
-  
+  percentualReducaoBC: z.coerce.number().min(0).max(100).optional().nullable(),
+
   // ICMS ST
-  modalidadeBCST: z.string().optional(),
-  percentualMVAST: z.coerce.number().min(0).optional(),
-  percentualReducaoBCST: z.coerce.number().min(0).max(100).optional(),
-  baseCalculoST: z.coerce.number().min(0).optional(),
-  aliquotaST: z.coerce.number().min(0).max(100).optional(),
-  valorST: z.coerce.number().min(0).optional(),
-  
+  modalidadeBCST: z.string().optional().nullable(),
+  percentualMVAST: z.coerce.number().min(0).optional().nullable(),
+  percentualReducaoBCST: z.coerce.number().min(0).max(100).optional().nullable(),
+  baseCalculoST: z.coerce.number().min(0).optional().nullable(),
+  aliquotaST: z.coerce.number().min(0).max(100).optional().nullable(),
+  valorST: z.coerce.number().min(0).optional().nullable(),
+
   // Desoneração
-  valorDesonerado: z.coerce.number().min(0).optional(),
-  motivoDesoneracao: z.string().optional(),
-  
+  valorDesonerado: z.coerce.number().min(0).optional().nullable(),
+  motivoDesoneracao: z.string().optional().nullable(),
+
   // Diferimento
-  percentualDiferimento: z.coerce.number().min(0).max(100).optional(),
-  valorDiferido: z.coerce.number().min(0).optional(),
-  valorICMSOperacao: z.coerce.number().min(0).optional(),
-  
+  percentualDiferimento: z.coerce.number().min(0).max(100).optional().nullable(),
+  valorDiferido: z.coerce.number().min(0).optional().nullable(),
+  valorICMSOperacao: z.coerce.number().min(0).optional().nullable(),
+
   // FCP (Fundo de Combate à Pobreza)
-  valorFCP: z.coerce.number().min(0).optional(),
-  valorFCPST: z.coerce.number().min(0).optional(),
-  valorFCPSTRetido: z.coerce.number().min(0).optional(),
+  valorFCP: z.coerce.number().min(0).optional().nullable(),
+  valorFCPST: z.coerce.number().min(0).optional().nullable(),
+  valorFCPSTRetido: z.coerce.number().min(0).optional().nullable(),
 })
 
 // Schema para IPI
@@ -44,10 +44,10 @@ export const nfeItemIPISchema = z.object({
   baseCalculo: z.coerce.number().min(0).default(0),
   aliquota: z.coerce.number().min(0).max(100).default(0),
   valor: z.coerce.number().min(0).default(0),
-  classeEnquadramento: z.string().optional(),
-  cnpjProdutor: z.string().optional(),
-  codigoSeloControle: z.string().optional(),
-  quantidadeSeloControle: z.coerce.number().int().optional(),
+  classeEnquadramento: z.string().optional().nullable(),
+  cnpjProdutor: z.string().optional().nullable(),
+  codigoSeloControle: z.string().optional().nullable(),
+  quantidadeSeloControle: z.coerce.number().int().optional().nullable(),
 })
 
 // Schema para PIS
@@ -56,8 +56,8 @@ export const nfeItemPISSchema = z.object({
   baseCalculo: z.coerce.number().min(0).default(0),
   aliquota: z.coerce.number().min(0).max(100).default(0),
   valor: z.coerce.number().min(0).default(0),
-  quantidadeVendida: z.coerce.number().min(0).optional(),
-  aliquotaReais: z.coerce.number().min(0).optional(),
+  quantidadeVendida: z.coerce.number().min(0).optional().nullable(),
+  aliquotaReais: z.coerce.number().min(0).optional().nullable(),
 })
 
 // Schema para COFINS
@@ -66,8 +66,8 @@ export const nfeItemCOFINSSchema = z.object({
   baseCalculo: z.coerce.number().min(0).default(0),
   aliquota: z.coerce.number().min(0).max(100).default(0),
   valor: z.coerce.number().min(0).default(0),
-  quantidadeVendida: z.coerce.number().min(0).optional(),
-  aliquotaReais: z.coerce.number().min(0).optional(),
+  quantidadeVendida: z.coerce.number().min(0).optional().nullable(),
+  aliquotaReais: z.coerce.number().min(0).optional().nullable(),
 })
 
 // ================================
@@ -78,36 +78,36 @@ export const nfeItemSchema = z.object({
   // Produto
   produtoId: z.string().min(1, "Produto é obrigatório"),
   codigo: z.string().min(1, "Código é obrigatório"),
-  codigoBarras: z.string().optional(),
+  codigoBarras: z.string().optional().nullable(),
   descricao: z.string().min(1, "Descrição é obrigatória"),
-  
+
   // Classificação Fiscal
   ncmId: z.string().min(1, "NCM é obrigatório"),
   cfopId: z.string().min(1, "CFOP é obrigatório"),
-  
+
   // Unidades e Quantidades Comerciais
   unidadeComercial: z.string().min(1, "Unidade comercial é obrigatória"),
   quantidadeComercial: z.coerce.number().min(0.0001, "Quantidade deve ser maior que zero"),
   valorUnitario: z.coerce.number().min(0.01, "Valor unitário deve ser maior que zero"),
   valorTotal: z.coerce.number().min(0),
-  
+
   // Unidades e Quantidades Tributáveis
-  unidadeTributavel: z.string().optional(),
-  quantidadeTributavel: z.coerce.number().min(0).optional(),
-  valorUnitarioTrib: z.coerce.number().min(0).optional(),
-  
+  unidadeTributavel: z.string().optional().nullable(),
+  quantidadeTributavel: z.coerce.number().min(0).optional().nullable(),
+  valorUnitarioTrib: z.coerce.number().min(0).optional().nullable(),
+
   // Valores Adicionais
   valorFrete: z.coerce.number().min(0).default(0),
   valorSeguro: z.coerce.number().min(0).default(0),
   valorDesconto: z.coerce.number().min(0).default(0),
   valorOutros: z.coerce.number().min(0).default(0),
-  
+
   // Tributação
   origem: z.string().min(1, "Origem é obrigatória"),
   incluiTotal: z.boolean().default(true),
-  
+
   // Informações Adicionais
-  informacoesAdicionais: z.string().optional(),
+  informacoesAdicionais: z.string().optional().nullable(),
   
   // Impostos
   icms: nfeItemICMSSchema.optional(),
@@ -121,7 +121,7 @@ export const nfeItemSchema = z.object({
 // ================================
 
 export const nfeCobrancaSchema = z.object({
-  numeroFatura: z.string().optional(),
+  numeroFatura: z.string().optional().nullable(),
   valorOriginal: z.coerce.number().min(0),
   valorDesconto: z.coerce.number().min(0).default(0),
   valorLiquido: z.coerce.number().min(0),
@@ -136,15 +136,15 @@ export const nfeDuplicataSchema = z.object({
 export const nfePagamentoSchema = z.object({
   indicadorPagamento: z.coerce.number().int().min(0).max(1).default(0), // 0=À vista, 1=A prazo
   formaPagamentoId: z.string().min(1, "Forma de pagamento é obrigatória"),
-  descricaoPagamento: z.string().optional(),
+  descricaoPagamento: z.string().optional().nullable(),
   valor: z.coerce.number().min(0.01, "Valor deve ser maior que zero"),
-  dataPagamento: z.string().optional(),
-  
+  dataPagamento: z.string().optional().nullable(),
+
   // Dados de Cartão (se aplicável)
-  tipoIntegracao: z.coerce.number().int().optional(), // 1=Integrado, 2=Não integrado
-  cnpjCredenciadora: z.string().optional(),
-  bandeira: z.string().optional(),
-  numeroAutorizacao: z.string().optional(),
+  tipoIntegracao: z.coerce.number().int().optional().nullable(), // 1=Integrado, 2=Não integrado
+  cnpjCredenciadora: z.string().optional().nullable(),
+  bandeira: z.string().optional().nullable(),
+  numeroAutorizacao: z.string().optional().nullable(),
 })
 
 // ================================
@@ -153,27 +153,27 @@ export const nfePagamentoSchema = z.object({
 
 export const nfeFormSchema = z.object({
   // Identificação
-  emitenteId: z.string().optional(), // Será preenchido automaticamente no backend
+  emitenteId: z.string().optional().nullable(), // Será preenchido automaticamente no backend
   clienteId: z.string().min(1, "Cliente é obrigatório"),
   serie: z.coerce.number().int().min(1).default(1),
 
   // Natureza da Operação (pode ser ID da natureza cadastrada ou texto livre)
   naturezaOperacao: z.string().min(3, "Natureza da operação é obrigatória (mínimo 3 caracteres)"),
-  naturezaOperacaoId: z.string().optional(), // ID da natureza selecionada (se houver)
-  
+  naturezaOperacaoId: z.string().optional().nullable(), // ID da natureza selecionada (se houver)
+
   // Tipo de Operação
   tipoOperacao: z.coerce.number().int().min(0).max(1).default(1), // 0=Entrada, 1=Saída
   finalidade: z.coerce.number().int().min(0).max(4).default(0), // 0=Normal, 1=Complementar, 2=Ajuste, 3=Devolução, 4=Devolução de mercadoria
   consumidorFinal: z.coerce.number().int().min(0).max(1).default(1), // 0=Não, 1=Sim
   presencaComprador: z.coerce.number().int().min(0).max(9).default(1), // 0=Não se aplica, 1=Presencial, etc
-  
+
   // Datas
-  dataEmissao: z.string().optional(),
-  dataSaida: z.string().optional(),
-  
+  dataEmissao: z.string().optional().nullable(),
+  dataSaida: z.string().optional().nullable(),
+
   // Frete
   modalidadeFrete: z.coerce.number().int().min(0).max(9).default(9), // 0=Por conta do emitente, 1=Por conta do destinatário, 9=Sem frete
-  
+
   // Valores Totais
   valorFrete: z.coerce.number().min(0).default(0),
   valorSeguro: z.coerce.number().min(0).default(0),
@@ -183,10 +183,10 @@ export const nfeFormSchema = z.object({
   valorFCP: z.coerce.number().min(0).default(0),
   valorII: z.coerce.number().min(0).default(0),
   valorOutrasDespesas: z.coerce.number().min(0).default(0),
-  
+
   // Informações Adicionais
-  informacoesAdicionais: z.string().optional(),
-  informacoesFisco: z.string().optional(),
+  informacoesAdicionais: z.string().optional().nullable(),
+  informacoesFisco: z.string().optional().nullable(),
   
   // Itens
   itens: z.array(nfeItemSchema).min(1, "Adicione pelo menos um item"),
