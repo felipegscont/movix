@@ -23,12 +23,11 @@ import {
   IconScale,
 } from "@tabler/icons-react"
 import { AppSidebar } from "@/components/layout/app-sidebar"
-import { SidebarLayout } from "@/components/layout/sidebar-layout"
-
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { ProdutoService, type Produto } from "@/lib/services/produto.service"
 import { toast } from "sonner"
 

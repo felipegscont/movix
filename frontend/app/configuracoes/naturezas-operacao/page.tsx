@@ -2,9 +2,7 @@
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { SidebarLayout } from "@/components/layout/sidebar-layout"
 import { AppSidebar } from "@/components/layout/app-sidebar"
-
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -13,6 +11,12 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { Separator } from "@/components/ui/separator"
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar"
 import { NaturezaOperacaoDataTable } from "@/components/configuracoes/natureza-operacao/natureza-operacao-data-table"
 import { IconHome, IconFileInvoice } from "@tabler/icons-react"
 

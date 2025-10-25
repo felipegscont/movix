@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { AppSidebar } from "@/components/layout/app-sidebar"
 import { EmitenteForm } from "@/components/configuracoes/emitente"
 import {
   Breadcrumb,
@@ -10,9 +11,11 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { Separator } from "@/components/ui/separator"
 import {
   SidebarInset,
   SidebarProvider,
+  SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { IconHome, IconSettings, IconBuilding } from "@tabler/icons-react"
 

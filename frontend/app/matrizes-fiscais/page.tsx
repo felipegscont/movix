@@ -1,9 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { SidebarLayout } from "@/components/layout/sidebar-layout"
 import { AppSidebar } from "@/components/layout/app-sidebar"
-
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -12,6 +10,12 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { Separator } from "@/components/ui/separator"
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar"
 import { MatrizFiscalDataTable } from "@/components/cadastros/matriz-fiscal/matriz-fiscal-data-table"
 import { IconHome, IconTable } from "@tabler/icons-react"
 

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateOrcamentoDto } from './dto/create-orcamento.dto';
 import { UpdateOrcamentoDto } from './dto/update-orcamento.dto';
@@ -8,6 +8,7 @@ import { PedidoService } from '../pedido/pedido.service';
 export class OrcamentoService {
   constructor(
     private prisma: PrismaService,
+    @Inject(forwardRef(() => PedidoService))
     private pedidoService: PedidoService,
   ) {}
 

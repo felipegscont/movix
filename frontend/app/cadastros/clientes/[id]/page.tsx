@@ -26,12 +26,10 @@ import {
 import { AppSidebar } from "@/components/layout"
 import { Separator } from "@/components/ui/separator"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
-
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
 import { ClienteService, type Cliente } from "@/lib/services/cliente.service"
 import { toast } from "sonner"
 
@@ -211,56 +209,56 @@ export default function ClienteViewPage() {
             {/* Stats Cards */}
             <div className="grid gap-4 md:grid-cols-4">
               <Card>
-                <CardContent className="p-6">
+                <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Total de Pedidos</p>
-                      <p className="text-2xl font-bold">0</p>
+                      <p className="text-xs font-medium text-muted-foreground">Total de Pedidos</p>
+                      <p className="text-xl font-bold">0</p>
                     </div>
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
-                      <IconShoppingCart className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
+                      <IconShoppingCart className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardContent className="p-6">
+                <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Total Faturado</p>
-                      <p className="text-2xl font-bold">R$ 0,00</p>
+                      <p className="text-xs font-medium text-muted-foreground">Total Faturado</p>
+                      <p className="text-xl font-bold">R$ 0,00</p>
                     </div>
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
-                      <IconTrendingUp className="h-6 w-6 text-green-600 dark:text-green-400" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
+                      <IconTrendingUp className="h-5 w-5 text-green-600 dark:text-green-400" />
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardContent className="p-6">
+                <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Último Pedido</p>
-                      <p className="text-2xl font-bold">-</p>
+                      <p className="text-xs font-medium text-muted-foreground">Último Pedido</p>
+                      <p className="text-xl font-bold">-</p>
                     </div>
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900">
-                      <IconClock className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900">
+                      <IconClock className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardContent className="p-6">
+                <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Pendências</p>
-                      <p className="text-2xl font-bold">0</p>
+                      <p className="text-xs font-medium text-muted-foreground">Pendências</p>
+                      <p className="text-xl font-bold">0</p>
                     </div>
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900">
-                      <IconAlertCircle className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900">
+                      <IconAlertCircle className="h-5 w-5 text-orange-600 dark:text-orange-400" />
                     </div>
                   </div>
                 </CardContent>

@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { usePathname } from "next/navigation"
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -64,11 +65,16 @@ const data = {
       ],
     },
     {
-      title: "NFes",
-      url: "/nfes",
+      title: "Notas Fiscais",
+      url: "/notas-fiscais",
       icon: FileText,
       isActive: false,
-      items: [],
+      items: [
+        {
+          title: "NFe",
+          url: "/nfes",
+        },
+      ],
     },
     {
       title: "Cadastros",
@@ -91,13 +97,6 @@ const data = {
       ],
     },
     {
-      title: "Matrizes Fiscais",
-      url: "/matrizes-fiscais",
-      icon: Table2,
-      isActive: false,
-      items: [],
-    },
-    {
       title: "Configurações",
       url: "/configuracoes",
       icon: Settings,
@@ -110,6 +109,10 @@ const data = {
         {
           title: "Naturezas de Operação",
           url: "/configuracoes/naturezas-operacao",
+        },
+        {
+          title: "Matrizes Fiscais",
+          url: "/matrizes-fiscais",
         },
       ],
     },
@@ -131,11 +134,54 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  // Note: I'm using state to show active item.
-  // IRL you should use the url/router.
-  const [activeItem, setActiveItem] = React.useState(data.navMain[0])
-  const [mails, setMails] = React.useState(data.mails)
-  const { setOpen } = useSidebar()
+  const pathname = usePathname()
+  const { setOpen, open } = useSidebar()
+
+  // Função para encontrar o item ativo baseado na URL atual
+  const getActiveItem = React.useCallback(() => {
+    // Encontrar o item que corresponde à rota atual
+    for (const item of data.navMain) {
+      // Verificar se a URL atual começa com a URL do item
+      if (pathname.startsWith(item.url)) {
+        return item
+      }
+      // Verificar se algum subitem corresponde à URL atual
+      if (item.items.length > 0) {
+        for (const subItem of item.items) {
+          if (pathname.startsWith(subItem.url)) {
+            return item
+          }
+        }
+      }
+    }
+    // Se não encontrar, retornar o primeiro item (Dashboard)
+    return data.navMain[0]
+  }, [pathname])
+
+  const [activeItem, setActiveItem] = React.useState(getActiveItem())
+  const [previousActiveItem, setPreviousActiveItem] = React.useState(getActiveItem())
+
+  // Atualizar o item ativo quando a rota mudar
+  React.useEffect(() => {
+    const newActiveItem = getActiveItem()
+    const hasSubitems = newActiveItem.items.length > 0
+    const itemChanged = previousActiveItem?.title !== newActiveItem.title
+
+    setActiveItem(newActiveItem)
+
+    // Só alterar o estado do sidebar se mudou de item principal
+    if (itemChanged) {
+      if (hasSubitems) {
+        // Se o novo item tem subitens, abrir o sidebar
+        setOpen(true)
+      } else {
+        // Se o novo item não tem subitens, fechar o sidebar
+        setOpen(false)
+      }
+      setPreviousActiveItem(newActiveItem)
+    }
+    // Se não mudou de item, manter o estado atual (open) escolhido pelo usuário
+  }, [pathname, getActiveItem, setOpen, previousActiveItem])
 
   return (
     <Sidebar
@@ -154,13 +200,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton size="lg" asChild className="md:h-8 md:p-0">
-                <a href="#">
+                <a href="/">
                   <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                     <Command className="size-4" />
                   </div>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-medium">Acme Inc</span>
-                    <span className="truncate text-xs">Enterprise</span>
+                    <span className="truncate font-medium">Movix</span>
+                    <span className="truncate text-xs">Sistema</span>
                   </div>
                 </a>
               </SidebarMenuButton>
@@ -180,20 +226,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       }}
                       onClick={() => {
                         setActiveItem(item)
-                        const mail = data.mails.sort(() => Math.random() - 0.5)
-                        setMails(
-                          mail.slice(
-                            0,
-                            Math.max(5, Math.floor(Math.random() * 10) + 1)
-                          )
-                        )
                         setOpen(true)
                       }}
                       isActive={activeItem?.title === item.title}
                       className="px-2.5 md:px-2"
+                      asChild={item.items.length === 0}
                     >
-                      <item.icon />
-                      <span>{item.title}</span>
+                      {item.items.length === 0 ? (
+                        <a href={item.url}>
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </a>
+                      ) : (
+                        <>
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </>
+                      )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
@@ -214,32 +263,35 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <div className="text-foreground text-base font-medium">
               {activeItem?.title}
             </div>
-            <Label className="flex items-center gap-2 text-sm">
-              <span>Unreads</span>
-              <Switch className="shadow-none" />
-            </Label>
           </div>
-          <SidebarInput placeholder="Type to search..." />
+          <SidebarInput placeholder="Buscar..." />
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup className="px-0">
             <SidebarGroupContent>
-              {mails.map((mail) => (
-                <a
-                  href="#"
-                  key={mail.email}
-                  className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex flex-col items-start gap-2 border-b p-4 text-sm leading-tight whitespace-nowrap last:border-b-0"
-                >
-                  <div className="flex w-full items-center gap-2">
-                    <span>{mail.name}</span>{" "}
-                    <span className="ml-auto text-xs">{mail.date}</span>
-                  </div>
-                  <span className="font-medium">{mail.subject}</span>
-                  <span className="line-clamp-2 w-[260px] text-xs whitespace-break-spaces">
-                    {mail.teaser}
-                  </span>
-                </a>
-              ))}
+              {activeItem?.items && activeItem.items.length > 0 ? (
+                <SidebarMenu>
+                  {activeItem.items.map((subItem) => {
+                    const isActive = pathname === subItem.url || pathname.startsWith(subItem.url + '/')
+                    return (
+                      <SidebarMenuItem key={subItem.title}>
+                        <SidebarMenuButton asChild isActive={isActive}>
+                          <a
+                            href={subItem.url}
+                            className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex items-center gap-2 border-b p-4 text-sm leading-tight last:border-b-0"
+                          >
+                            <span className="font-medium">{subItem.title}</span>
+                          </a>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    )
+                  })}
+                </SidebarMenu>
+              ) : (
+                <div className="p-4 text-sm text-muted-foreground">
+                  Nenhum subitem disponível
+                </div>
+              )}
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>

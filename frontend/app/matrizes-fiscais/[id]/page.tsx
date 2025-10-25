@@ -2,9 +2,7 @@
 
 import Link from "next/link"
 import { useParams } from "next/navigation"
-import { SidebarLayout } from "@/components/layout/sidebar-layout"
 import { AppSidebar } from "@/components/layout/app-sidebar"
-
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -13,6 +11,12 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { Separator } from "@/components/ui/separator"
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar"
 import { MatrizFiscalForm } from "@/components/cadastros/matriz-fiscal/matriz-fiscal-form"
 import { IconHome, IconTable, IconEdit } from "@tabler/icons-react"
 
