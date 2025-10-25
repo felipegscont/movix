@@ -327,30 +327,21 @@ export function useNfeForm({ nfeId, onSuccess }: UseNfeFormProps = {}): UseNfeFo
         console.log('🔄 Atualizando NFe:', nfeId)
         await NfeService.update(nfeId, backendData as any)
         toast.success("NFe atualizada com sucesso!")
-
-        console.log('➡️ Redirecionando para /nfes em 1 segundo...')
-        setTimeout(() => {
-          console.log('🔀 Executando router.push("/nfes")')
-          router.push('/nfes')
-        }, 1000)
       } else {
         // Criar nova NFe
         console.log('➕ Criando nova NFe')
         const result = await NfeService.create(backendData as any)
         console.log('✅ NFe criada:', result)
         toast.success("NFe criada com sucesso!")
-
-        console.log('➡️ Redirecionando para /nfes em 1 segundo...')
-        setTimeout(() => {
-          console.log('🔀 Executando router.push("/nfes")')
-          router.push('/nfes')
-        }, 1000)
       }
 
-      // Chamar callback se fornecido
+      // Chamar callback se fornecido, senão redirecionar diretamente
       if (onSuccess) {
         console.log('📞 Chamando callback onSuccess')
         onSuccess()
+      } else {
+        console.log('➡️ Redirecionando para /nfes')
+        router.push('/nfes')
       }
     } catch (error: any) {
       console.error("❌ Erro ao salvar NFe:", error)

@@ -10,6 +10,7 @@ export default function NovaFePage() {
   const router = useRouter()
 
   const handleSuccess = () => {
+    console.log('✅ handleSuccess chamado - redirecionando para /nfes')
     router.push('/nfes')
   }
   return (

@@ -185,7 +185,7 @@ export function NfeWizard({ nfeId, onSuccess }: NfeWizardProps) {
   return (
     <>
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {/* Header com progresso - Compacto */}
         <Card className="py-3">
           <CardHeader className="pb-0">
