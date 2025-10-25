@@ -56,7 +56,7 @@ export function FornecedorCombobox({
   const loadFornecedores = async () => {
     try {
       setLoading(true)
-      const response = await FornecedorService.getAll({ page: 1, limit: 1000 })
+      const response = await FornecedorService.getAll(1, 1000)
       setFornecedores(response.data)
     } catch (error) {
       console.error("Erro ao carregar fornecedores:", error)

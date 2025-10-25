@@ -1,11 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { AppSidebar } from "@/components/layout/app-sidebar"
-import { SiteHeader } from "@/components/layout/site-header"
-import { SidebarLayout } from "@/components/layout/sidebar-layout"
-import { ClientesSectionCards } from "@/components/cadastros/clientes/clientes-section-cards"
-import { ClientesDataTable } from "@/components/cadastros/clientes/clientes-data-table"
+import { AppSidebar, SiteHeader, SidebarLayout } from "@/components/layout"
+import { ClientesSectionCards, ClientesDataTable } from "@/components/cadastros/clientes"
 import { SidebarInset } from "@/components/ui/sidebar"
 import {
   Breadcrumb,

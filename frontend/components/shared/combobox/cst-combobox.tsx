@@ -30,7 +30,7 @@ interface CST {
 interface CSTComboboxProps {
   value?: string
   onValueChange: (value: string | undefined) => void
-  tipo: 'ICMS' | 'PIS' | 'COFINS' | 'IPI'
+  tipo: 'ICMS' | 'CSOSN' | 'PIS' | 'COFINS' | 'IPI'
   placeholder?: string
   disabled?: boolean
   className?: string
@@ -56,8 +56,14 @@ export function CSTCombobox({
   const loadCSTs = async () => {
     try {
       setLoading(true)
-      const data = await AuxiliarService.getCSTs(tipo)
-      setCsts(data)
+      // CSOSN tem endpoint separado
+      if (tipo === 'CSOSN') {
+        const data = await AuxiliarService.getCSOSNs()
+        setCsts(data)
+      } else {
+        const data = await AuxiliarService.getCSTs(tipo)
+        setCsts(data)
+      }
     } catch (error) {
       console.error("Erro ao carregar CSTs:", error)
     } finally {

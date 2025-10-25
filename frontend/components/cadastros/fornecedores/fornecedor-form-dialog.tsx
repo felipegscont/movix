@@ -309,15 +309,17 @@ export function FornecedorFormDialog({
     try {
       setLoading(true)
 
-      // Limpa campos opcionais vazios (converte string vazia para undefined)
+      // Remove formatação e limpa campos opcionais vazios
       const cleanedValues = {
         ...values,
+        documento: values.documento.replace(/\D/g, ''), // Remove máscara
+        cep: values.cep.replace(/\D/g, ''), // Remove máscara
         nomeFantasia: values.nomeFantasia?.trim() || undefined,
         inscricaoEstadual: values.inscricaoEstadual?.trim() || undefined,
         inscricaoMunicipal: values.inscricaoMunicipal?.trim() || undefined,
         complemento: values.complemento?.trim() || undefined,
-        telefone: values.telefone?.trim() || undefined,
-        celular: values.celular?.trim() || undefined,
+        telefone: values.telefone?.replace(/\D/g, '') || undefined, // Remove máscara
+        celular: values.celular?.replace(/\D/g, '') || undefined, // Remove máscara
         email: values.email?.trim() || undefined,
         site: values.site?.trim() || undefined,
         contato: values.contato?.trim() || undefined,

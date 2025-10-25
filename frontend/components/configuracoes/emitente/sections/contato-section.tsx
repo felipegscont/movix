@@ -7,7 +7,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import type { EmitenteFormData } from "../types"
+import type { EmitenteFormData } from "@/lib/schemas/emitente.schema"
 
 interface ContatoSectionProps {
   form: UseFormReturn<EmitenteFormData>

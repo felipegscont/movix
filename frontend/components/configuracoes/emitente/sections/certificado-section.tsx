@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { IconLoader2, IconCheck, IconAlertCircle, IconFileTypePdf } from "@tabler/icons-react"
-import type { CertificadoState } from "../types"
+import type { CertificadoState } from "@/types"
 
 interface CertificadoSectionProps {
   certificado: CertificadoState

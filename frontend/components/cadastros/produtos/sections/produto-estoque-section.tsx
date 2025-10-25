@@ -7,7 +7,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { ProdutoSectionProps } from "../types"
+import { ProdutoSectionProps } from "@/types"
 import { Separator } from "@/components/ui/separator"
 
 export function ProdutoEstoqueSection({ form }: ProdutoSectionProps) {

@@ -1,11 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { AppSidebar } from "@/components/layout/app-sidebar"
-import { SiteHeader } from "@/components/layout/site-header"
-import { SidebarLayout } from "@/components/layout/sidebar-layout"
-import { FornecedoresSectionCards } from "@/components/cadastros/fornecedores/fornecedores-section-cards"
-import { FornecedoresDataTable } from "@/components/cadastros/fornecedores/fornecedores-data-table"
+import { AppSidebar, SiteHeader, SidebarLayout } from "@/components/layout"
+import { FornecedoresSectionCards, FornecedoresDataTable } from "@/components/cadastros/fornecedores"
 import { SidebarInset } from "@/components/ui/sidebar"
 import {
   Breadcrumb,

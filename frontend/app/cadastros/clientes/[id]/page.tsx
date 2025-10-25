@@ -23,9 +23,7 @@ import {
   IconCheck,
   IconX,
 } from "@tabler/icons-react"
-import { AppSidebar } from "@/components/layout/app-sidebar"
-import { SiteHeader } from "@/components/layout/site-header"
-import { SidebarLayout } from "@/components/layout/sidebar-layout"
+import { AppSidebar, SiteHeader, SidebarLayout } from "@/components/layout"
 import { SidebarInset } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"

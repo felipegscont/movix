@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { IconLoader2, IconSearch } from "@tabler/icons-react"
 import { StaticCombobox, REGIME_TRIBUTARIO_OPTIONS } from "@/components/shared/combobox/static-combobox"
-import type { EmitenteFormData } from "../types"
+import type { EmitenteFormData } from "@/lib/schemas/emitente.schema"
 
 interface DadosBasicosSectionProps {
   form: UseFormReturn<EmitenteFormData>

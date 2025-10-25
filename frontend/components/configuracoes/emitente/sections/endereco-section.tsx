@@ -16,7 +16,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { IconLoader2, IconSearch } from "@tabler/icons-react"
-import type { EmitenteFormData, Estado, Municipio } from "../types"
+import type { EmitenteFormData } from "@/lib/schemas/emitente.schema"
+import type { Estado, Municipio } from "@/types"
 
 interface EnderecoSectionProps {
   form: UseFormReturn<EmitenteFormData>
