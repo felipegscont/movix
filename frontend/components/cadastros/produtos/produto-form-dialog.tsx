@@ -145,11 +145,37 @@ export function ProdutoFormDialog({
     try {
       setLoading(true)
 
+      // Limpa campos opcionais vazios (converte string vazia para undefined)
+      const cleanedData = {
+        ...data,
+        codigoBarras: data.codigoBarras?.trim() || undefined,
+        descricaoComplementar: data.descricaoComplementar?.trim() || undefined,
+        cestId: data.cestId?.trim() || undefined,
+        cfopId: data.cfopId?.trim() || undefined,
+        unidadeTributavel: data.unidadeTributavel?.trim() || undefined,
+        valorCusto: data.valorCusto || undefined,
+        margemLucro: data.margemLucro || undefined,
+        estoqueAtual: data.estoqueAtual || undefined,
+        estoqueMinimo: data.estoqueMinimo || undefined,
+        estoqueMaximo: data.estoqueMaximo || undefined,
+        icmsCstId: data.icmsCstId?.trim() || undefined,
+        icmsCsosnId: data.icmsCsosnId?.trim() || undefined,
+        icmsAliquota: data.icmsAliquota || undefined,
+        icmsReducao: data.icmsReducao || undefined,
+        pisCstId: data.pisCstId?.trim() || undefined,
+        pisAliquota: data.pisAliquota || undefined,
+        cofinsCstId: data.cofinsCstId?.trim() || undefined,
+        cofinsAliquota: data.cofinsAliquota || undefined,
+        ipiCstId: data.ipiCstId?.trim() || undefined,
+        ipiAliquota: data.ipiAliquota || undefined,
+        fornecedorId: data.fornecedorId?.trim() || undefined,
+      }
+
       if (produtoId) {
-        await ProdutoService.update(produtoId, data)
+        await ProdutoService.update(produtoId, cleanedData)
         toast.success("Produto atualizado com sucesso!")
       } else {
-        await ProdutoService.create(data)
+        await ProdutoService.create(cleanedData)
         toast.success("Produto criado com sucesso!")
       }
 
