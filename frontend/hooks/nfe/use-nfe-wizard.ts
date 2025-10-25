@@ -28,8 +28,10 @@ const WIZARD_STEPS: { key: WizardStep; label: string; description: string }[] = 
 
 const INITIAL_FORM_DATA: NfeFormData = {
   clienteId: '',
+  serie: 1,
   naturezaOperacao: '',
   tipoOperacao: 1,
+  finalidade: 0,
   consumidorFinal: 1,
   presencaComprador: 1,
   modalidadeFrete: 9,
@@ -100,10 +102,10 @@ export function useNfeWizard({ initialData, onStepChange }: UseNfeWizardProps = 
         
         // Validar cada item
         formData.itens.forEach((item, index) => {
-          if (!item.pisCstId) {
+          if (!item.pis?.cstId) {
             errors[`item_${index}_pisCstId`] = ['CST de PIS é obrigatório']
           }
-          if (!item.cofinsCstId) {
+          if (!item.cofins?.cstId) {
             errors[`item_${index}_cofinsCstId`] = ['CST de COFINS é obrigatório']
           }
           if (item.quantidadeComercial <= 0) {
@@ -245,9 +247,9 @@ export function useNfeWizard({ initialData, onStepChange }: UseNfeWizardProps = 
       total,
       totalItens: itens.length,
       totalImpostos: {
-        icms: itens.reduce((sum, item) => sum + (item.icmsValor || 0), 0),
-        pis: itens.reduce((sum, item) => sum + (item.pisValor || 0), 0),
-        cofins: itens.reduce((sum, item) => sum + (item.cofinsValor || 0), 0)
+        icms: itens.reduce((sum, item) => sum + (item.icms?.valor || 0), 0),
+        pis: itens.reduce((sum, item) => sum + (item.pis?.valor || 0), 0),
+        cofins: itens.reduce((sum, item) => sum + (item.cofins?.valor || 0), 0)
       }
     }
   }, [formData])
