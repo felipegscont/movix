@@ -157,10 +157,10 @@ export function ClienteFormDialog({
                 type="multiple"
                 value={accordionValue}
                 onValueChange={setAccordionValue}
-                className="w-full space-y-4"
+                className="w-full space-y-2"
               >
                 {/* Accordion: Dados Básicos */}
-                <AccordionItem value="basicos" className="border rounded-lg">
+                <AccordionItem value="basicos" className="border rounded-lg border-b-0 last:border-b">
                   <AccordionTrigger className="px-6 py-4 hover:no-underline">
                     <div className="flex items-center justify-between w-full pr-4">
                       <div className="flex items-center gap-3">

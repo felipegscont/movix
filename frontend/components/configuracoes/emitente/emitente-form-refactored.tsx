@@ -10,9 +10,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { IconLoader2, IconDeviceFloppy, IconAlertCircle, IconBuilding, IconMapPin, IconPhone, IconCertificate } from "@tabler/icons-react"
+import { IconLoader2, IconDeviceFloppy, IconAlertCircle, IconBuilding, IconMapPin, IconPhone, IconCertificate, IconFileTypePdf, IconReceipt } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { EmitenteService } from "@/lib/services/emitente.service"
 import { useEmitenteForm } from "./hooks/use-emitente-form"
@@ -53,9 +52,7 @@ export function EmitenteFormRefactored() {
   const { loading: loadingCnpj, consultarCnpj, formatCNPJ } = useCnpjLookup(form as any, estados, loadMunicipios)
   const { loading: loadingCep, consultarCep, formatCEP } = useCepLookup(form as any, estados, loadMunicipios)
 
-  const [accordionValue, setAccordionValue] = useState<string[]>(
-    emitenteId ? ["basicos", "endereco", "contato", "nfe"] : ["basicos"]
-  )
+  const [accordionValue, setAccordionValue] = useState<string[]>([])
 
   const onSubmit = async (data: EmitenteFormData) => {
     try {
@@ -103,9 +100,25 @@ export function EmitenteFormRefactored() {
 
   if (loadingData) {
     return (
-      <div className="space-y-6">
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-96 w-full" />
+      <div className="space-y-2">
+        {/* Skeleton para cada accordion */}
+        {[1, 2, 3, 4, 5].map((item) => (
+          <div key={item} className="border rounded-lg p-6">
+            <div className="flex items-center gap-3">
+              {/* Ícone circular */}
+              <Skeleton className="h-10 w-10 rounded-full" />
+              {/* Título e descrição */}
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-5 w-48" />
+                <Skeleton className="h-4 w-64" />
+              </div>
+            </div>
+          </div>
+        ))}
+        {/* Skeleton para botão */}
+        <div className="flex justify-end pt-4">
+          <Skeleton className="h-10 w-48" />
+        </div>
       </div>
     )
   }
@@ -130,26 +143,23 @@ export function EmitenteFormRefactored() {
           type="multiple"
           value={accordionValue}
           onValueChange={setAccordionValue}
-          className="w-full space-y-4"
+          className="w-full space-y-2"
         >
           {/* Accordion: Dados Básicos */}
-          <AccordionItem value="basicos" className="border rounded-lg">
+          <AccordionItem value="basicos" className="border rounded-lg !border-b">
             <AccordionTrigger className="px-6 py-4 hover:no-underline">
-              <div className="flex items-center justify-between w-full pr-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
-                    <IconBuilding className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="text-left">
-                    <h3 className="text-base font-semibold">Dados da Empresa</h3>
-                    <p className="text-sm text-muted-foreground">Informações básicas do emitente</p>
-                  </div>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
+                  <IconBuilding className="h-5 w-5 text-primary" />
                 </div>
-                <Badge variant="secondary" className="ml-auto mr-2">Obrigatório</Badge>
+                <div className="text-left">
+                  <h3 className="text-base font-semibold">Dados da Empresa</h3>
+                  <p className="text-sm text-muted-foreground">Informações básicas do emitente</p>
+                </div>
               </div>
             </AccordionTrigger>
             <AccordionContent className="px-6 pb-6">
-              <div className="space-y-4 pt-4">
+              <div className="pt-4">
                 <DadosBasicosSection
                   form={form as any}
                   loadingCnpj={loadingCnpj}
@@ -161,23 +171,20 @@ export function EmitenteFormRefactored() {
           </AccordionItem>
 
           {/* Accordion: Endereço */}
-          <AccordionItem value="endereco" className="border rounded-lg">
+          <AccordionItem value="endereco" className="border rounded-lg !border-b">
             <AccordionTrigger className="px-6 py-4 hover:no-underline">
-              <div className="flex items-center justify-between w-full pr-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
-                    <IconMapPin className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="text-left">
-                    <h3 className="text-base font-semibold">Endereço</h3>
-                    <p className="text-sm text-muted-foreground">Localização da empresa</p>
-                  </div>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
+                  <IconMapPin className="h-5 w-5 text-primary" />
                 </div>
-                <Badge variant="secondary" className="ml-auto mr-2">Obrigatório</Badge>
+                <div className="text-left">
+                  <h3 className="text-base font-semibold">Endereço</h3>
+                  <p className="text-sm text-muted-foreground">Localização da empresa</p>
+                </div>
               </div>
             </AccordionTrigger>
             <AccordionContent className="px-6 pb-6">
-              <div className="space-y-4 pt-4">
+              <div className="pt-4">
                 <EnderecoSection
                   form={form as any}
                   estados={estados as any}
@@ -193,47 +200,60 @@ export function EmitenteFormRefactored() {
           </AccordionItem>
 
           {/* Accordion: Contato */}
-          <AccordionItem value="contato" className="border rounded-lg">
+          <AccordionItem value="contato" className="border rounded-lg !border-b">
             <AccordionTrigger className="px-6 py-4 hover:no-underline">
-              <div className="flex items-center justify-between w-full pr-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
-                    <IconPhone className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="text-left">
-                    <h3 className="text-base font-semibold">Informações de Contato</h3>
-                    <p className="text-sm text-muted-foreground">Dados para contato (opcionais)</p>
-                  </div>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
+                  <IconPhone className="h-5 w-5 text-primary" />
                 </div>
-                <Badge variant="outline" className="ml-auto mr-2">Opcional</Badge>
+                <div className="text-left">
+                  <h3 className="text-base font-semibold">Informações de Contato</h3>
+                  <p className="text-sm text-muted-foreground">Dados para contato</p>
+                </div>
               </div>
             </AccordionTrigger>
             <AccordionContent className="px-6 pb-6">
-              <div className="space-y-4 pt-4">
+              <div className="pt-4">
                 <ContatoSection form={form as any} />
               </div>
             </AccordionContent>
           </AccordionItem>
 
           {/* Accordion: Configurações NFe */}
-          <AccordionItem value="nfe" className="border rounded-lg">
+          <AccordionItem value="nfe" className="border rounded-lg !border-b">
             <AccordionTrigger className="px-6 py-4 hover:no-underline">
-              <div className="flex items-center justify-between w-full pr-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
-                    <IconCertificate className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="text-left">
-                    <h3 className="text-base font-semibold">Configurações de NFe</h3>
-                    <p className="text-sm text-muted-foreground">Parâmetros para emissão de Notas Fiscais</p>
-                  </div>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
+                  <IconReceipt className="h-5 w-5 text-primary" />
                 </div>
-                <Badge variant="secondary" className="ml-auto mr-2">Obrigatório</Badge>
+                <div className="text-left">
+                  <h3 className="text-base font-semibold">Configurações de NFe</h3>
+                  <p className="text-sm text-muted-foreground">Parâmetros para emissão de Notas Fiscais</p>
+                </div>
               </div>
             </AccordionTrigger>
             <AccordionContent className="px-6 pb-6">
-              <div className="space-y-4 pt-4">
+              <div className="pt-4">
                 <NfeSection form={form as any} />
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Accordion: Certificado Digital */}
+          <AccordionItem value="certificado" className="border rounded-lg !border-b">
+            <AccordionTrigger className="px-6 py-4 hover:no-underline">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
+                  <IconFileTypePdf className="h-5 w-5 text-primary" />
+                </div>
+                <div className="text-left">
+                  <h3 className="text-base font-semibold">Certificado Digital</h3>
+                  <p className="text-sm text-muted-foreground">Certificado A1 para assinatura de NFes</p>
+                </div>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-6 pb-6">
+              <div className="pt-4">
                 <CertificadoSection
                   certificado={certificado}
                   certificadoInfoFromDb={certificadoInfoFromDb}

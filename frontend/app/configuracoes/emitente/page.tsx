@@ -1,12 +1,22 @@
 "use client"
 
+import Link from "next/link"
 import { AppSidebar } from "@/components/layout/app-sidebar"
 import { SiteHeader } from "@/components/layout/site-header"
 import { EmitenteFormRefactored } from "@/components/configuracoes/emitente/emitente-form-refactored"
 import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
+import {
   SidebarInset,
   SidebarProvider,
 } from "@/components/ui/sidebar"
+import { IconHome, IconSettings, IconBuilding } from "@tabler/icons-react"
 
 export default function ConfiguracoesEmitentePage() {
   return (
@@ -20,20 +30,43 @@ export default function ConfiguracoesEmitentePage() {
     >
       <AppSidebar variant="inset" />
       <SidebarInset>
-        <SiteHeader />
+        <SiteHeader
+          breadcrumb={
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem className="hidden md:block">
+                  <BreadcrumbLink asChild>
+                    <Link href="/dashboard">
+                      <IconHome className="h-4 w-4" />
+                    </Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className="hidden md:block" />
+                <BreadcrumbItem className="hidden md:block">
+                  <BreadcrumbLink asChild>
+                    <Link href="/configuracoes" className="flex items-center gap-1.5">
+                      <IconSettings className="h-4 w-4" />
+                      Configurações
+                    </Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className="hidden md:block" />
+                <BreadcrumbItem>
+                  <BreadcrumbPage className="flex items-center gap-1.5">
+                    <IconBuilding className="h-4 w-4" />
+                    Emitente
+                  </BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          }
+        />
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
-            <div className="flex flex-col gap-4 py-4 px-4 md:gap-6 md:py-6 md:px-6">
-              {/* Header */}
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight">Configuração do Emitente</h1>
-                <p className="text-muted-foreground">
-                  Configure os dados da sua empresa para emissão de NFe
-                </p>
+            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+              <div className="px-4 lg:px-6">
+                <EmitenteFormRefactored />
               </div>
-
-              {/* Formulário */}
-              <EmitenteFormRefactored />
             </div>
           </div>
         </div>

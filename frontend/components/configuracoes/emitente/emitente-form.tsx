@@ -31,7 +31,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { Badge } from "@/components/ui/badge"
 import { IconLoader2, IconDeviceFloppy, IconAlertCircle, IconSearch, IconUpload, IconFileTypePdf, IconCheck, IconBuilding, IconMapPin, IconPhone, IconFileText, IconCertificate } from "@tabler/icons-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { toast } from "sonner"
@@ -80,7 +79,7 @@ export function EmitenteForm() {
   const [certificadoUploaded, setCertificadoUploaded] = useState(false)
   const [certificadoPassword, setCertificadoPassword] = useState("")
   const [certificadoInfo, setCertificadoInfo] = useState<any>(null)
-  const [accordionValue, setAccordionValue] = useState<string[]>(["basicos"])
+  const [accordionValue, setAccordionValue] = useState<string[]>([])
   const [validatingCertificado, setValidatingCertificado] = useState(false)
   const [certificadoValid, setCertificadoValid] = useState<boolean | null>(null)
 
@@ -509,10 +508,25 @@ export function EmitenteForm() {
 
   if (loadingData) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-64 w-full" />
-        <Skeleton className="h-64 w-full" />
+      <div className="space-y-2">
+        {/* Skeleton para cada accordion */}
+        {[1, 2, 3, 4, 5].map((item) => (
+          <div key={item} className="border rounded-lg p-6">
+            <div className="flex items-center gap-3">
+              {/* Ícone circular */}
+              <Skeleton className="h-10 w-10 rounded-full" />
+              {/* Título e descrição */}
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-5 w-48" />
+                <Skeleton className="h-4 w-64" />
+              </div>
+            </div>
+          </div>
+        ))}
+        {/* Skeleton para botão */}
+        <div className="flex justify-end pt-4">
+          <Skeleton className="h-10 w-48" />
+        </div>
       </div>
     )
   }
@@ -537,22 +551,19 @@ export function EmitenteForm() {
           type="multiple"
           value={accordionValue}
           onValueChange={setAccordionValue}
-          className="w-full space-y-4"
+          className="w-full space-y-2"
         >
           {/* Accordion: Dados Básicos */}
-          <AccordionItem value="basicos" className="border rounded-lg">
+          <AccordionItem value="basicos" className="border rounded-lg !border-b">
             <AccordionTrigger className="px-6 py-4 hover:no-underline">
-              <div className="flex items-center justify-between w-full pr-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
-                    <IconBuilding className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="text-left">
-                    <h3 className="text-base font-semibold">Dados da Empresa</h3>
-                    <p className="text-sm text-muted-foreground">Informações básicas do emitente</p>
-                  </div>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
+                  <IconBuilding className="h-5 w-5 text-primary" />
                 </div>
-                <Badge variant="secondary" className="ml-auto mr-2">Obrigatório</Badge>
+                <div className="text-left">
+                  <h3 className="text-base font-semibold">Dados da Empresa</h3>
+                  <p className="text-sm text-muted-foreground">Informações básicas do emitente</p>
+                </div>
               </div>
             </AccordionTrigger>
             <AccordionContent className="px-6 pb-6">
@@ -728,19 +739,16 @@ export function EmitenteForm() {
           </AccordionItem>
 
           {/* Accordion: Endereço */}
-          <AccordionItem value="endereco" className="border rounded-lg">
+          <AccordionItem value="endereco" className="border rounded-lg !border-b">
             <AccordionTrigger className="px-6 py-4 hover:no-underline">
-              <div className="flex items-center justify-between w-full pr-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
-                    <IconMapPin className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="text-left">
-                    <h3 className="text-base font-semibold">Endereço</h3>
-                    <p className="text-sm text-muted-foreground">Localização da empresa</p>
-                  </div>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
+                  <IconMapPin className="h-5 w-5 text-primary" />
                 </div>
-                <Badge variant="secondary" className="ml-auto mr-2">Obrigatório</Badge>
+                <div className="text-left">
+                  <h3 className="text-base font-semibold">Endereço</h3>
+                  <p className="text-sm text-muted-foreground">Localização da empresa</p>
+                </div>
               </div>
             </AccordionTrigger>
             <AccordionContent className="px-6 pb-6">
@@ -902,19 +910,16 @@ export function EmitenteForm() {
           </AccordionItem>
 
           {/* Accordion: Contato */}
-          <AccordionItem value="contato" className="border rounded-lg">
+          <AccordionItem value="contato" className="border rounded-lg !border-b">
             <AccordionTrigger className="px-6 py-4 hover:no-underline">
-              <div className="flex items-center justify-between w-full pr-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
-                    <IconPhone className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="text-left">
-                    <h3 className="text-base font-semibold">Informações de Contato</h3>
-                    <p className="text-sm text-muted-foreground">Dados para contato (opcionais)</p>
-                  </div>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
+                  <IconPhone className="h-5 w-5 text-primary" />
                 </div>
-                <Badge variant="outline" className="ml-auto mr-2">Opcional</Badge>
+                <div className="text-left">
+                  <h3 className="text-base font-semibold">Informações de Contato</h3>
+                  <p className="text-sm text-muted-foreground">Dados para contato</p>
+                </div>
               </div>
             </AccordionTrigger>
             <AccordionContent className="px-6 pb-6">
@@ -967,19 +972,16 @@ export function EmitenteForm() {
           </AccordionItem>
 
           {/* Accordion: Configurações NFe */}
-          <AccordionItem value="nfe" className="border rounded-lg">
+          <AccordionItem value="nfe" className="border rounded-lg !border-b">
             <AccordionTrigger className="px-6 py-4 hover:no-underline">
-              <div className="flex items-center justify-between w-full pr-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
-                    <IconCertificate className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="text-left">
-                    <h3 className="text-base font-semibold">Configurações de NFe</h3>
-                    <p className="text-sm text-muted-foreground">Parâmetros para emissão de Notas Fiscais</p>
-                  </div>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
+                  <IconCertificate className="h-5 w-5 text-primary" />
                 </div>
-                <Badge variant="secondary" className="ml-auto mr-2">Obrigatório</Badge>
+                <div className="text-left">
+                  <h3 className="text-base font-semibold">Configurações de NFe</h3>
+                  <p className="text-sm text-muted-foreground">Parâmetros para emissão de Notas Fiscais</p>
+                </div>
               </div>
             </AccordionTrigger>
             <AccordionContent className="px-6 pb-6">
