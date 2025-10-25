@@ -99,7 +99,7 @@ export function CSTCombobox({
   const selectedCST = csts.find(cst => cst.id === value)
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={setOpen} modal={true}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -125,7 +125,12 @@ export function CSTCombobox({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[500px] p-0" align="start">
+      <PopoverContent
+        className="w-[90vw] sm:w-[500px] max-w-[500px] p-0"
+        align="start"
+        side="bottom"
+        sideOffset={4}
+      >
         <Command shouldFilter={false}>
           <CommandInput
             placeholder="Buscar por código ou descrição..."
@@ -152,7 +157,7 @@ export function CSTCombobox({
                       value === cst.id ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  <div className="flex flex-col">
+                  <div className="flex flex-col w-full overflow-hidden">
                     <span className="font-medium">{cst.codigo}</span>
                     <span className="text-sm text-muted-foreground truncate">
                       {cst.descricao}

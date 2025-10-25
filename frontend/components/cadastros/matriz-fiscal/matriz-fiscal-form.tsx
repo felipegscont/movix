@@ -206,20 +206,20 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-w-full">
         {/* Dados Gerais */}
-        <Card>
+        <Card className="overflow-hidden">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium">Dados Gerais</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {/* Linha 1 - 3 campos */}
-            <div className="grid grid-cols-12 gap-3">
+            {/* Linha 1 - Responsivo */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3">
               <FormField
                 control={form.control}
                 name="codigo"
                 render={({ field }) => (
-                  <FormItem className="col-span-2">
+                  <FormItem className="lg:col-span-2">
                     <FormLabel className="text-xs">Imposto/Taxa</FormLabel>
                     <FormControl>
                       <StaticCombobox
@@ -227,7 +227,7 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
                         value={field.value}
                         onValueChange={field.onChange}
                         placeholder="Selecione"
-                        className="h-9"
+                        className="h-9 w-full"
                       />
                     </FormControl>
                     <FormMessage />
@@ -239,7 +239,7 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
                 control={form.control}
                 name="descricao"
                 render={({ field }) => (
-                  <FormItem className="col-span-8">
+                  <FormItem className="sm:col-span-2 lg:col-span-8">
                     <FormLabel className="text-xs">Nome</FormLabel>
                     <FormControl>
                       <Input className="h-9 w-full" placeholder="ICMS Padrão (NF-e)" {...field} />
@@ -253,7 +253,7 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
                 control={form.control}
                 name="modeloNF"
                 render={({ field }) => (
-                  <FormItem className="col-span-2">
+                  <FormItem className="lg:col-span-2">
                     <FormLabel className="text-xs">Modelo da NF</FormLabel>
                     <FormControl>
                       <StaticCombobox
@@ -261,7 +261,7 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
                         value={field.value}
                         onValueChange={field.onChange}
                         placeholder="Selecione"
-                        className="h-9"
+                        className="h-9 w-full"
                       />
                     </FormControl>
                     <FormMessage />
@@ -270,13 +270,13 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
               />
             </div>
 
-            {/* Linha 2 - 3 campos (vigência agrupada no centro) */}
-            <div className="grid grid-cols-12 gap-3">
+            {/* Linha 2 - Responsivo */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3">
               <FormField
                 control={form.control}
                 name="seAplicaA"
                 render={({ field }) => (
-                  <FormItem className="col-span-3">
+                  <FormItem className="lg:col-span-3">
                     <FormLabel className="text-xs">Se aplica a</FormLabel>
                     <FormControl>
                       <StaticCombobox
@@ -284,7 +284,7 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
                         value={field.value}
                         onValueChange={field.onChange}
                         placeholder="Selecione"
-                        className="h-9"
+                        className="h-9 w-full"
                       />
                     </FormControl>
                     <FormMessage />
@@ -292,9 +292,9 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
                 )}
               />
 
-              <div className="col-span-6">
+              <div className="sm:col-span-2 lg:col-span-6">
                 <FormLabel className="text-xs">Vigência</FormLabel>
-                <div className="grid grid-cols-2 gap-2 mt-1.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1.5">
                   <FormField
                     control={form.control}
                     name="dataInicio"
@@ -327,7 +327,7 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
                 control={form.control}
                 name="regimeTributario"
                 render={({ field }) => (
-                  <FormItem className="col-span-3">
+                  <FormItem className="lg:col-span-3">
                     <FormLabel className="text-xs">Regime Fiscal</FormLabel>
                     <FormControl>
                       <StaticCombobox
@@ -335,7 +335,7 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
                         value={field.value}
                         onValueChange={(value) => field.onChange(value as number)}
                         placeholder="Selecione"
-                        className="h-9"
+                        className="h-9 w-full"
                       />
                     </FormControl>
                     <FormMessage />
@@ -366,47 +366,45 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
         </Card>
 
         {/* Filtros */}
-        <Card>
+        <Card className="overflow-hidden">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium">Filtros</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {isISSQN ? (
               /* ISSQN - Apenas Atividade Principal */
-              <div className="grid grid-cols-12 gap-3">
-                <FormField
-                  control={form.control}
-                  name="produtoId"
-                  render={({ field }) => (
-                    <FormItem className="col-span-12">
-                      <FormLabel className="text-xs">Atividade Principal</FormLabel>
-                      <ProdutoCombobox
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        className="w-full"
-                      />
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <FormField
+                control={form.control}
+                name="produtoId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs">Atividade Principal</FormLabel>
+                    <ProdutoCombobox
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      className="w-full"
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             ) : (
               <>
-                {/* Linha 1 - Campos condicionais */}
-                <div className="grid grid-cols-12 gap-3">
+                {/* Linha 1 - Responsivo */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {mostrarEstadoDestino && (
                     <FormField
                       control={form.control}
                       name="ufDestino"
                       render={({ field }) => (
-                        <FormItem className="col-span-4">
+                        <FormItem>
                           <FormLabel className="text-xs">Estado do Destinatário</FormLabel>
                           <FormControl>
                             <EstadoCombobox
                               value={field.value}
                               onValueChange={field.onChange}
                               placeholder="Selecione o estado"
-                              className="h-9"
+                              className="h-9 w-full"
                               returnUf={true}
                             />
                           </FormControl>
@@ -420,7 +418,7 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
                     control={form.control}
                     name="cfopId"
                     render={({ field }) => (
-                      <FormItem className={mostrarEstadoDestino ? "col-span-4" : "col-span-6"}>
+                      <FormItem>
                         <FormLabel className="text-xs">CFOP</FormLabel>
                         <CFOPCombobox
                           value={field.value}
@@ -436,7 +434,7 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
                     control={form.control}
                     name="tipoItem"
                     render={({ field }) => (
-                      <FormItem className={mostrarEstadoDestino ? "col-span-4" : "col-span-6"}>
+                      <FormItem>
                         <FormLabel className="text-xs">Tipo de Item</FormLabel>
                         <FormControl>
                           <StaticCombobox
@@ -444,7 +442,7 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
                             value={field.value}
                             onValueChange={field.onChange}
                             placeholder="Selecione"
-                            className="h-9"
+                            className="h-9 w-full"
                           />
                         </FormControl>
                         <FormMessage />
@@ -453,13 +451,13 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
                   />
                 </div>
 
-                {/* Linha 2 - Produto e NCM */}
-                <div className="grid grid-cols-12 gap-3">
+                {/* Linha 2 - Responsivo */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
                   <FormField
                     control={form.control}
                     name="produtoId"
                     render={({ field }) => (
-                      <FormItem className={mostrarNCM ? "col-span-8" : "col-span-12"}>
+                      <FormItem className={mostrarNCM ? "lg:col-span-8" : "lg:col-span-12"}>
                         <FormLabel className="text-xs">Código do Produto/Serviço</FormLabel>
                         <ProdutoCombobox
                           value={field.value}
@@ -476,7 +474,7 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
                       control={form.control}
                       name="ncmId"
                       render={({ field }) => (
-                        <FormItem className="col-span-4">
+                        <FormItem className="lg:col-span-4">
                           <FormLabel className="text-xs">Código NCM</FormLabel>
                           <NCMCombobox
                             value={field.value}
@@ -495,62 +493,56 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
         </Card>
 
         {/* Definições Fiscais */}
-        <Card>
+        <Card className="overflow-hidden">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium">Definições Fiscais</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {/* Linha 1 - CST ou CSOSN (dinâmico) */}
-            <div className="grid grid-cols-12 gap-3">
-              {mostrarCSOSN ? (
-                <FormField
-                  control={form.control}
-                  name="csosnId"
-                  render={({ field }) => (
-                    <FormItem className="col-span-12">
-                      <FormLabel className="text-xs">CSOSN (Simples Nacional)</FormLabel>
-                      <CSOSNCombobox
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        className="w-full"
-                      />
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              ) : (
-                <FormField
-                  control={form.control}
-                  name="cstId"
-                  render={({ field }) => (
-                    <FormItem className="col-span-12">
-                      <FormLabel className="text-xs">
-                        CST {impostoSelecionado ? `(${impostoSelecionado})` : ""}
-                      </FormLabel>
-                      <CSTCombobox
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        tipo={impostoSelecionado as "ICMS" | "PIS" | "COFINS" | "IPI"}
-                        className="w-full"
-                      />
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-            </div>
+            {/* CST ou CSOSN */}
+            {mostrarCSOSN ? (
+              <FormField
+                control={form.control}
+                name="csosnId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs">CSOSN (Simples Nacional)</FormLabel>
+                    <CSOSNCombobox
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      className="w-full"
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ) : (
+              <FormField
+                control={form.control}
+                name="cstId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs">
+                      CST {impostoSelecionado ? `(${impostoSelecionado})` : ""}
+                    </FormLabel>
+                    <CSTCombobox
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      tipo={impostoSelecionado as "ICMS" | "PIS" | "COFINS" | "IPI"}
+                      className="w-full"
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
-            {/* Linha 2 - Alíquotas (condicionais) */}
-            <div className="grid grid-cols-12 gap-3">
+            {/* Alíquotas - Responsivo */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               <FormField
                 control={form.control}
                 name="aliquota"
                 render={({ field }) => (
-                  <FormItem className={
-                    mostrarReducaoBC && mostrarFCP ? "col-span-4" :
-                    mostrarReducaoBC || mostrarFCP ? "col-span-6" :
-                    "col-span-12"
-                  }>
+                  <FormItem className={!mostrarReducaoBC && !mostrarFCP ? "sm:col-span-2 lg:col-span-3" : ""}>
                     <FormLabel className="text-xs">Alíquota</FormLabel>
                     <FormControl>
                       <Input
@@ -572,7 +564,7 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
                   control={form.control}
                   name="reducaoBC"
                   render={({ field }) => (
-                    <FormItem className={mostrarFCP ? "col-span-4" : "col-span-6"}>
+                    <FormItem>
                       <FormLabel className="text-xs">Redução BC (%)</FormLabel>
                       <FormControl>
                         <Input
@@ -595,7 +587,7 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
                   control={form.control}
                   name="fcp"
                   render={({ field }) => (
-                    <FormItem className={mostrarReducaoBC ? "col-span-4" : "col-span-6"}>
+                    <FormItem>
                       <FormLabel className="text-xs">Percentual para FCP (NT2016.002)</FormLabel>
                       <FormControl>
                         <Input
@@ -617,18 +609,19 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
         </Card>
 
         {/* Botões de Ação */}
-        <div className="flex justify-between">
+        <div className="flex flex-col sm:flex-row justify-between gap-3">
           <Button
             type="button"
             variant="ghost"
             size="sm"
             onClick={() => router.push("/matrizes-fiscais")}
             disabled={loading}
+            className="w-full sm:w-auto"
           >
             <IconArrowLeft className="mr-2 h-4 w-4" />
             Voltar
           </Button>
-          <Button type="submit" size="sm" disabled={loading}>
+          <Button type="submit" size="sm" disabled={loading} className="w-full sm:w-auto">
             {loading && <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />}
             {matrizId ? "Salvar" : "Criar"}
           </Button>
