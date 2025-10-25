@@ -15,12 +15,6 @@ export { ContatoSection } from './sections/contato-section'
 export { NfeSection } from './sections/nfe-section'
 export { CertificadoSection } from './sections/certificado-section'
 
-// Hooks
-export { useCepLookup } from './hooks/use-cep-lookup'
-export { useCertificado } from './hooks/use-certificado'
-export { useCnpjLookup } from './hooks/use-cnpj-lookup'
-export { useEmitenteForm } from './hooks/use-emitente-form'
-
 // Tipos
 export type { EmitenteFormData, CertificadoInfo, CertificadoState } from './types'
 
