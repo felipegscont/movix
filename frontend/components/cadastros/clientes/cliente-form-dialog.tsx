@@ -214,19 +214,17 @@ export function ClienteFormDialog({
                       />
 
                       {/* Nome */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                         <FormField
                           control={form.control}
                           name="nome"
                           render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>
-                                {form.watch("documento")?.replace(/\D/g, '').length > 11
-                                  ? "Razão Social"
-                                  : "Nome"}
+                            <FormItem className="space-y-1">
+                              <FormLabel className="text-xs font-medium">
+                                {form.watch("documento")?.replace(/\D/g, '').length > 11 ? "Razão Social" : "Nome"}
                               </FormLabel>
                               <FormControl>
-                                <Input {...field} />
+                                <Input {...field} className="h-9 text-sm w-full" />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -238,10 +236,10 @@ export function ClienteFormDialog({
                             control={form.control}
                             name="nomeFantasia"
                             render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Nome Fantasia</FormLabel>
+                              <FormItem className="space-y-1">
+                                <FormLabel className="text-xs font-medium">Nome Fantasia</FormLabel>
                                 <FormControl>
-                                  <Input {...field} />
+                                  <Input {...field} className="h-9 text-sm w-full" />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -255,20 +253,13 @@ export function ClienteFormDialog({
                         control={form.control}
                         name="ativo"
                         render={({ field }) => (
-                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
                             <div className="space-y-0.5">
-                              <FormLabel className="text-base">
-                                Cliente Ativo
-                              </FormLabel>
-                              <FormDescription>
-                                Desative para impedir novas transações com este cliente
-                              </FormDescription>
+                              <FormLabel className="text-sm">Cliente Ativo</FormLabel>
+                              <FormDescription className="text-[10px]">Desative para impedir novas transações com este cliente</FormDescription>
                             </div>
                             <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
+                              <Switch checked={field.value} onCheckedChange={field.onChange} />
                             </FormControl>
                           </FormItem>
                         )}

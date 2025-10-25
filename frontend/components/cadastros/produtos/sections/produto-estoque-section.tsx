@@ -26,31 +26,22 @@ export function ProdutoEstoqueSection({ form }: ProdutoSectionProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* Valores */}
-      <div className="space-y-4">
-        <h4 className="text-sm font-medium">Valores</h4>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="space-y-2">
+        <h4 className="text-xs font-semibold">Valores</h4>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
           {/* Valor de Custo */}
           <FormField
             control={form.control}
             name="valorCusto"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Valor de Custo</FormLabel>
+              <FormItem className="space-y-1">
+                <FormLabel className="text-xs font-medium">Valor de Custo</FormLabel>
                 <FormControl>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="0.00"
-                    {...field}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                  />
+                  <Input type="number" step="0.01" min="0" placeholder="0.00" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} className="h-9 text-sm w-full" />
                 </FormControl>
-                <FormDescription>
-                  Custo de aquisição do produto
-                </FormDescription>
+                <FormDescription className="text-[10px]">Custo de aquisição do produto</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -61,21 +52,12 @@ export function ProdutoEstoqueSection({ form }: ProdutoSectionProps) {
             control={form.control}
             name="margemLucro"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Margem de Lucro (%)</FormLabel>
+              <FormItem className="space-y-1">
+                <FormLabel className="text-xs font-medium">Margem de Lucro (%)</FormLabel>
                 <FormControl>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="0.00"
-                    {...field}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                  />
+                  <Input type="number" step="0.01" min="0" placeholder="0.00" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} className="h-9 text-sm w-full" />
                 </FormControl>
-                <FormDescription>
-                  Percentual de lucro sobre o custo
-                </FormDescription>
+                <FormDescription className="text-[10px]">Percentual de lucro sobre o custo</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -86,25 +68,14 @@ export function ProdutoEstoqueSection({ form }: ProdutoSectionProps) {
             control={form.control}
             name="valorUnitario"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Valor Unitário *</FormLabel>
+              <FormItem className="space-y-1">
+                <FormLabel className="text-xs font-medium">Valor Unitário *</FormLabel>
                 <FormControl>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="0.00"
-                    {...field}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                  />
+                  <Input type="number" step="0.01" min="0" placeholder="0.00" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} className="h-9 text-sm w-full" />
                 </FormControl>
-                <FormDescription>
+                <FormDescription className="text-[10px]">
                   Preço de venda do produto
-                  {calcularValorUnitario() && (
-                    <span className="text-primary ml-1">
-                      (Sugestão: R$ {calcularValorUnitario()})
-                    </span>
-                  )}
+                  {calcularValorUnitario() && <span className="text-primary ml-1">(Sugestão: R$ {calcularValorUnitario()})</span>}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -113,32 +84,23 @@ export function ProdutoEstoqueSection({ form }: ProdutoSectionProps) {
         </div>
       </div>
 
-      <Separator />
+      <Separator className="my-2" />
 
       {/* Estoque */}
-      <div className="space-y-4">
-        <h4 className="text-sm font-medium">Controle de Estoque</h4>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="space-y-2">
+        <h4 className="text-xs font-semibold">Controle de Estoque</h4>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
           {/* Estoque Atual */}
           <FormField
             control={form.control}
             name="estoqueAtual"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Estoque Atual</FormLabel>
+              <FormItem className="space-y-1">
+                <FormLabel className="text-xs font-medium">Estoque Atual</FormLabel>
                 <FormControl>
-                  <Input
-                    type="number"
-                    step="1"
-                    min="0"
-                    placeholder="0"
-                    {...field}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                  />
+                  <Input type="number" step="1" min="0" placeholder="0" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} className="h-9 text-sm w-full" />
                 </FormControl>
-                <FormDescription>
-                  Quantidade em estoque
-                </FormDescription>
+                <FormDescription className="text-[10px]">Quantidade em estoque</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -149,21 +111,12 @@ export function ProdutoEstoqueSection({ form }: ProdutoSectionProps) {
             control={form.control}
             name="estoqueMinimo"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Estoque Mínimo</FormLabel>
+              <FormItem className="space-y-1">
+                <FormLabel className="text-xs font-medium">Estoque Mínimo</FormLabel>
                 <FormControl>
-                  <Input
-                    type="number"
-                    step="1"
-                    min="0"
-                    placeholder="0"
-                    {...field}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                  />
+                  <Input type="number" step="1" min="0" placeholder="0" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} className="h-9 text-sm w-full" />
                 </FormControl>
-                <FormDescription>
-                  Alerta de estoque baixo
-                </FormDescription>
+                <FormDescription className="text-[10px]">Alerta de estoque baixo</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -174,21 +127,12 @@ export function ProdutoEstoqueSection({ form }: ProdutoSectionProps) {
             control={form.control}
             name="estoqueMaximo"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Estoque Máximo</FormLabel>
+              <FormItem className="space-y-1">
+                <FormLabel className="text-xs font-medium">Estoque Máximo</FormLabel>
                 <FormControl>
-                  <Input
-                    type="number"
-                    step="1"
-                    min="0"
-                    placeholder="0"
-                    {...field}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                  />
+                  <Input type="number" step="1" min="0" placeholder="0" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} className="h-9 text-sm w-full" />
                 </FormControl>
-                <FormDescription>
-                  Capacidade máxima de estoque
-                </FormDescription>
+                <FormDescription className="text-[10px]">Capacidade máxima de estoque</FormDescription>
                 <FormMessage />
               </FormItem>
             )}

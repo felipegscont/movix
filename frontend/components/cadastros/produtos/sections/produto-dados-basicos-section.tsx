@@ -21,16 +21,16 @@ import { ProdutoSectionProps, UNIDADE_OPTIONS } from "../types"
 
 export function ProdutoDadosBasicosSection({ form }: ProdutoSectionProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
       {/* Código */}
       <FormField
         control={form.control}
         name="codigo"
         render={({ field }) => (
-          <FormItem>
-            <FormLabel>Código *</FormLabel>
+          <FormItem className="space-y-1">
+            <FormLabel className="text-xs font-medium">Código *</FormLabel>
             <FormControl>
-              <Input placeholder="Ex: PROD001" {...field} />
+              <Input placeholder="Ex: PROD001" {...field} className="h-9 text-sm w-full" />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -42,10 +42,10 @@ export function ProdutoDadosBasicosSection({ form }: ProdutoSectionProps) {
         control={form.control}
         name="codigoBarras"
         render={({ field }) => (
-          <FormItem>
-            <FormLabel>Código de Barras</FormLabel>
+          <FormItem className="space-y-1">
+            <FormLabel className="text-xs font-medium">Código de Barras</FormLabel>
             <FormControl>
-              <Input placeholder="EAN/GTIN" {...field} />
+              <Input placeholder="EAN/GTIN" {...field} className="h-9 text-sm w-full" />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -57,11 +57,11 @@ export function ProdutoDadosBasicosSection({ form }: ProdutoSectionProps) {
         control={form.control}
         name="unidade"
         render={({ field }) => (
-          <FormItem>
-            <FormLabel>Unidade *</FormLabel>
+          <FormItem className="space-y-1">
+            <FormLabel className="text-xs font-medium">Unidade *</FormLabel>
             <Select onValueChange={field.onChange} value={field.value}>
               <FormControl>
-                <SelectTrigger>
+                <SelectTrigger className="h-9 text-sm w-full">
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
               </FormControl>
@@ -83,10 +83,10 @@ export function ProdutoDadosBasicosSection({ form }: ProdutoSectionProps) {
         control={form.control}
         name="descricao"
         render={({ field }) => (
-          <FormItem className="md:col-span-3">
-            <FormLabel>Descrição *</FormLabel>
+          <FormItem className="md:col-span-3 space-y-1">
+            <FormLabel className="text-xs font-medium">Descrição *</FormLabel>
             <FormControl>
-              <Input placeholder="Nome do produto" {...field} />
+              <Input placeholder="Nome do produto" {...field} className="h-9 text-sm w-full" />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -98,14 +98,10 @@ export function ProdutoDadosBasicosSection({ form }: ProdutoSectionProps) {
         control={form.control}
         name="descricaoComplementar"
         render={({ field }) => (
-          <FormItem className="md:col-span-3">
-            <FormLabel>Descrição Complementar</FormLabel>
+          <FormItem className="md:col-span-3 space-y-1">
+            <FormLabel className="text-xs font-medium">Descrição Complementar</FormLabel>
             <FormControl>
-              <Textarea
-                placeholder="Informações adicionais sobre o produto..."
-                className="min-h-[80px]"
-                {...field}
-              />
+              <Textarea placeholder="Informações adicionais sobre o produto..." className="min-h-[60px] text-sm" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -117,16 +113,10 @@ export function ProdutoDadosBasicosSection({ form }: ProdutoSectionProps) {
         control={form.control}
         name="ncmId"
         render={({ field }) => (
-          <FormItem className="md:col-span-2">
-            <FormLabel>NCM *</FormLabel>
-            <NCMCombobox
-              value={field.value}
-              onValueChange={field.onChange}
-              placeholder="Selecione o NCM"
-            />
-            <FormDescription>
-              Nomenclatura Comum do Mercosul
-            </FormDescription>
+          <FormItem className="md:col-span-2 space-y-1">
+            <FormLabel className="text-xs font-medium">NCM *</FormLabel>
+            <NCMCombobox value={field.value} onValueChange={field.onChange} placeholder="Selecione o NCM" />
+            <FormDescription className="text-[10px]">Nomenclatura Comum do Mercosul</FormDescription>
             <FormMessage />
           </FormItem>
         )}
@@ -137,14 +127,12 @@ export function ProdutoDadosBasicosSection({ form }: ProdutoSectionProps) {
         control={form.control}
         name="cestId"
         render={({ field }) => (
-          <FormItem>
-            <FormLabel>CEST</FormLabel>
+          <FormItem className="space-y-1">
+            <FormLabel className="text-xs font-medium">CEST</FormLabel>
             <FormControl>
-              <Input placeholder="Código CEST" {...field} />
+              <Input placeholder="Código CEST" {...field} className="h-9 text-sm w-full" />
             </FormControl>
-            <FormDescription>
-              Código Especificador da Substituição Tributária
-            </FormDescription>
+            <FormDescription className="text-[10px]">Código Especificador da Substituição Tributária</FormDescription>
             <FormMessage />
           </FormItem>
         )}
@@ -155,16 +143,10 @@ export function ProdutoDadosBasicosSection({ form }: ProdutoSectionProps) {
         control={form.control}
         name="cfopId"
         render={({ field }) => (
-          <FormItem className="md:col-span-2">
-            <FormLabel>CFOP Padrão</FormLabel>
-            <CFOPCombobox
-              value={field.value || ""}
-              onValueChange={field.onChange}
-              placeholder="Selecione o CFOP"
-            />
-            <FormDescription>
-              Código Fiscal de Operações e Prestações
-            </FormDescription>
+          <FormItem className="md:col-span-2 space-y-1">
+            <FormLabel className="text-xs font-medium">CFOP Padrão</FormLabel>
+            <CFOPCombobox value={field.value || ""} onValueChange={field.onChange} placeholder="Selecione o CFOP" />
+            <FormDescription className="text-[10px]">Código Fiscal de Operações e Prestações</FormDescription>
             <FormMessage />
           </FormItem>
         )}
@@ -175,11 +157,11 @@ export function ProdutoDadosBasicosSection({ form }: ProdutoSectionProps) {
         control={form.control}
         name="unidadeTributavel"
         render={({ field }) => (
-          <FormItem>
-            <FormLabel>Unidade Tributável</FormLabel>
+          <FormItem className="space-y-1">
+            <FormLabel className="text-xs font-medium">Unidade Tributável</FormLabel>
             <Select onValueChange={field.onChange} value={field.value}>
               <FormControl>
-                <SelectTrigger>
+                <SelectTrigger className="h-9 text-sm w-full">
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
               </FormControl>
@@ -191,9 +173,7 @@ export function ProdutoDadosBasicosSection({ form }: ProdutoSectionProps) {
                 ))}
               </SelectContent>
             </Select>
-            <FormDescription>
-              Unidade para cálculo de tributos (se diferente da unidade comercial)
-            </FormDescription>
+            <FormDescription className="text-[10px]">Unidade para cálculo de tributos</FormDescription>
             <FormMessage />
           </FormItem>
         )}
