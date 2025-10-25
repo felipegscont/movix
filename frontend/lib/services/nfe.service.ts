@@ -1,5 +1,26 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
+// Helper function to create fetch with timeout
+const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeout = 10000): Promise<Response> => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error: any) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      throw new Error('Request timeout - O servidor demorou muito para responder');
+    }
+    throw error;
+  }
+};
+
 export interface NfeItem {
   id: string;
   numeroItem: number;
@@ -192,62 +213,96 @@ export interface NfesResponse {
 
 export class NfeService {
   static async getFormasPagamento(): Promise<FormaPagamento[]> {
-    const response = await fetch(`${API_BASE_URL}/formas-pagamento`);
-    if (!response.ok) {
-      throw new Error('Erro ao buscar formas de pagamento');
+    try {
+      const response = await fetchWithTimeout(`${API_BASE_URL}/formas-pagamento`);
+      if (!response.ok) {
+        throw new Error('Erro ao buscar formas de pagamento');
+      }
+      return response.json();
+    } catch (error: any) {
+      console.error('❌ Erro ao buscar formas de pagamento:', error);
+      throw new Error(error.message || 'Erro ao buscar formas de pagamento');
     }
-    return response.json();
   }
 
   static async getAll(params?: { page?: number; limit?: number; search?: string; emitenteId?: string; status?: string } | number, limit?: number, emitenteId?: string, status?: string): Promise<NfesResponse> {
-    // Suportar ambas as assinaturas para compatibilidade
-    let queryParams: URLSearchParams;
+    try {
+      // Suportar ambas as assinaturas para compatibilidade
+      let queryParams: URLSearchParams;
 
-    if (typeof params === 'object' && params !== null) {
-      queryParams = new URLSearchParams({
-        page: (params.page || 1).toString(),
-        limit: (params.limit || 10).toString(),
-      });
+      if (typeof params === 'object' && params !== null) {
+        queryParams = new URLSearchParams({
+          page: (params.page || 1).toString(),
+          limit: (params.limit || 10).toString(),
+        });
 
-      if (params.search) {
-        queryParams.append('search', params.search);
+        if (params.search) {
+          queryParams.append('search', params.search);
+        }
+
+        if (params.emitenteId) {
+          queryParams.append('emitenteId', params.emitenteId);
+        }
+
+        if (params.status) {
+          queryParams.append('status', params.status);
+        }
+      } else {
+        queryParams = new URLSearchParams({
+          page: (params || 1).toString(),
+          limit: (limit || 10).toString(),
+        });
+
+        if (emitenteId) {
+          queryParams.append('emitenteId', emitenteId);
+        }
+
+        if (status) {
+          queryParams.append('status', status);
+        }
       }
 
-      if (params.emitenteId) {
-        queryParams.append('emitenteId', params.emitenteId);
+      const url = `${API_BASE_URL}/nfes?${queryParams}`;
+      console.log('🔍 Fetching NFes from:', url);
+
+      const response = await fetchWithTimeout(url, {}, 15000); // 15 second timeout
+
+      console.log('📡 Response status:', response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => 'Unknown error');
+        console.error('❌ Error response:', errorText);
+        throw new Error(`Erro ao buscar NFes: ${response.status} - ${errorText}`);
       }
 
-      if (params.status) {
-        queryParams.append('status', params.status);
-      }
-    } else {
-      queryParams = new URLSearchParams({
-        page: (params || 1).toString(),
-        limit: (limit || 10).toString(),
-      });
+      const data = await response.json();
+      console.log('✅ NFes loaded:', data.meta?.total || 0, 'total');
+      return data;
+    } catch (error: any) {
+      console.error('❌ Erro ao buscar NFes:', error);
 
-      if (emitenteId) {
-        queryParams.append('emitenteId', emitenteId);
+      // Provide more specific error messages
+      if (error.message.includes('timeout')) {
+        throw new Error('Timeout: O servidor demorou muito para responder. Verifique se o backend está rodando.');
+      } else if (error.message.includes('Failed to fetch')) {
+        throw new Error('Erro de conexão: Não foi possível conectar ao servidor. Verifique se o backend está rodando em ' + API_BASE_URL);
       }
 
-      if (status) {
-        queryParams.append('status', status);
-      }
+      throw error;
     }
-
-    const response = await fetch(`${API_BASE_URL}/nfes?${queryParams}`);
-    if (!response.ok) {
-      throw new Error('Erro ao buscar NFes');
-    }
-    return response.json();
   }
 
   static async getById(id: string): Promise<Nfe> {
-    const response = await fetch(`${API_BASE_URL}/nfes/${id}`);
-    if (!response.ok) {
-      throw new Error('Erro ao buscar NFe');
+    try {
+      const response = await fetchWithTimeout(`${API_BASE_URL}/nfes/${id}`);
+      if (!response.ok) {
+        throw new Error('Erro ao buscar NFe');
+      }
+      return response.json();
+    } catch (error: any) {
+      console.error('❌ Erro ao buscar NFe:', error);
+      throw new Error(error.message || 'Erro ao buscar NFe');
     }
-    return response.json();
   }
 
   static async create(data: CreateNfeData): Promise<Nfe> {
