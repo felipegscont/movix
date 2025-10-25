@@ -18,6 +18,7 @@ export interface Produto {
   estoqueMinimo?: number;
   estoqueMaximo?: number;
   origem: string;
+  tipoItem: string;
   // Impostos ICMS
   icmsCstId?: string;
   icmsCsosnId?: string;
@@ -96,6 +97,7 @@ export interface CreateProdutoData {
   estoqueMinimo?: number;
   estoqueMaximo?: number;
   origem: string;
+  tipoItem: string;
   // Impostos ICMS
   icmsCstId?: string;
   icmsCsosnId?: string;

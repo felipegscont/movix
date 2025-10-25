@@ -128,9 +128,9 @@ export function ProdutoTributacaoSection({ form }: ProdutoSectionProps) {
             name="pisCstId"
             render={({ field }) => (
               <FormItem className="space-y-1">
-                <FormLabel className="text-xs font-medium">CST PIS</FormLabel>
+                <FormLabel className="text-xs font-medium">CST PIS *</FormLabel>
                 <CSTCombobox tipo="PIS" value={field.value || ""} onValueChange={field.onChange} placeholder="Selecione o CST" />
-                <FormDescription className="text-[10px]">Código de Situação Tributária do PIS</FormDescription>
+                <FormDescription className="text-[10px]">Código de Situação Tributária do PIS (obrigatório para NFe)</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -165,9 +165,9 @@ export function ProdutoTributacaoSection({ form }: ProdutoSectionProps) {
             name="cofinsCstId"
             render={({ field }) => (
               <FormItem className="space-y-1">
-                <FormLabel className="text-xs font-medium">CST COFINS</FormLabel>
+                <FormLabel className="text-xs font-medium">CST COFINS *</FormLabel>
                 <CSTCombobox tipo="COFINS" value={field.value || ""} onValueChange={field.onChange} placeholder="Selecione o CST" />
-                <FormDescription className="text-[10px]">Código de Situação Tributária do COFINS</FormDescription>
+                <FormDescription className="text-[10px]">Código de Situação Tributária do COFINS (obrigatório para NFe)</FormDescription>
                 <FormMessage />
               </FormItem>
             )}

@@ -32,3 +32,22 @@ export const UNIDADE_OPTIONS = [
   { value: "M3", label: "M3 - Metro Cúbico" },
 ] as const
 
+/**
+ * Tipos de Item para Matriz Fiscal
+ * Usado para definir a tributação baseada na Natureza de Operação
+ */
+export const TIPO_ITEM_OPTIONS = [
+  { value: "00", label: "00 - Mercadoria para Revenda" },
+  { value: "01", label: "01 - Matéria-Prima" },
+  { value: "02", label: "02 - Embalagem" },
+  { value: "03", label: "03 - Produto em Processo" },
+  { value: "04", label: "04 - Produto Acabado" },
+  { value: "05", label: "05 - Subproduto" },
+  { value: "06", label: "06 - Produto Intermediário" },
+  { value: "07", label: "07 - Material de Uso e Consumo" },
+  { value: "08", label: "08 - Ativo Imobilizado" },
+  { value: "09", label: "09 - Serviços" },
+  { value: "10", label: "10 - Outros Insumos" },
+  { value: "99", label: "99 - Outras" },
+] as const
+

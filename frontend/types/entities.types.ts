@@ -97,6 +97,8 @@ export interface Produto {
   ncmId: string
   cestId?: string
   cfopId?: string
+  origem: string
+  tipoItem: string
   unidade: string
   unidadeTributavel?: string
   valorUnitario: number

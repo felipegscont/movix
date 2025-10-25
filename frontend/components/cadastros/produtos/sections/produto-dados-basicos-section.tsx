@@ -16,9 +16,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { NCMCombobox } from "@/components/shared/combobox/ncm-combobox"
-import { CFOPCombobox } from "@/components/shared/combobox/cfop-combobox"
 import { ProdutoSectionProps } from "@/types"
-import { UNIDADE_OPTIONS } from "@/lib/constants/produto.constants"
+import { UNIDADE_OPTIONS, TIPO_ITEM_OPTIONS, ORIGEM_OPTIONS } from "@/lib/constants/produto.constants"
 
 export function ProdutoDadosBasicosSection({ form }: ProdutoSectionProps) {
   return (
@@ -139,15 +138,55 @@ export function ProdutoDadosBasicosSection({ form }: ProdutoSectionProps) {
         )}
       />
 
-      {/* CFOP */}
+      {/* Origem da Mercadoria */}
       <FormField
         control={form.control}
-        name="cfopId"
+        name="origem"
+        render={({ field }) => (
+          <FormItem className="space-y-1">
+            <FormLabel className="text-xs font-medium">Origem *</FormLabel>
+            <Select onValueChange={field.onChange} value={field.value}>
+              <FormControl>
+                <SelectTrigger className="h-9 text-sm w-full">
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {ORIGEM_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormDescription className="text-[10px]">Origem da mercadoria</FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* Tipo de Item */}
+      <FormField
+        control={form.control}
+        name="tipoItem"
         render={({ field }) => (
           <FormItem className="md:col-span-2 space-y-1">
-            <FormLabel className="text-xs font-medium">CFOP Padrão</FormLabel>
-            <CFOPCombobox value={field.value || ""} onValueChange={field.onChange} placeholder="Selecione o CFOP" />
-            <FormDescription className="text-[10px]">Código Fiscal de Operações e Prestações</FormDescription>
+            <FormLabel className="text-xs font-medium">Tipo de Item *</FormLabel>
+            <Select onValueChange={field.onChange} value={field.value}>
+              <FormControl>
+                <SelectTrigger className="h-9 text-sm w-full">
+                  <SelectValue placeholder="Selecione o tipo" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {TIPO_ITEM_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormDescription className="text-[10px]">Usado para definir tributação pela Matriz Fiscal</FormDescription>
             <FormMessage />
           </FormItem>
         )}

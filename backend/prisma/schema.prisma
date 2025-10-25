@@ -360,6 +360,7 @@ model Produto {
 
   // Tributação
   origem                String @db.VarChar(1) // 0=Nacional, 1=Estrangeira, etc
+  tipoItem              String @default("00") @db.VarChar(2) // Tipo de item para Matriz Fiscal (00-99)
 
   // Impostos - ICMS
   icmsCstId             String? // Para regime normal

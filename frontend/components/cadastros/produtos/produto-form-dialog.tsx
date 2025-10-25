@@ -25,7 +25,6 @@ import { Package, Receipt, ChartBar, Settings } from "lucide-react"
 
 // Importar seções
 import { ProdutoDadosBasicosSection } from "./sections/produto-dados-basicos-section"
-import { ProdutoTributacaoSection } from "./sections/produto-tributacao-section"
 import { ProdutoEstoqueSection } from "./sections/produto-estoque-section"
 import { ProdutoOutrosSection } from "./sections/produto-outros-section"
 
@@ -58,7 +57,8 @@ export function ProdutoFormDialog({
       descricaoComplementar: "",
       ncmId: "",
       cestId: "",
-      cfopId: "",
+      origem: "0",
+      tipoItem: "00", // Mercadoria para Revenda (padrão)
       unidade: "UN",
       unidadeTributavel: "",
       valorUnitario: 0,
@@ -67,17 +67,6 @@ export function ProdutoFormDialog({
       estoqueAtual: 0,
       estoqueMinimo: 0,
       estoqueMaximo: 0,
-      origem: "0",
-      icmsCstId: "",
-      icmsCsosnId: "",
-      icmsAliquota: 0,
-      icmsReducao: 0,
-      pisCstId: "",
-      pisAliquota: 0,
-      cofinsCstId: "",
-      cofinsAliquota: 0,
-      ipiCstId: "",
-      ipiAliquota: 0,
       fornecedorId: "",
       ativo: true,
     },
@@ -109,7 +98,8 @@ export function ProdutoFormDialog({
           descricaoComplementar: produto.descricaoComplementar || "",
           ncmId: produto.ncmId || "",
           cestId: produto.cestId || "",
-          cfopId: produto.cfopId || "",
+          origem: produto.origem || "0",
+          tipoItem: produto.tipoItem || "00",
           unidade: produto.unidade || "UN",
           unidadeTributavel: produto.unidadeTributavel || "",
           valorUnitario: produto.valorUnitario || 0,
@@ -118,17 +108,6 @@ export function ProdutoFormDialog({
           estoqueAtual: produto.estoqueAtual || 0,
           estoqueMinimo: produto.estoqueMinimo || 0,
           estoqueMaximo: produto.estoqueMaximo || 0,
-          origem: produto.origem || "0",
-          icmsCstId: produto.icmsCstId || "",
-          icmsCsosnId: produto.icmsCsosnId || "",
-          icmsAliquota: produto.icmsAliquota || 0,
-          icmsReducao: produto.icmsReducao || 0,
-          pisCstId: produto.pisCstId || "",
-          pisAliquota: produto.pisAliquota || 0,
-          cofinsCstId: produto.cofinsCstId || "",
-          cofinsAliquota: produto.cofinsAliquota || 0,
-          ipiCstId: produto.ipiCstId || "",
-          ipiAliquota: produto.ipiAliquota || 0,
           fornecedorId: produto.fornecedorId || "",
           ativo: produto.ativo ?? true,
         })
@@ -151,23 +130,12 @@ export function ProdutoFormDialog({
         codigoBarras: data.codigoBarras?.trim() || undefined,
         descricaoComplementar: data.descricaoComplementar?.trim() || undefined,
         cestId: data.cestId?.trim() || undefined,
-        cfopId: data.cfopId?.trim() || undefined,
         unidadeTributavel: data.unidadeTributavel?.trim() || undefined,
         valorCusto: data.valorCusto || undefined,
         margemLucro: data.margemLucro || undefined,
         estoqueAtual: data.estoqueAtual || undefined,
         estoqueMinimo: data.estoqueMinimo || undefined,
         estoqueMaximo: data.estoqueMaximo || undefined,
-        icmsCstId: data.icmsCstId?.trim() || undefined,
-        icmsCsosnId: data.icmsCsosnId?.trim() || undefined,
-        icmsAliquota: data.icmsAliquota || undefined,
-        icmsReducao: data.icmsReducao || undefined,
-        pisCstId: data.pisCstId?.trim() || undefined,
-        pisAliquota: data.pisAliquota || undefined,
-        cofinsCstId: data.cofinsCstId?.trim() || undefined,
-        cofinsAliquota: data.cofinsAliquota || undefined,
-        ipiCstId: data.ipiCstId?.trim() || undefined,
-        ipiAliquota: data.ipiAliquota || undefined,
         fornecedorId: data.fornecedorId?.trim() || undefined,
       }
 
@@ -246,26 +214,6 @@ export function ProdutoFormDialog({
                     <AccordionContent className="px-6 pb-6">
                       <div className="pt-4">
                         <ProdutoDadosBasicosSection form={form as any} />
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  {/* Accordion: Tributação */}
-                  <AccordionItem value="tributacao" className="border rounded-lg !border-b">
-                    <AccordionTrigger className="px-6 py-4 hover:no-underline">
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
-                          <Receipt className="h-5 w-5 text-primary" />
-                        </div>
-                        <div className="text-left">
-                          <h3 className="text-base font-semibold">Tributação</h3>
-                          <p className="text-sm text-muted-foreground">Configurações fiscais e impostos</p>
-                        </div>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="px-6 pb-6">
-                      <div className="pt-4">
-                        <ProdutoTributacaoSection form={form as any} />
                       </div>
                     </AccordionContent>
                   </AccordionItem>

@@ -98,6 +98,10 @@ export class CreateProdutoDto {
   @IsIn(['0', '1', '2', '3', '4', '5', '6', '7', '8'])
   origem: string; // 0=Nacional, 1=Estrangeira, etc
 
+  @IsString()
+  @IsIn(['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '99'])
+  tipoItem: string; // Tipo de item para Matriz Fiscal
+
   // Impostos - ICMS
   @IsOptional()
   @IsString()
