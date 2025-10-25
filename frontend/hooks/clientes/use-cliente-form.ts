@@ -421,17 +421,18 @@ export function useClienteForm({ clienteId, onSuccess }: UseClienteFormProps): U
         ...data,
         // Remove caracteres não numéricos do documento
         documento: data.documento?.replace(/\D/g, '') || '',
+        // Remove caracteres não numéricos do CEP
+        cep: data.cep?.replace(/\D/g, '') || '',
         // Converte strings vazias para undefined para campos opcionais
         nomeFantasia: data.nomeFantasia?.trim() || undefined,
         inscricaoEstadual: data.inscricaoEstadual?.trim() || undefined,
         inscricaoMunicipal: data.inscricaoMunicipal?.trim() || undefined,
         inscricaoSuframa: data.inscricaoSuframa?.trim() || undefined,
         complemento: data.complemento?.trim() || undefined,
-        telefone: data.telefone?.trim() || undefined,
-        celular: data.celular?.trim() || undefined,
+        // Remove máscara dos telefones
+        telefone: data.telefone?.replace(/\D/g, '') || undefined,
+        celular: data.celular?.replace(/\D/g, '') || undefined,
         email: data.email?.trim() || undefined,
-        // Remove caracteres não numéricos do CEP
-        cep: data.cep?.replace(/\D/g, '') || '',
       }
 
       let cliente
