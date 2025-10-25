@@ -1,13 +1,23 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
+import { SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/layout/app-sidebar"
 import { SiteHeader } from "@/components/layout/site-header"
+import { SidebarLayout } from "@/components/layout/sidebar-layout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { IconPlus, IconSearch } from "@tabler/icons-react"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
+import { IconPlus, IconSearch, IconHome, IconFileInvoice } from "@tabler/icons-react"
 import { NfeDataTable } from "@/components/nfe/nfe-data-table"
 import { NfeService, Nfe } from "@/lib/services/nfe.service"
 import { toast } from "sonner"
@@ -44,61 +54,67 @@ export default function NfesPage() {
   }
 
   return (
-    <SidebarProvider
-      style={
-        {
-          "--sidebar-width": "calc(var(--spacing) * 72)",
-          "--header-height": "calc(var(--spacing) * 12)",
-        } as React.CSSProperties
-      }
-    >
+    <SidebarLayout>
       <AppSidebar variant="inset" />
       <SidebarInset>
-        <SiteHeader />
+        <SiteHeader
+          breadcrumb={
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem className="hidden md:block">
+                  <BreadcrumbLink asChild>
+                    <Link href="/dashboard">
+                      <IconHome className="h-4 w-4" />
+                    </Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className="hidden md:block" />
+                <BreadcrumbItem>
+                  <BreadcrumbPage className="flex items-center gap-1.5">
+                    <IconFileInvoice className="h-4 w-4" />
+                    NFes
+                  </BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          }
+        />
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
-            <div className="flex flex-col gap-4 py-4 px-4 md:gap-6 md:py-6 md:px-6">
-              {/* Header */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-3xl font-bold tracking-tight">Notas Fiscais Eletrônicas</h1>
-                  <p className="text-muted-foreground">
-                    Gerencie suas NFes de entrada e saída
-                  </p>
+            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+              <div className="px-4 lg:px-6">
+                {/* Header com botão */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="relative flex-1 max-w-sm">
+                    <IconSearch className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Buscar por número, cliente..."
+                      className="pl-8"
+                      value={search}
+                      onChange={(e) => handleSearch(e.target.value)}
+                    />
+                  </div>
+                  <Button onClick={() => router.push("/nfes/nova")}>
+                    <IconPlus className="h-4 w-4 mr-2" />
+                    Nova NFe
+                  </Button>
                 </div>
-                <Button onClick={() => router.push("/nfes/nova")}>
-                  <IconPlus className="h-4 w-4 mr-2" />
-                  Nova NFe
-                </Button>
-              </div>
 
-              {/* Search */}
-              <div className="flex items-center gap-2">
-                <div className="relative flex-1 max-w-sm">
-                  <IconSearch className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Buscar por número, cliente..."
-                    className="pl-8"
-                    value={search}
-                    onChange={(e) => handleSearch(e.target.value)}
-                  />
-                </div>
+                {/* Table */}
+                {loading ? (
+                  <div className="space-y-4">
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-64 w-full" />
+                  </div>
+                ) : (
+                  <NfeDataTable nfes={nfes} onRefresh={loadNfes} />
+                )}
               </div>
-
-              {/* Table */}
-              {loading ? (
-                <div className="space-y-4">
-                  <Skeleton className="h-12 w-full" />
-                  <Skeleton className="h-64 w-full" />
-                </div>
-              ) : (
-                <NfeDataTable nfes={nfes} onRefresh={loadNfes} />
-              )}
             </div>
           </div>
         </div>
       </SidebarInset>
-    </SidebarProvider>
+    </SidebarLayout>
   )
 }
 
