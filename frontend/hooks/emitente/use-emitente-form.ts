@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
 import { EmitenteService } from "@/lib/services/emitente.service"
 import { AuxiliarService, type Estado, type Municipio } from "@/lib/services/auxiliar.service"
-import { emitenteSchema, type EmitenteFormData } from "../types"
+import { emitenteSchema, type EmitenteFormData } from "@/lib/schemas/emitente.schema"
 
 export function useEmitenteForm() {
   const [loading, setLoading] = useState(false)

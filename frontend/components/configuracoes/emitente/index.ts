@@ -15,6 +15,7 @@ export { ContatoSection } from './sections/contato-section'
 export { NfeSection } from './sections/nfe-section'
 export { CertificadoSection } from './sections/certificado-section'
 
-// Tipos
-export type { EmitenteFormData, CertificadoInfo, CertificadoState } from './types'
+// Tipos e Schemas (re-export para conveniência)
+export { emitenteSchema, type EmitenteFormData } from '@/lib/schemas/emitente.schema'
+export type { CertificadoInfo, CertificadoState } from '@/types'
 

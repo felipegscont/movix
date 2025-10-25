@@ -1,6 +1,9 @@
 import * as z from "zod"
 
-// Schema de validação do emitente
+/**
+ * Schema de validação do Emitente
+ * Usado para validação de formulários de emitente
+ */
 export const emitenteSchema = z.object({
   cnpj: z.string().min(14, "CNPJ deve ter 14 dígitos").max(14),
   razaoSocial: z.string().min(3, "Razão social é obrigatória"),
@@ -26,45 +29,4 @@ export const emitenteSchema = z.object({
 })
 
 export type EmitenteFormData = z.infer<typeof emitenteSchema>
-
-// Tipos para certificado
-export interface CertificadoInfo {
-  cnpj?: string
-  cnpjFormatado?: string
-  razaoSocial?: string
-  titular?: string
-  validFrom: string
-  validTo: string
-  daysUntilExpiration: number
-  expired: boolean
-  issuer?: string
-  nearExpiration: boolean
-}
-
-export interface CertificadoState {
-  file: File | null
-  password: string
-  info: CertificadoInfo | null
-  valid: boolean | null
-  uploading: boolean
-  validating: boolean
-}
-
-// Tipos para estados e municípios
-export interface Estado {
-  id: string
-  codigo: string
-  uf: string
-  nome: string
-  regiao: string
-  ativo: boolean
-}
-
-export interface Municipio {
-  id: string
-  codigo: string
-  nome: string
-  estadoId: string
-  ativo: boolean
-}
 

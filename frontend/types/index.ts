@@ -42,6 +42,7 @@ export type {
   TableState,
   CertificadoInfo,
   CertificadoUploadResponse,
+  CertificadoState,
   SelectOption,
   SelectGroup,
   ValidationError,

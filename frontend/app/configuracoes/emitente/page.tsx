@@ -1,9 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { AppSidebar } from "@/components/layout/app-sidebar"
-import { SiteHeader } from "@/components/layout/site-header"
-import { EmitenteFormRefactored } from "@/components/configuracoes/emitente/emitente-form-refactored"
+import { AppSidebar, SiteHeader } from "@/components/layout"
+import { EmitenteFormRefactored } from "@/components/configuracoes/emitente"
 import {
   Breadcrumb,
   BreadcrumbItem,

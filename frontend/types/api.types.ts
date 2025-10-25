@@ -178,6 +178,15 @@ export interface CertificadoUploadResponse {
   certificado?: CertificadoInfo
 }
 
+export interface CertificadoState {
+  file: File | null
+  password: string
+  info: CertificadoInfo | null
+  valid: boolean | null
+  uploading: boolean
+  validating: boolean
+}
+
 // ============================================
 // TIPOS DE SELEÇÃO (Combobox/Select)
 // ============================================
