@@ -18,14 +18,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { AuxiliarService } from "@/lib/services/auxiliar.service"
+import { AuxiliarService, CST as CSTType, CSOSN } from "@/lib/services/auxiliar.service"
 
-interface CST {
-  id: string
-  codigo: string
-  descricao: string
-  tipo: string
-}
+type CSTOrCSOSN = CSTType | CSOSN
 
 interface CSTComboboxProps {
   value?: string
@@ -45,7 +40,7 @@ export function CSTCombobox({
   className,
 }: CSTComboboxProps) {
   const [open, setOpen] = React.useState(false)
-  const [csts, setCsts] = React.useState<CST[]>([])
+  const [csts, setCsts] = React.useState<CSTOrCSOSN[]>([])
   const [loading, setLoading] = React.useState(false)
   const [search, setSearch] = React.useState("")
 

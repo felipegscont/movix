@@ -71,9 +71,8 @@ export function ProdutoCombobox({
 
   const selectedProduto = produtos.find((p) => p.id === value)
 
-  const handleCreateSuccess = (novoProduto: any) => {
+  const handleCreateSuccess = () => {
     loadProdutos()
-    onValueChange(novoProduto.id)
     setShowCreateDialog(false)
     setOpen(false)
   }

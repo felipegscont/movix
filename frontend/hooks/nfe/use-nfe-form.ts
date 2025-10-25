@@ -81,7 +81,7 @@ export function useNfeForm({ nfeId, onSuccess }: UseNfeFormProps = {}): UseNfeFo
 
   // Inicializar form com React Hook Form + Zod
   const form = useForm<NfeFormData>({
-    resolver: zodResolver(nfeFormSchema),
+    resolver: zodResolver(nfeFormSchema) as any,
     mode: "onBlur",
     defaultValues: {
       ...defaultNfeFormData,
@@ -238,10 +238,13 @@ export function useNfeForm({ nfeId, onSuccess }: UseNfeFormProps = {}): UseNfeFo
         informacoesFisco: data.informacoesFisco,
         itens: data.itens.map((item, index) => {
           // Validar campos obrigatórios
-          if (!item.pisCstId) {
+          if (!item.cfopId) {
+            throw new Error(`Item ${index + 1}: CFOP é obrigatório`)
+          }
+          if (!item.pis?.cstId) {
             throw new Error(`Item ${index + 1}: CST PIS é obrigatório`)
           }
-          if (!item.cofinsCstId) {
+          if (!item.cofins?.cstId) {
             throw new Error(`Item ${index + 1}: CST COFINS é obrigatório`)
           }
 
@@ -257,21 +260,21 @@ export function useNfeForm({ nfeId, onSuccess }: UseNfeFormProps = {}): UseNfeFo
             valorOutros: item.valorOutros || 0,
             informacoesAdicionais: item.informacoesAdicionais,
             // Tributação ICMS
-            icmsCstId: item.icmsCstId,
-            icmsCsosnId: item.icmsCsosnId,
-            icmsBaseCalculo: item.icmsBaseCalculo || 0,
-            icmsAliquota: item.icmsAliquota || 0,
-            icmsValor: item.icmsValor || 0,
+            icmsCstId: item.icms?.cstId,
+            icmsCsosnId: item.icms?.csosnId,
+            icmsBaseCalculo: item.icms?.baseCalculo || 0,
+            icmsAliquota: item.icms?.aliquota || 0,
+            icmsValor: item.icms?.valor || 0,
             // Tributação PIS
-            pisCstId: item.pisCstId,
-            pisBaseCalculo: item.pisBaseCalculo || 0,
-            pisAliquota: item.pisAliquota || 0,
-            pisValor: item.pisValor || 0,
+            pisCstId: item.pis.cstId,
+            pisBaseCalculo: item.pis.baseCalculo || 0,
+            pisAliquota: item.pis.aliquota || 0,
+            pisValor: item.pis.valor || 0,
             // Tributação COFINS
-            cofinsCstId: item.cofinsCstId,
-            cofinsBaseCalculo: item.cofinsBaseCalculo || 0,
-            cofinsAliquota: item.cofinsAliquota || 0,
-            cofinsValor: item.cofinsValor || 0,
+            cofinsCstId: item.cofins.cstId,
+            cofinsBaseCalculo: item.cofins.baseCalculo || 0,
+            cofinsAliquota: item.cofins.aliquota || 0,
+            cofinsValor: item.cofins.valor || 0,
           }
         }),
         duplicatas: data.duplicatas?.map(dup => ({
@@ -287,7 +290,7 @@ export function useNfeForm({ nfeId, onSuccess }: UseNfeFormProps = {}): UseNfeFo
         } : undefined,
         pagamentos: data.pagamentos?.map(pag => ({
           indicadorPagamento: pag.indicadorPagamento,
-          formaPagamento: pag.formaPagamentoCodigo || pag.formaPagamento, // Código da forma de pagamento (string)
+          formaPagamentoId: pag.formaPagamentoId,
           descricaoPagamento: pag.descricaoPagamento,
           valor: pag.valor,
           dataPagamento: pag.dataPagamento,
@@ -302,23 +305,19 @@ export function useNfeForm({ nfeId, onSuccess }: UseNfeFormProps = {}): UseNfeFo
       if (backendData.pagamentos && backendData.pagamentos.length > 0) {
         const formasPagamento = await NfeService.getFormasPagamento()
 
-        backendData.pagamentos = backendData.pagamentos.map(pag => {
-          // Se já tem o código, usa ele
-          if (pag.formaPagamento && pag.formaPagamento.length === 2) {
-            return pag
-          }
-
+        backendData.pagamentos = backendData.pagamentos.map((pag: any) => {
           // Buscar o código pelo ID (formaPagamentoId do formulário)
-          const formaPagamentoId = (data.pagamentos?.find(p => p.valor === pag.valor))?.formaPagamentoId
+          const formaPagamentoId = pag.formaPagamentoId
           if (formaPagamentoId) {
             const forma = formasPagamento.find((f: any) => f.id === formaPagamentoId)
             if (forma) {
-              return { ...pag, formaPagamento: forma.codigo }
+              const { formaPagamentoId: _, ...rest } = pag
+              return { ...rest, formaPagamento: forma.codigo }
             }
           }
 
-          return pag
-        })
+          throw new Error('Forma de pagamento não encontrada')
+        }) as any
       }
 
       console.log('📦 Dados transformados para backend:', backendData)

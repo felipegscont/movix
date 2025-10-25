@@ -71,7 +71,9 @@ export interface Nfe {
   serie: number;
   chave?: string;
   naturezaOperacao: string;
+  naturezaOperacaoId?: string;
   tipoOperacao: number;
+  finalidade?: number;
   consumidorFinal: number;
   presencaComprador: number;
   dataEmissao: string;

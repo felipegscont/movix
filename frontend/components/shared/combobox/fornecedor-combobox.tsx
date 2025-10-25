@@ -75,9 +75,8 @@ export function FornecedorCombobox({
   // Encontrar fornecedor selecionado
   const selectedFornecedor = fornecedores.find((f) => f.id === value)
 
-  const handleCreateSuccess = (novoFornecedor: any) => {
+  const handleCreateSuccess = () => {
     loadFornecedores()
-    onValueChange(novoFornecedor.id)
     setShowCreateDialog(false)
     setOpen(false)
   }
