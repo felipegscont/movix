@@ -42,15 +42,6 @@ export default function ConfiguracoesEmitentePage() {
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink asChild>
-                    <Link href="/configuracoes" className="flex items-center gap-1.5">
-                      <IconSettings className="h-4 w-4" />
-                      Configurações
-                    </Link>
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>
                   <BreadcrumbPage className="flex items-center gap-1.5">
                     <IconBuilding className="h-4 w-4" />

@@ -1,11 +1,21 @@
 "use client"
 
+import Link from "next/link"
 import { useParams } from "next/navigation"
 import { SidebarLayout } from "@/components/layout/sidebar-layout"
 import { AppSidebar } from "@/components/layout/app-sidebar"
 import { SidebarInset } from "@/components/ui/sidebar"
 import { SiteHeader } from "@/components/layout/site-header"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import { MatrizFiscalForm } from "@/components/cadastros/matriz-fiscal/matriz-fiscal-form"
+import { IconHome, IconTable, IconEdit } from "@tabler/icons-react"
 
 export default function EditarMatrizFiscalPage() {
   const params = useParams()
@@ -15,10 +25,45 @@ export default function EditarMatrizFiscalPage() {
     <SidebarLayout>
       <AppSidebar variant="inset" />
       <SidebarInset>
-        <SiteHeader />
-        <div className="flex flex-1 flex-col gap-4 p-4">
-          <h1 className="text-2xl font-semibold">Editar Matriz Fiscal</h1>
-          <MatrizFiscalForm matrizId={id} />
+        <SiteHeader
+          breadcrumb={
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem className="hidden md:block">
+                  <BreadcrumbLink asChild>
+                    <Link href="/dashboard">
+                      <IconHome className="h-4 w-4" />
+                    </Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className="hidden md:block" />
+                <BreadcrumbItem className="hidden md:block">
+                  <BreadcrumbLink asChild>
+                    <Link href="/matrizes-fiscais" className="flex items-center gap-1.5">
+                      <IconTable className="h-4 w-4" />
+                      Matrizes Fiscais
+                    </Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className="hidden md:block" />
+                <BreadcrumbItem>
+                  <BreadcrumbPage className="flex items-center gap-1.5">
+                    <IconEdit className="h-4 w-4" />
+                    Editar
+                  </BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          }
+        />
+        <div className="flex flex-1 flex-col">
+          <div className="@container/main flex flex-1 flex-col gap-2">
+            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+              <div className="px-4 lg:px-6">
+                <MatrizFiscalForm matrizId={id} />
+              </div>
+            </div>
+          </div>
         </div>
       </SidebarInset>
     </SidebarLayout>
