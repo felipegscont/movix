@@ -1,21 +1,22 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
 import {
-  IconBuilding,
-  IconChartBar,
-  IconDashboard,
-  IconDatabase,
-  IconFileInvoice,
-  IconInnerShadowTop,
-  IconSettings,
-  IconShoppingCart,
-} from "@tabler/icons-react"
+  LayoutDashboard,
+  ShoppingCart,
+  FileText,
+  Users,
+  Package,
+  Building2,
+  Table2,
+  Settings,
+  BarChart3,
+  HelpCircle,
+  Command
+} from "lucide-react"
 
 import { NavUser } from "@/components/layout/nav-user"
-import { ThemeToggle } from "@/components/theme-toggle"
+import { Label } from "@/components/ui/label"
 import {
   Sidebar,
   SidebarContent,
@@ -23,115 +24,118 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
+  SidebarInput,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { Switch } from "@/components/ui/switch"
 
-// Dados do sistema Movix
+// Dados do sistema
 const data = {
   user: {
-    name: "Usuário",
-    email: "usuario@movix.com",
+    name: "shadcn",
+    email: "m@example.com",
     avatar: "/avatars/shadcn.jpg",
   },
   navMain: [
     {
       title: "Dashboard",
       url: "/dashboard",
-      icon: IconDashboard,
+      icon: LayoutDashboard,
+      isActive: true,
+      items: [],
     },
     {
       title: "Vendas",
-      url: "/vendas/orcamentos",
-      icon: IconShoppingCart,
+      url: "/vendas",
+      icon: ShoppingCart,
+      isActive: false,
+      items: [
+        {
+          title: "Orçamentos",
+          url: "/vendas/orcamentos",
+        },
+        {
+          title: "Pedidos",
+          url: "/vendas/pedidos",
+        },
+      ],
     },
     {
-      title: "Faturamento",
+      title: "NFes",
       url: "/nfes",
-      icon: IconFileInvoice,
+      icon: FileText,
+      isActive: false,
+      items: [],
     },
     {
       title: "Cadastros",
-      url: "/cadastros/clientes",
-      icon: IconDatabase,
+      url: "/cadastros",
+      icon: Users,
+      isActive: false,
+      items: [
+        {
+          title: "Clientes",
+          url: "/cadastros/clientes",
+        },
+        {
+          title: "Fornecedores",
+          url: "/cadastros/fornecedores",
+        },
+        {
+          title: "Produtos",
+          url: "/cadastros/produtos",
+        },
+      ],
     },
     {
-      title: "Relatórios",
-      url: "/relatorios",
-      icon: IconChartBar,
+      title: "Matrizes Fiscais",
+      url: "/matrizes-fiscais",
+      icon: Table2,
+      isActive: false,
+      items: [],
     },
     {
       title: "Configurações",
       url: "/configuracoes",
-      icon: IconSettings,
+      icon: Settings,
+      isActive: false,
+      items: [
+        {
+          title: "Emitente",
+          url: "/configuracoes/emitente",
+        },
+        {
+          title: "Naturezas de Operação",
+          url: "/configuracoes/naturezas-operacao",
+        },
+      ],
+    },
+    {
+      title: "Relatórios",
+      url: "/relatorios",
+      icon: BarChart3,
+      isActive: false,
+      items: [],
+    },
+    {
+      title: "Ajuda",
+      url: "/ajuda",
+      icon: HelpCircle,
+      isActive: false,
+      items: [],
     },
   ],
-  menuItems: {
-    "/dashboard": [],
-    "/vendas/orcamentos": [
-      { title: "Orçamentos", url: "/vendas/orcamentos" },
-      { title: "Novo Orçamento", url: "/vendas/orcamentos/novo" },
-      { title: "Pedidos", url: "/vendas/pedidos" },
-      { title: "Novo Pedido", url: "/vendas/pedidos/novo" },
-    ],
-    "/nfes": [
-      { title: "Todas as NFes", url: "/nfes" },
-      { title: "Nova NFe", url: "/nfes/nova" },
-      { title: "Em Digitação", url: "/nfes?status=DIGITACAO" },
-      { title: "Autorizadas", url: "/nfes?status=AUTORIZADA" },
-      { title: "Canceladas", url: "/nfes?status=CANCELADA" },
-    ],
-    "/cadastros/clientes": [
-      { title: "Clientes", url: "/cadastros/clientes" },
-      { title: "Fornecedores", url: "/cadastros/fornecedores" },
-      { title: "Produtos", url: "/cadastros/produtos" },
-      { title: "Emitentes", url: "/cadastros/emitentes" },
-      { title: "NCM", url: "/cadastros/ncm" },
-      { title: "CEST", url: "/cadastros/cest" },
-      { title: "CFOP", url: "/cadastros/cfop" },
-      { title: "Natureza de Operação", url: "/cadastros/natureza-operacao" },
-      { title: "Forma de Pagamento", url: "/cadastros/forma-pagamento" },
-      { title: "Matriz Fiscal", url: "/cadastros/matriz-fiscal" },
-    ],
-    "/relatorios": [
-      { title: "Vendas", url: "/relatorios/vendas" },
-      { title: "Estoque", url: "/relatorios/estoque" },
-      { title: "Fiscal", url: "/relatorios/fiscal" },
-    ],
-    "/configuracoes": [
-      { title: "Geral", url: "/configuracoes/geral" },
-      { title: "Emitente", url: "/cadastros/emitentes" },
-      { title: "Usuários", url: "/configuracoes/usuarios" },
-    ],
-  },
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const pathname = usePathname()
+  // Note: I'm using state to show active item.
+  // IRL you should use the url/router.
+  const [activeItem, setActiveItem] = React.useState(data.navMain[0])
+  const [mails, setMails] = React.useState(data.mails)
   const { setOpen } = useSidebar()
-
-  // Encontrar o item ativo baseado na URL atual
-  const getActiveItem = React.useCallback(() => {
-    return data.navMain.find(item => {
-      const items = data.menuItems[item.url] || []
-      if (items.length > 0) {
-        return items.some((subItem: any) => pathname.startsWith(subItem.url))
-      }
-      return pathname.startsWith(item.url)
-    }) || data.navMain[0]
-  }, [pathname])
-
-  const [activeItem, setActiveItem] = React.useState(getActiveItem())
-  const [menuItems, setMenuItems] = React.useState(data.menuItems[activeItem.url] || [])
-
-  // Atualizar activeItem quando a URL mudar
-  React.useEffect(() => {
-    const newActiveItem = getActiveItem()
-    setActiveItem(newActiveItem)
-    setMenuItems(data.menuItems[newActiveItem.url] || [])
-  }, [pathname, getActiveItem])
 
   return (
     <Sidebar
@@ -150,15 +154,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton size="lg" asChild className="md:h-8 md:p-0">
-                <Link href="/dashboard">
+                <a href="#">
                   <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                    <IconInnerShadowTop className="size-4" />
+                    <Command className="size-4" />
                   </div>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-medium">Movix</span>
-                    <span className="truncate text-xs">NFe</span>
+                    <span className="truncate font-medium">Acme Inc</span>
+                    <span className="truncate text-xs">Enterprise</span>
                   </div>
-                </Link>
+                </a>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -176,7 +180,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       }}
                       onClick={() => {
                         setActiveItem(item)
-                        setMenuItems(data.menuItems[item.url] || [])
+                        const mail = data.mails.sort(() => Math.random() - 0.5)
+                        setMails(
+                          mail.slice(
+                            0,
+                            Math.max(5, Math.floor(Math.random() * 10) + 1)
+                          )
+                        )
                         setOpen(true)
                       }}
                       isActive={activeItem?.title === item.title}
@@ -199,34 +209,37 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       {/* This is the second sidebar */}
       {/* We disable collapsible and let it fill remaining space */}
       <Sidebar collapsible="none" className="hidden flex-1 md:flex">
-        <SidebarHeader className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+        <SidebarHeader className="gap-3.5 border-b p-4">
           <div className="flex w-full items-center justify-between">
             <div className="text-foreground text-base font-medium">
               {activeItem?.title}
             </div>
-            <ThemeToggle />
+            <Label className="flex items-center gap-2 text-sm">
+              <span>Unreads</span>
+              <Switch className="shadow-none" />
+            </Label>
           </div>
+          <SidebarInput placeholder="Type to search..." />
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup className="px-0">
             <SidebarGroupContent>
-              {menuItems.length > 0 ? (
-                <SidebarMenu>
-                  {menuItems.map((item) => (
-                    <SidebarMenuItem key={item.url}>
-                      <SidebarMenuButton asChild isActive={pathname === item.url || pathname.startsWith(item.url + '/')}>
-                        <Link href={item.url}>
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              ) : (
-                <div className="p-4 text-sm text-muted-foreground">
-                  Nenhum item disponível
-                </div>
-              )}
+              {mails.map((mail) => (
+                <a
+                  href="#"
+                  key={mail.email}
+                  className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex flex-col items-start gap-2 border-b p-4 text-sm leading-tight whitespace-nowrap last:border-b-0"
+                >
+                  <div className="flex w-full items-center gap-2">
+                    <span>{mail.name}</span>{" "}
+                    <span className="ml-auto text-xs">{mail.date}</span>
+                  </div>
+                  <span className="font-medium">{mail.subject}</span>
+                  <span className="line-clamp-2 w-[260px] text-xs whitespace-break-spaces">
+                    {mail.teaser}
+                  </span>
+                </a>
+              ))}
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
