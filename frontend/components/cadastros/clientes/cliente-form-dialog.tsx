@@ -274,20 +274,18 @@ export function ClienteFormDialog({
                               Dados Fiscais
                             </h4>
 
-                            <div className="space-y-4">
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                 <FormField
                                   control={form.control}
                                   name="inscricaoEstadual"
                                   render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel>Inscrição Estadual</FormLabel>
+                                    <FormItem className="space-y-1">
+                                      <FormLabel className="text-xs font-medium">Inscrição Estadual</FormLabel>
                                       <FormControl>
-                                        <Input placeholder="000.000.000.000" {...field} />
+                                        <Input placeholder="000.000.000.000" {...field} className="h-9 text-sm w-full" />
                                       </FormControl>
-                                      <FormDescription>
-                                        Preenchido automaticamente pela consulta de CNPJ quando disponível
-                                      </FormDescription>
+                                      <FormDescription className="text-[10px]">Preenchido automaticamente pela consulta de CNPJ quando disponível</FormDescription>
                                       <FormMessage />
                                     </FormItem>
                                   )}
@@ -297,14 +295,12 @@ export function ClienteFormDialog({
                                   control={form.control}
                                   name="inscricaoMunicipal"
                                   render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel>Inscrição Municipal</FormLabel>
+                                    <FormItem className="space-y-1">
+                                      <FormLabel className="text-xs font-medium">Inscrição Municipal</FormLabel>
                                       <FormControl>
-                                        <Input placeholder="000000000" {...field} />
+                                        <Input placeholder="000000000" {...field} className="h-9 text-sm w-full" />
                                       </FormControl>
-                                      <FormDescription>
-                                        Inscrição municipal da empresa (se aplicável)
-                                      </FormDescription>
+                                      <FormDescription className="text-[10px]">Inscrição municipal da empresa (se aplicável)</FormDescription>
                                       <FormMessage />
                                     </FormItem>
                                   )}

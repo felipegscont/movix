@@ -399,16 +399,14 @@ export function FornecedorFormDialog({
                 {/* Tab: Dados Básicos */}
                 <TabsContent value="dados-basicos" className="space-y-4 mt-4">
                   <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <User className="h-5 w-5" />
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <User className="h-4 w-4" />
                         Informações Básicas
                       </CardTitle>
-                      <CardDescription>
-                        Dados principais do fornecedor
-                      </CardDescription>
+                      <CardDescription className="text-xs">Dados principais do fornecedor</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    <CardContent className="space-y-2">
                       {/* Documento CPF/CNPJ */}
                       <FormField
                         control={form.control}
