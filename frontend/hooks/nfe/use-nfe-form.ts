@@ -467,6 +467,9 @@ export function useNfeForm({ nfeId, onSuccess }: UseNfeFormProps = {}): UseNfeFo
       (errors) => {
         console.error('❌ Erros de validação do formulário:', errors)
 
+        // Coletar mensagens de erro
+        const errorMessages: string[] = []
+
         // Mostrar erros detalhados
         Object.keys(errors).forEach(key => {
           const error = (errors as any)[key]
@@ -477,12 +480,30 @@ export function useNfeForm({ nfeId, onSuccess }: UseNfeFormProps = {}): UseNfeFo
             error.forEach((itemError: any, index: number) => {
               if (itemError) {
                 console.error(`  Item ${index}:`, itemError)
+                // Extrair mensagens de erro do item
+                Object.keys(itemError).forEach(field => {
+                  const fieldError = itemError[field]
+                  if (fieldError?.message) {
+                    errorMessages.push(`Item ${index + 1} - ${field}: ${fieldError.message}`)
+                  }
+                })
               }
             })
+          } else if (error?.message) {
+            errorMessages.push(`${key}: ${error.message}`)
           }
         })
 
-        toast.error('Há erros no formulário. Verifique os campos.')
+        // Mostrar erros no console e toast
+        console.error('📋 Mensagens de erro:', errorMessages)
+
+        if (errorMessages.length > 0) {
+          toast.error(errorMessages[0], {
+            description: errorMessages.length > 1 ? `E mais ${errorMessages.length - 1} erro(s)` : undefined
+          })
+        } else {
+          toast.error('Há erros no formulário. Verifique os campos.')
+        }
       }
     ),
     loadNfe,

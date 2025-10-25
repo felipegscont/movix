@@ -83,7 +83,7 @@ export const nfeItemSchema = z.object({
   
   // Classificação Fiscal
   ncmId: z.string().min(1, "NCM é obrigatório"),
-  cfopId: z.string().optional(), // CFOP será preenchido automaticamente ou pelo usuário
+  cfopId: z.string().min(1, "CFOP é obrigatório"),
   
   // Unidades e Quantidades Comerciais
   unidadeComercial: z.string().min(1, "Unidade comercial é obrigatória"),
