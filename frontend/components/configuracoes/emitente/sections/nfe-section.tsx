@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { StaticCombobox, AMBIENTE_NFE_OPTIONS } from "@/components/shared/combobox/static-combobox"
-import type { EmitenteFormData } from "../types"
+import type { EmitenteFormData } from "@/lib/schemas/emitente.schema"
 
 interface NfeSectionProps {
   form: UseFormReturn<EmitenteFormData>
