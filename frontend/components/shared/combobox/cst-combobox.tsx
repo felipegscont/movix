@@ -56,8 +56,14 @@ export function CSTCombobox({
   const loadCSTs = async () => {
     try {
       setLoading(true)
-      const data = await AuxiliarService.getCSTs(tipo)
-      setCsts(data)
+      // CSOSN tem endpoint separado
+      if (tipo === 'CSOSN') {
+        const data = await AuxiliarService.getCSOSNs()
+        setCsts(data)
+      } else {
+        const data = await AuxiliarService.getCSTs(tipo)
+        setCsts(data)
+      }
     } catch (error) {
       console.error("Erro ao carregar CSTs:", error)
     } finally {
