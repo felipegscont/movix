@@ -27,10 +27,6 @@ export class CreateProdutoDto {
   @IsString()
   cestId?: string;
 
-  @IsOptional()
-  @IsString()
-  cfopId?: string;
-
   // Unidades
   @IsString()
   @Length(1, 10)
@@ -93,7 +89,7 @@ export class CreateProdutoDto {
   @IsNumber({ maxDecimalPlaces: 4 })
   profundidade?: number;
 
-  // Tributação
+  // Tributação (usada pela Matriz Fiscal)
   @IsString()
   @IsIn(['0', '1', '2', '3', '4', '5', '6', '7', '8'])
   origem: string; // 0=Nacional, 1=Estrangeira, etc
@@ -101,55 +97,6 @@ export class CreateProdutoDto {
   @IsString()
   @IsIn(['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '99'])
   tipoItem: string; // Tipo de item para Matriz Fiscal
-
-  // Impostos - ICMS
-  @IsOptional()
-  @IsString()
-  icmsCstId?: string; // Para regime normal
-
-  @IsOptional()
-  @IsString()
-  icmsCsosnId?: string; // Para Simples Nacional
-
-  @IsOptional()
-  @Transform(({ value }) => value ? parseFloat(value) : 0)
-  @IsNumber({ maxDecimalPlaces: 2 })
-  icmsAliquota?: number;
-
-  @IsOptional()
-  @Transform(({ value }) => value ? parseFloat(value) : undefined)
-  @IsNumber({ maxDecimalPlaces: 2 })
-  icmsReducao?: number;
-
-  // Impostos - PIS
-  @IsOptional()
-  @IsString()
-  pisCstId?: string;
-
-  @IsOptional()
-  @Transform(({ value }) => value ? parseFloat(value) : 0)
-  @IsNumber({ maxDecimalPlaces: 4 })
-  pisAliquota?: number;
-
-  // Impostos - COFINS
-  @IsOptional()
-  @IsString()
-  cofinsCstId?: string;
-
-  @IsOptional()
-  @Transform(({ value }) => value ? parseFloat(value) : 0)
-  @IsNumber({ maxDecimalPlaces: 4 })
-  cofinsAliquota?: number;
-
-  // Impostos - IPI
-  @IsOptional()
-  @IsString()
-  ipiCstId?: string;
-
-  @IsOptional()
-  @Transform(({ value }) => value ? parseFloat(value) : undefined)
-  @IsNumber({ maxDecimalPlaces: 2 })
-  ipiAliquota?: number;
 
   // Fornecedor
   @IsOptional()

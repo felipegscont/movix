@@ -55,12 +55,18 @@ export function NfeStepItens({ form, addItem, updateItem, removeItem, emitenteRe
     })
   }
 
+  // Pegar naturezaOperacaoId e clienteId do form
+  const naturezaOperacaoId = form.watch('naturezaOperacaoId')
+  const clienteId = form.watch('clienteId')
+
   return (
     <div className="space-y-4">
       {/* Formulário de adicionar item */}
       <NfeAddItemQuick
         onAddItem={addItem}
         emitenteRegime={emitenteRegime}
+        naturezaOperacaoId={naturezaOperacaoId}
+        clienteId={clienteId}
       />
 
       {/* Lista de itens - Compacto */}

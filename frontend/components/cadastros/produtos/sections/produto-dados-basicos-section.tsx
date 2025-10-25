@@ -45,7 +45,7 @@ export function ProdutoDadosBasicosSection({ form }: ProdutoSectionProps) {
           <FormItem className="space-y-1">
             <FormLabel className="text-xs font-medium">Código de Barras</FormLabel>
             <FormControl>
-              <Input placeholder="EAN/GTIN" {...field} className="h-9 text-sm w-full" />
+              <Input placeholder="EAN/GTIN" {...field} value={field.value || ''} className="h-9 text-sm w-full" />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -101,7 +101,7 @@ export function ProdutoDadosBasicosSection({ form }: ProdutoSectionProps) {
           <FormItem className="md:col-span-3 space-y-1">
             <FormLabel className="text-xs font-medium">Descrição Complementar</FormLabel>
             <FormControl>
-              <Textarea placeholder="Informações adicionais sobre o produto..." className="min-h-[60px] text-sm" {...field} />
+              <Textarea placeholder="Informações adicionais sobre o produto..." className="min-h-[60px] text-sm" {...field} value={field.value || ''} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -130,7 +130,7 @@ export function ProdutoDadosBasicosSection({ form }: ProdutoSectionProps) {
           <FormItem className="space-y-1">
             <FormLabel className="text-xs font-medium">CEST</FormLabel>
             <FormControl>
-              <Input placeholder="Código CEST" {...field} className="h-9 text-sm w-full" />
+              <Input placeholder="Código CEST" {...field} value={field.value || ''} className="h-9 text-sm w-full" />
             </FormControl>
             <FormDescription className="text-[10px]">Código Especificador da Substituição Tributária</FormDescription>
             <FormMessage />
@@ -199,7 +199,7 @@ export function ProdutoDadosBasicosSection({ form }: ProdutoSectionProps) {
         render={({ field }) => (
           <FormItem className="space-y-1">
             <FormLabel className="text-xs font-medium">Unidade Tributável</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value}>
+            <Select onValueChange={field.onChange} value={field.value || undefined}>
               <FormControl>
                 <SelectTrigger className="h-9 text-sm w-full">
                   <SelectValue placeholder="Selecione" />

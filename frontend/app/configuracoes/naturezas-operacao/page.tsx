@@ -4,8 +4,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { SidebarLayout } from "@/components/layout/sidebar-layout"
 import { AppSidebar } from "@/components/layout/app-sidebar"
-import { SidebarInset } from "@/components/ui/sidebar"
-import { SiteHeader } from "@/components/layout/site-header"
+
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -25,12 +24,13 @@ export default function NaturezasOperacaoPage() {
   }
 
   return (
-    <SidebarLayout>
-      <AppSidebar variant="inset" />
+    <SidebarProvider style={{ "--sidebar-width": "350px" } as React.CSSProperties}>
+      <AppSidebar />
       <SidebarInset>
-        <SiteHeader
-          breadcrumb={
-            <Breadcrumb>
+        <header className="bg-background sticky top-0 flex shrink-0 items-center gap-2 border-b p-4">
+          <SidebarTrigger className="-ml-1" />
+          <Separator orientation="vertical" className="mr-2 h-4" />
+          <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
                   <BreadcrumbLink asChild>
@@ -48,8 +48,8 @@ export default function NaturezasOperacaoPage() {
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
-          }
-        />
+        </header>
+        
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
@@ -58,7 +58,7 @@ export default function NaturezasOperacaoPage() {
           </div>
         </div>
       </SidebarInset>
-    </SidebarLayout>
+    </SidebarProvider>
   )
 }
 

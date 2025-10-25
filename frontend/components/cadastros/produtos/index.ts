@@ -11,6 +11,5 @@ export { ProdutosSectionCards } from './produtos-section-cards'
 // Seções do formulário
 export { ProdutoDadosBasicosSection } from './sections/produto-dados-basicos-section'
 export { ProdutoEstoqueSection } from './sections/produto-estoque-section'
-export { ProdutoTributacaoSection } from './sections/produto-tributacao-section'
 export { ProdutoOutrosSection } from './sections/produto-outros-section'
 

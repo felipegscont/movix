@@ -24,9 +24,8 @@ import {
   IconWorld,
 } from "@tabler/icons-react"
 import { AppSidebar } from "@/components/layout/app-sidebar"
-import { SiteHeader } from "@/components/layout/site-header"
 import { SidebarLayout } from "@/components/layout/sidebar-layout"
-import { SidebarInset } from "@/components/ui/sidebar"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -95,10 +94,9 @@ export default function FornecedorViewPage() {
 
   if (loading) {
     return (
-      <SidebarLayout>
-        <AppSidebar variant="inset" />
+      <SidebarProvider style={{ "--sidebar-width": "350px" } as React.CSSProperties}>
+        <AppSidebar />
         <SidebarInset>
-          <SiteHeader />
           <div className="flex flex-1 items-center justify-center">
             <div className="flex items-center gap-2 text-muted-foreground">
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
@@ -106,7 +104,7 @@ export default function FornecedorViewPage() {
             </div>
           </div>
         </SidebarInset>
-      </SidebarLayout>
+      </SidebarProvider>
     )
   }
 
@@ -115,10 +113,9 @@ export default function FornecedorViewPage() {
   }
 
   return (
-    <SidebarLayout>
-      <AppSidebar variant="inset" />
+    <SidebarProvider style={{ "--sidebar-width": "350px" } as React.CSSProperties}>
+      <AppSidebar />
       <SidebarInset>
-        <SiteHeader />
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-4 p-4 md:gap-6 md:p-6">
             {/* Header com Avatar */}
@@ -492,7 +489,7 @@ export default function FornecedorViewPage() {
           </div>
         </div>
       </SidebarInset>
-    </SidebarLayout>
+    </SidebarProvider>
   )
 }
 

@@ -14,6 +14,8 @@ import { ExternalApisModule } from './modules/external-apis/external-apis.module
 import { NaturezaOperacaoModule } from './modules/natureza-operacao/natureza-operacao.module';
 import { FormaPagamentoModule } from './modules/forma-pagamento/forma-pagamento.module';
 import { MatrizFiscalModule } from './modules/matriz-fiscal/matriz-fiscal.module';
+import { OrcamentoModule } from './modules/orcamento/orcamento.module';
+import { PedidoModule } from './modules/pedido/pedido.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -34,6 +36,8 @@ import configuration from './config/configuration';
     NaturezaOperacaoModule,
     FormaPagamentoModule,
     MatrizFiscalModule,
+    OrcamentoModule,
+    PedidoModule,
   ],
   controllers: [AppController],
   providers: [AppService],

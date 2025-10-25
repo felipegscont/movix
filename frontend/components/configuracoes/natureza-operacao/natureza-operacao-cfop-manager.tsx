@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { IconPlus, IconTrash } from "@tabler/icons-react"
@@ -201,17 +200,16 @@ export function NaturezaOperacaoCFOPManager({
         </div>
 
         <div className="flex items-center space-x-2">
-          <Checkbox
+          <Switch
             id="padrao"
             checked={isPadrao}
-            onCheckedChange={(checked) => setIsPadrao(checked === true)}
-            className="h-4 w-4"
+            onCheckedChange={(checked) => setIsPadrao(checked)}
           />
           <label
             htmlFor="padrao"
-            className="text-sm font-medium"
+            className="text-sm font-medium cursor-pointer"
           >
-            Padrão?
+            CFOP Padrão
           </label>
         </div>
 
@@ -236,7 +234,7 @@ export function NaturezaOperacaoCFOPManager({
                 <TableRow>
                   <TableHead>CFOP</TableHead>
                   <TableHead>Descrição Resumida do CFOP</TableHead>
-                  <TableHead className="text-center">Padrão?</TableHead>
+                  <TableHead className="text-center">CFOP Padrão</TableHead>
                   <TableHead className="text-center">Ações</TableHead>
                 </TableRow>
               </TableHeader>
@@ -252,14 +250,12 @@ export function NaturezaOperacaoCFOPManager({
                       </div>
                     </TableCell>
                     <TableCell className="text-center">
-                      <Checkbox
-                        checked={item.padrao}
-                        onCheckedChange={(checked) => {
-                          if (checked !== "indeterminate") {
-                            handleTogglePadrao(item.id)
-                          }
-                        }}
-                      />
+                      <div className="flex items-center justify-center">
+                        <Switch
+                          checked={item.padrao}
+                          onCheckedChange={() => handleTogglePadrao(item.id)}
+                        />
+                      </div>
                     </TableCell>
                     <TableCell className="text-center">
                       <Button

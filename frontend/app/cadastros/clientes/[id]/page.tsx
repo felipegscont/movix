@@ -23,8 +23,10 @@ import {
   IconCheck,
   IconX,
 } from "@tabler/icons-react"
-import { AppSidebar, SiteHeader, SidebarLayout } from "@/components/layout"
-import { SidebarInset } from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/layout"
+import { Separator } from "@/components/ui/separator"
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -95,10 +97,9 @@ export default function ClienteViewPage() {
 
   if (loading) {
     return (
-      <SidebarLayout>
-        <AppSidebar variant="inset" />
+      <SidebarProvider style={{ "--sidebar-width": "350px" } as React.CSSProperties}>
+        <AppSidebar />
         <SidebarInset>
-          <SiteHeader />
           <div className="flex flex-1 items-center justify-center">
             <div className="flex items-center gap-2 text-muted-foreground">
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
@@ -106,7 +107,7 @@ export default function ClienteViewPage() {
             </div>
           </div>
         </SidebarInset>
-      </SidebarLayout>
+      </SidebarProvider>
     )
   }
 
@@ -115,10 +116,9 @@ export default function ClienteViewPage() {
   }
 
   return (
-    <SidebarLayout>
-      <AppSidebar variant="inset" />
+    <SidebarProvider style={{ "--sidebar-width": "350px" } as React.CSSProperties}>
+      <AppSidebar />
       <SidebarInset>
-        <SiteHeader />
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-4 p-4 md:gap-6 md:p-6">
             {/* Header com Avatar */}
@@ -463,6 +463,6 @@ export default function ClienteViewPage() {
           </div>
         </div>
       </SidebarInset>
-    </SidebarLayout>
+    </SidebarProvider>
   )
 }

@@ -262,6 +262,7 @@ const columns: ColumnDef<Produto>[] = [
           valorUnitario: 125.50,
           estoqueAtual: 10,
           origem: '0',
+          tipoItem: '00',
           ativo: true,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),

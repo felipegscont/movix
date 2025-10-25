@@ -85,6 +85,9 @@ export const nfeItemSchema = z.object({
   ncmId: z.string().min(1, "NCM é obrigatório"),
   cfopId: z.string().min(1, "CFOP é obrigatório"),
 
+  // Matriz Fiscal Aplicada (rastreabilidade)
+  matrizFiscalId: z.string().optional().nullable(),
+
   // Unidades e Quantidades Comerciais
   unidadeComercial: z.string().min(1, "Unidade comercial é obrigatória"),
   quantidadeComercial: z.coerce.number().min(0.0001, "Quantidade deve ser maior que zero"),

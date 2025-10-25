@@ -49,5 +49,5 @@ export const TIPO_ITEM_OPTIONS = [
   { value: "09", label: "09 - Serviços" },
   { value: "10", label: "10 - Outros Insumos" },
   { value: "99", label: "99 - Outras" },
-] as const
+]
 

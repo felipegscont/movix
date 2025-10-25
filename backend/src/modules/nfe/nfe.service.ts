@@ -636,22 +636,13 @@ export class NfeService {
       regimeTributario: emitente.regimeTributario,
     });
 
-    // Se não encontrou matriz, retornar dados do produto como fallback
+    // Se não encontrou matriz, lançar erro (tributação obrigatória via matriz)
     if (!matriz) {
-      return {
-        fonte: 'produto',
-        cfopId: produto.cfopId,
-        icmsCstId: produto.icmsCstId,
-        icmsCsosnId: produto.icmsCsosnId,
-        icmsAliquota: produto.icmsAliquota,
-        icmsReducao: produto.icmsReducao,
-        pisCstId: produto.pisCstId,
-        pisAliquota: produto.pisAliquota,
-        cofinsCstId: produto.cofinsCstId,
-        cofinsAliquota: produto.cofinsAliquota,
-        ipiCstId: produto.ipiCstId,
-        ipiAliquota: produto.ipiAliquota,
-      };
+      throw new BadRequestException(
+        `Matriz fiscal não encontrada para o produto ${produto.codigo}. ` +
+        `Configure uma matriz fiscal para: Natureza=${params.naturezaOperacaoId}, ` +
+        `Cliente=${params.clienteId}, NCM=${produto.ncm.codigo}, TipoItem=${produto.tipoItem}`
+      );
     }
 
     // Retornar dados da matriz

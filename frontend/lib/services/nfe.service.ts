@@ -400,11 +400,35 @@ export class NfeService {
 
   static async checkSefazStatus(): Promise<any> {
     const response = await fetch(`${API_BASE_URL}/nfes/sefaz-status`);
-    
+
     if (!response.ok) {
       throw new Error('Erro ao verificar status da SEFAZ');
     }
-    
+
+    return response.json();
+  }
+
+  /**
+   * Buscar matriz fiscal aplicável para um item da NFe
+   */
+  static async buscarMatrizFiscal(params: {
+    naturezaOperacaoId: string;
+    clienteId: string;
+    produtoId: string;
+  }): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/nfes/buscar-matriz-fiscal`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(params),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Erro ao buscar matriz fiscal');
+    }
+
     return response.json();
   }
 }

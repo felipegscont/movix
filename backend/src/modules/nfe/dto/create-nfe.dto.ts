@@ -12,6 +12,10 @@ export class CreateNfeItemDto {
   @IsString()
   cfopId: string;
 
+  @IsOptional()
+  @IsString()
+  matrizFiscalId?: string; // ID da matriz fiscal aplicada (rastreabilidade)
+
   @Transform(({ value }) => parseFloat(value))
   @IsNumber({ maxDecimalPlaces: 4 })
   quantidadeComercial: number;

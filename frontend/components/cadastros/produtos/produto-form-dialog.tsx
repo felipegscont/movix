@@ -77,7 +77,7 @@ export function ProdutoFormDialog({
     if (open && produtoId) {
       loadProduto()
       // Ao editar, abre todas as seções
-      setAccordionValue(["basicos", "tributacao", "estoque", "outros"])
+      setAccordionValue(["basicos", "estoque", "outros"])
     } else if (open && !produtoId) {
       form.reset()
       // Ao criar novo, abre apenas "basicos"
