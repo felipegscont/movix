@@ -5,7 +5,6 @@
 
 // Componentes principais
 export { EmitenteForm } from './emitente-form'
-export { EmitenteFormRefactored } from './emitente-form-refactored'
 export { EmitentesDataTable } from './emitentes-data-table'
 
 // Seções do formulário

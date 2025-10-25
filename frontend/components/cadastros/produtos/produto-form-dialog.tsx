@@ -49,7 +49,7 @@ export function ProdutoFormDialog({
   const [loadingData, setLoadingData] = useState(false)
   const [accordionValue, setAccordionValue] = useState<string[]>([])
 
-  const form = useForm<ProdutoFormValues>({
+  const form = useForm({
     resolver: zodResolver(produtoFormSchema),
     defaultValues: {
       codigo: "",

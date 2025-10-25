@@ -30,7 +30,7 @@ interface CST {
 interface CSTComboboxProps {
   value?: string
   onValueChange: (value: string | undefined) => void
-  tipo: 'ICMS' | 'PIS' | 'COFINS' | 'IPI'
+  tipo: 'ICMS' | 'CSOSN' | 'PIS' | 'COFINS' | 'IPI'
   placeholder?: string
   disabled?: boolean
   className?: string

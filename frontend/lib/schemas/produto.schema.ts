@@ -42,7 +42,7 @@ export const produtoFormSchema = z.object({
   
   // Outros
   fornecedorId: z.string().optional(),
-  ativo: z.boolean().optional().default(true),
+  ativo: z.boolean().default(true),
 }).refine((data) => {
   // Validar que pelo menos um entre icmsCstId ou icmsCsosnId deve estar preenchido
   return data.icmsCstId || data.icmsCsosnId
