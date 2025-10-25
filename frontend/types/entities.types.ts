@@ -136,6 +136,19 @@ export interface Produto {
   fornecedor?: Fornecedor
 }
 
+export interface NCM {
+  id: string
+  codigo: string
+  descricao: string
+}
+
+export interface CEST {
+  id: string
+  codigo: string
+  descricao: string
+  ncmId: string
+}
+
 // ============================================
 // EMITENTE
 // ============================================

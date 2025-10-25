@@ -10,6 +10,8 @@ export type {
   Cliente,
   Fornecedor,
   Produto,
+  NCM,
+  CEST,
   Emitente,
   CFOP,
   NaturezaOperacao,
@@ -20,6 +22,12 @@ export type {
   NfeItem,
   NfeStatus,
 } from './entities.types'
+
+// Formulários
+export type {
+  ProdutoForm,
+  ProdutoSectionProps,
+} from './forms.types'
 
 // API
 export type {

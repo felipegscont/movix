@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/form"
 import { Switch } from "@/components/ui/switch"
 import { FornecedorCombobox } from "@/components/shared/combobox/fornecedor-combobox"
-import { ProdutoSectionProps } from "../types"
+import { ProdutoSectionProps } from "@/types"
 
 export function ProdutoOutrosSection({ form }: ProdutoSectionProps) {
   return (

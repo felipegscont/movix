@@ -14,6 +14,3 @@ export { ProdutoEstoqueSection } from './sections/produto-estoque-section'
 export { ProdutoTributacaoSection } from './sections/produto-tributacao-section'
 export { ProdutoOutrosSection } from './sections/produto-outros-section'
 
-// Tipos
-export type { ProdutoFormValues, ProdutoForm, ProdutoSectionProps } from './types'
-

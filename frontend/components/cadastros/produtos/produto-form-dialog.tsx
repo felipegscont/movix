@@ -30,7 +30,7 @@ import { ProdutoEstoqueSection } from "./sections/produto-estoque-section"
 import { ProdutoOutrosSection } from "./sections/produto-outros-section"
 
 // Importar types
-import { produtoFormSchema, type ProdutoFormValues } from "./types"
+import { produtoFormSchema, type ProdutoFormValues } from "@/lib/schemas/produto.schema"
 
 interface ProdutoFormDialogProps {
   open: boolean

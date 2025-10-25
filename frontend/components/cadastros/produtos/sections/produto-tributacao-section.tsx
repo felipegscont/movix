@@ -15,7 +15,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { CSTCombobox } from "@/components/shared/combobox/cst-combobox"
-import { ProdutoSectionProps, ORIGEM_OPTIONS } from "../types"
+import { ProdutoSectionProps } from "@/types"
+import { ORIGEM_OPTIONS } from "@/lib/constants/produto.constants"
 import { Separator } from "@/components/ui/separator"
 
 export function ProdutoTributacaoSection({ form }: ProdutoSectionProps) {

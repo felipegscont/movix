@@ -17,7 +17,8 @@ import {
 } from "@/components/ui/select"
 import { NCMCombobox } from "@/components/shared/combobox/ncm-combobox"
 import { CFOPCombobox } from "@/components/shared/combobox/cfop-combobox"
-import { ProdutoSectionProps, UNIDADE_OPTIONS } from "../types"
+import { ProdutoSectionProps } from "@/types"
+import { UNIDADE_OPTIONS } from "@/lib/constants/produto.constants"
 
 export function ProdutoDadosBasicosSection({ form }: ProdutoSectionProps) {
   return (
