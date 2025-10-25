@@ -70,15 +70,13 @@ export function StaticCombobox({
           className={cn("w-full justify-between", className)}
           disabled={disabled}
         >
-          {selectedOption ? (
-            <span className="truncate">{selectedOption.label}</span>
-          ) : (
-            <span className="text-muted-foreground">{placeholder}</span>
-          )}
+          <span className="truncate">
+            {selectedOption ? selectedOption.label : placeholder}
+          </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-0" align="start">
+      <PopoverContent className="w-[400px] p-0" align="start">
         <Command shouldFilter={false}>
           <CommandInput
             placeholder={searchPlaceholder}
@@ -96,17 +94,21 @@ export function StaticCombobox({
                     onValueChange(option.value === value ? undefined : option.value)
                     setOpen(false)
                   }}
+                  className="cursor-pointer"
+                  title={option.label}
                 >
                   <Check
                     className={cn(
-                      "mr-2 h-4 w-4",
+                      "mr-2 h-4 w-4 shrink-0",
                       value === option.value ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  <div className="flex flex-col">
-                    <span>{option.label}</span>
+                  <div className="flex flex-col flex-1 min-w-0">
+                    <span className="truncate" title={option.label}>{option.label}</span>
                     {option.description && (
-                      <span className="text-sm text-muted-foreground">{option.description}</span>
+                      <span className="text-sm text-muted-foreground truncate" title={option.description}>
+                        {option.description}
+                      </span>
                     )}
                   </div>
                 </CommandItem>
@@ -192,11 +194,6 @@ export const REGIME_FISCAL_OPTIONS: StaticOption[] = [
   { value: 1, label: "Simples Nacional" },
   { value: 2, label: "Lucro Presumido" },
   { value: 3, label: "Lucro Real" },
-]
-
-export const TIPO_ITEM_OPTIONS: StaticOption[] = [
-  { value: "produto", label: "Produto" },
-  { value: "servico", label: "Serviço" },
 ]
 
 export const INDICADOR_IE_OPTIONS: StaticOption[] = [

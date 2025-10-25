@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/select"
 import { IconLoader2, IconArrowLeft } from "@tabler/icons-react"
 import { toast } from "sonner"
+import { cn } from "@/lib/utils"
 import { MatrizFiscalService, type MatrizFiscal } from "@/lib/services/matriz-fiscal.service"
 import { NCMCombobox } from "@/components/shared/combobox/ncm-combobox"
 import { CFOPCombobox } from "@/components/shared/combobox/cfop-combobox"
@@ -41,8 +42,8 @@ import {
   SE_APLICA_A_OPTIONS,
   MODELO_NF_OPTIONS,
   REGIME_FISCAL_OPTIONS,
-  TIPO_ITEM_OPTIONS,
 } from "@/components/shared/combobox/static-combobox"
+import { TIPO_ITEM_OPTIONS } from "@/lib/constants/produto.constants"
 
 const matrizFiscalSchema = z.object({
   // Dados Gerais
@@ -58,7 +59,7 @@ const matrizFiscalSchema = z.object({
   ufDestino: z.string().optional(),
   produtoId: z.string().optional(),
   cfopId: z.string().optional(),
-  tipoItem: z.enum(["produto", "servico"]).optional(),
+  tipoItem: z.enum(["00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "99"]).optional(),
   ncmId: z.string().optional(),
 
   // Definições Fiscais - CST/CSOSN (dinâmico baseado no imposto)
@@ -139,7 +140,7 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
         ufDestino: matriz.ufDestino || undefined,
         produtoId: matriz.produtoId || undefined,
         cfopId: matriz.cfopId || undefined,
-        tipoItem: matriz.tipoItem as "produto" | "servico" | undefined,
+        tipoItem: matriz.tipoItem as "00" | "01" | "02" | "03" | "04" | "05" | "06" | "07" | "08" | "09" | "10" | "99" | undefined,
         ncmId: matriz.ncmId || undefined,
         cstId: matriz.cstId || undefined,
         csosnId: matriz.csosnId || undefined,
@@ -219,16 +220,18 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
                 control={form.control}
                 name="codigo"
                 render={({ field }) => (
-                  <FormItem className="lg:col-span-2">
+                  <FormItem className="lg:col-span-2 min-w-0 overflow-hidden">
                     <FormLabel className="text-xs">Imposto/Taxa</FormLabel>
                     <FormControl>
-                      <StaticCombobox
-                        options={IMPOSTO_TAXA_OPTIONS}
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        placeholder="Selecione"
-                        className="h-9 w-full"
-                      />
+                      <div className="overflow-hidden">
+                        <StaticCombobox
+                          options={IMPOSTO_TAXA_OPTIONS}
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          placeholder="Selecione"
+                          className="h-9 w-full"
+                        />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -253,16 +256,18 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
                 control={form.control}
                 name="modeloNF"
                 render={({ field }) => (
-                  <FormItem className="lg:col-span-2">
+                  <FormItem className="lg:col-span-2 min-w-0 overflow-hidden">
                     <FormLabel className="text-xs">Modelo da NF</FormLabel>
                     <FormControl>
-                      <StaticCombobox
-                        options={MODELO_NF_OPTIONS}
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        placeholder="Selecione"
-                        className="h-9 w-full"
-                      />
+                      <div className="overflow-hidden">
+                        <StaticCombobox
+                          options={MODELO_NF_OPTIONS}
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          placeholder="Selecione"
+                          className="h-9 w-full"
+                        />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -397,16 +402,18 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
                       control={form.control}
                       name="ufDestino"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="min-w-0 overflow-hidden">
                           <FormLabel className="text-xs">Estado do Destinatário</FormLabel>
                           <FormControl>
-                            <EstadoCombobox
-                              value={field.value}
-                              onValueChange={field.onChange}
-                              placeholder="Selecione o estado"
-                              className="h-9 w-full"
-                              returnUf={true}
-                            />
+                            <div className="overflow-hidden">
+                              <EstadoCombobox
+                                value={field.value}
+                                onValueChange={field.onChange}
+                                placeholder="Selecione o estado"
+                                className="h-9 w-full"
+                                returnUf={true}
+                              />
+                            </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -418,13 +425,17 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
                     control={form.control}
                     name="cfopId"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="min-w-0 overflow-hidden">
                         <FormLabel className="text-xs">CFOP</FormLabel>
-                        <CFOPCombobox
-                          value={field.value}
-                          onValueChange={field.onChange}
-                          className="w-full"
-                        />
+                        <FormControl>
+                          <div className="overflow-hidden">
+                            <CFOPCombobox
+                              value={field.value}
+                              onValueChange={field.onChange}
+                              className="w-full"
+                            />
+                          </div>
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -434,16 +445,18 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
                     control={form.control}
                     name="tipoItem"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="min-w-0 overflow-hidden">
                         <FormLabel className="text-xs">Tipo de Item</FormLabel>
                         <FormControl>
-                          <StaticCombobox
-                            options={TIPO_ITEM_OPTIONS}
-                            value={field.value}
-                            onValueChange={field.onChange}
-                            placeholder="Selecione"
-                            className="h-9 w-full"
-                          />
+                          <div className="overflow-hidden">
+                            <StaticCombobox
+                              options={TIPO_ITEM_OPTIONS}
+                              value={field.value}
+                              onValueChange={field.onChange}
+                              placeholder="Selecione"
+                              className="h-9 w-full"
+                            />
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -457,13 +470,20 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
                     control={form.control}
                     name="produtoId"
                     render={({ field }) => (
-                      <FormItem className={mostrarNCM ? "lg:col-span-8" : "lg:col-span-12"}>
+                      <FormItem className={cn(
+                        mostrarNCM ? "lg:col-span-8" : "lg:col-span-12",
+                        "min-w-0 overflow-hidden"
+                      )}>
                         <FormLabel className="text-xs">Código do Produto/Serviço</FormLabel>
-                        <ProdutoCombobox
-                          value={field.value}
-                          onValueChange={field.onChange}
-                          className="w-full"
-                        />
+                        <FormControl>
+                          <div className="overflow-hidden">
+                            <ProdutoCombobox
+                              value={field.value}
+                              onValueChange={field.onChange}
+                              className="w-full"
+                            />
+                          </div>
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -474,13 +494,17 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
                       control={form.control}
                       name="ncmId"
                       render={({ field }) => (
-                        <FormItem className="lg:col-span-4">
+                        <FormItem className="lg:col-span-4 min-w-0 overflow-hidden">
                           <FormLabel className="text-xs">Código NCM</FormLabel>
-                          <NCMCombobox
-                            value={field.value}
-                            onValueChange={field.onChange}
-                            className="w-full"
-                          />
+                          <FormControl>
+                            <div className="overflow-hidden">
+                              <NCMCombobox
+                                value={field.value}
+                                onValueChange={field.onChange}
+                                className="w-full"
+                              />
+                            </div>
+                          </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}

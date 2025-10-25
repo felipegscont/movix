@@ -58,9 +58,10 @@ export class CreateMatrizFiscalDto {
   cfopId?: string;
 
   // Tipo de Item (opcional - null = qualquer)
+  // 00=Mercadoria para Revenda, 01=Matéria-Prima, 02=Embalagem, etc
   @IsOptional()
   @IsString()
-  @IsIn(['produto', 'servico'])
+  @IsIn(['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '99'])
   tipoItem?: string;
 
   // NCM (opcional - null = qualquer)
