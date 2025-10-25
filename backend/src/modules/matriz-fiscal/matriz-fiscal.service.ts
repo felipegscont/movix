@@ -102,7 +102,11 @@ export class MatrizFiscalService {
     ufOrigem?: string;
     tipoCliente?: string;
   }) {
-    const { skip = 0, take = 50, ...filters } = params || {};
+    const { skip: rawSkip = 0, take: rawTake = 50, ...filters } = params || {};
+
+    // Ensure skip and take are valid numbers
+    const skip = Math.max(0, Number(rawSkip) || 0);
+    const take = Math.max(1, Number(rawTake) || 50);
 
     const where: any = {};
 

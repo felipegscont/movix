@@ -84,87 +84,90 @@ export function FornecedorCombobox({
 
   return (
     <>
-      <div className="flex gap-2">
-        <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              role="combobox"
-              aria-expanded={open}
-              className={cn("w-full justify-between", className)}
-              disabled={disabled || loading}
-            >
-              {selectedFornecedor ? (
-                <span className="truncate">
-                  {selectedFornecedor.nome} - {selectedFornecedor.documento}
-                </span>
-              ) : (
-                <span className="text-muted-foreground">{placeholder}</span>
-              )}
-              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[400px] p-0" align="start">
-            <Command shouldFilter={false}>
-              <CommandInput
-                placeholder="Buscar por nome ou documento..."
-                value={search}
-                onValueChange={setSearch}
-              />
-              <CommandList>
-                <CommandEmpty>
-                  <div className="py-6 text-center text-sm">
-                    {loading ? (
-                      "Carregando..."
-                    ) : (
-                      <div className="space-y-2">
-                        <p>Nenhum fornecedor encontrado</p>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setShowCreateDialog(true)
-                            setOpen(false)
-                          }}
-                        >
-                          <Plus className="mr-2 h-4 w-4" />
-                          Cadastrar novo fornecedor
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </CommandEmpty>
-                <CommandGroup>
-                  {filteredFornecedores.map((fornecedor) => (
-                    <CommandItem
-                      key={fornecedor.id}
-                      value={fornecedor.id}
-                      onSelect={() => {
-                        onValueChange(fornecedor.id === value ? undefined : fornecedor.id)
-                        setOpen(false)
-                      }}
-                    >
-                      <Check
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          value === fornecedor.id ? "opacity-100" : "opacity-0"
-                        )}
-                      />
-                      <div className="flex flex-col">
-                        <span className="font-medium">{fornecedor.nome}</span>
-                        <span className="text-sm text-muted-foreground">{fornecedor.documento}</span>
-                      </div>
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
+      <div className="flex gap-2 items-start">
+        <div className="flex-1 min-w-0">
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={open}
+                className={cn("w-full justify-between", className)}
+                disabled={disabled || loading}
+              >
+                {selectedFornecedor ? (
+                  <span className="truncate">
+                    {selectedFornecedor.nome} - {selectedFornecedor.documento}
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground">{placeholder}</span>
+                )}
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[400px] p-0" align="start">
+              <Command shouldFilter={false}>
+                <CommandInput
+                  placeholder="Buscar por nome ou documento..."
+                  value={search}
+                  onValueChange={setSearch}
+                />
+                <CommandList>
+                  <CommandEmpty>
+                    <div className="py-6 text-center text-sm">
+                      {loading ? (
+                        "Carregando..."
+                      ) : (
+                        <div className="space-y-2">
+                          <p>Nenhum fornecedor encontrado</p>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setShowCreateDialog(true)
+                              setOpen(false)
+                            }}
+                          >
+                            <Plus className="mr-2 h-4 w-4" />
+                            Cadastrar novo fornecedor
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </CommandEmpty>
+                  <CommandGroup>
+                    {filteredFornecedores.map((fornecedor) => (
+                      <CommandItem
+                        key={fornecedor.id}
+                        value={fornecedor.id}
+                        onSelect={() => {
+                          onValueChange(fornecedor.id === value ? undefined : fornecedor.id)
+                          setOpen(false)
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            value === fornecedor.id ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        <div className="flex flex-col">
+                          <span className="font-medium">{fornecedor.nome}</span>
+                          <span className="text-sm text-muted-foreground">{fornecedor.documento}</span>
+                        </div>
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        </div>
         <Button
           type="button"
           variant="outline"
           size="icon"
+          className="shrink-0"
           onClick={() => setShowCreateDialog(true)}
           disabled={disabled}
           title="Cadastrar novo fornecedor"

@@ -76,8 +76,11 @@ export class ProdutoService {
   }
 
   async findAll(page: number = 1, limit: number = 10, search?: string) {
-    const skip = (page - 1) * limit;
-    
+    // Ensure page and limit are valid numbers
+    const validPage = Math.max(1, Number(page) || 1);
+    const validLimit = Math.max(1, Number(limit) || 10);
+    const skip = (validPage - 1) * validLimit;
+
     const where = search ? {
       AND: [
         { ativo: true },
@@ -113,7 +116,7 @@ export class ProdutoService {
         },
         orderBy: { descricao: 'asc' },
         skip,
-        take: limit,
+        take: validLimit,
       }),
       this.prisma.produto.count({ where }),
     ]);
@@ -122,9 +125,9 @@ export class ProdutoService {
       data: produtos,
       meta: {
         total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
+        page: validPage,
+        limit: validLimit,
+        totalPages: Math.ceil(total / validLimit),
       },
     };
   }

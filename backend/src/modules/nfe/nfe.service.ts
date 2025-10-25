@@ -250,8 +250,11 @@ export class NfeService {
   }
 
   async findAll(page: number = 1, limit: number = 10, emitenteId?: string, status?: string) {
-    const skip = (page - 1) * limit;
-    
+    // Ensure page and limit are valid numbers
+    const validPage = Math.max(1, Number(page) || 1);
+    const validLimit = Math.max(1, Number(limit) || 10);
+    const skip = (validPage - 1) * validLimit;
+
     const where: any = {};
     if (emitenteId) where.emitenteId = emitenteId;
     if (status) where.status = status;
@@ -278,7 +281,7 @@ export class NfeService {
         },
         orderBy: { dataEmissao: 'desc' },
         skip,
-        take: limit,
+        take: validLimit,
       }),
       this.prisma.nfe.count({ where }),
     ]);
@@ -287,9 +290,9 @@ export class NfeService {
       data: nfes,
       meta: {
         total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
+        page: validPage,
+        limit: validLimit,
+        totalPages: Math.ceil(total / validLimit),
       },
     };
   }
