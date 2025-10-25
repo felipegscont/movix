@@ -613,15 +613,14 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
           <Button
             type="button"
             variant="ghost"
-            size="sm"
+            className="h-7 w-full sm:w-auto"
             onClick={() => router.push("/matrizes-fiscais")}
             disabled={loading}
-            className="w-full sm:w-auto"
           >
             <IconArrowLeft className="mr-2 h-4 w-4" />
             Voltar
           </Button>
-          <Button type="submit" size="sm" disabled={loading} className="w-full sm:w-auto">
+          <Button type="submit" className="h-7 w-full sm:w-auto" disabled={loading}>
             {loading && <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />}
             {matrizId ? "Salvar" : "Criar"}
           </Button>

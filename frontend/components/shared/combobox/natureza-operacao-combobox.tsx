@@ -92,26 +92,31 @@ export function NaturezaOperacaoCombobox({
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={setOpen} modal={true}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn("w-full justify-between", className)}
+          className={cn("w-full justify-between !flex", className)}
           disabled={disabled || loading}
         >
-          {value ? (
-            <span className="truncate">
-              {selectedNatureza ? `${selectedNatureza.codigo} - ` : ""}{value}
-            </span>
-          ) : (
-            <span className="text-muted-foreground">{placeholder}</span>
-          )}
+          <span className="truncate flex-1 text-left" title={selectedNatureza ? `${selectedNatureza.codigo} - ${value}` : value}>
+            {value ? (
+              selectedNatureza ? `${selectedNatureza.codigo} - ${value}` : value
+            ) : (
+              <span className="text-muted-foreground">{placeholder}</span>
+            )}
+          </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[500px] p-0" align="start">
+      <PopoverContent
+        className="w-[90vw] sm:w-[500px] max-w-[500px] p-0"
+        align="start"
+        side="bottom"
+        sideOffset={4}
+      >
         <Command shouldFilter={false}>
           <CommandInput
             placeholder="Buscar por código ou descrição..."
@@ -153,16 +158,17 @@ export function NaturezaOperacaoCombobox({
                     onValueChange(natureza.nome, natureza.id)
                     setOpen(false)
                   }}
+                  className="cursor-pointer"
                 >
                   <Check
                     className={cn(
-                      "mr-2 h-4 w-4",
+                      "mr-2 h-4 w-4 shrink-0",
                       value === natureza.nome ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  <div className="flex flex-col">
-                    <span className="font-medium">{natureza.codigo}</span>
-                    <span className="text-sm text-muted-foreground">{natureza.nome}</span>
+                  <div className="flex flex-col w-full min-w-0 overflow-hidden" title={`${natureza.codigo} - ${natureza.nome}`}>
+                    <span className="font-medium text-sm">{natureza.codigo}</span>
+                    <span className="text-xs text-muted-foreground truncate">{natureza.nome}</span>
                   </div>
                 </CommandItem>
               ))}

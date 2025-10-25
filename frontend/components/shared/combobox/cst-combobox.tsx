@@ -105,19 +105,12 @@ export function CSTCombobox({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn("w-full justify-between", className)}
+          className={cn("w-full justify-between !flex", className)}
           disabled={disabled}
         >
-          <span className="truncate flex-1 text-left">
+          <span className="truncate flex-1 text-left" title={selectedCST ? `${selectedCST.codigo} - ${selectedCST.descricao}` : undefined}>
             {selectedCST ? (
-              <>
-                <span className="font-medium">{selectedCST.codigo}</span>
-                <span className="text-muted-foreground ml-2">
-                  {selectedCST.descricao.length > 40
-                    ? selectedCST.descricao.substring(0, 40) + "..."
-                    : selectedCST.descricao}
-                </span>
-              </>
+              `${selectedCST.codigo} - ${selectedCST.descricao}`
             ) : (
               <span className="text-muted-foreground">{placeholder}</span>
             )}
@@ -150,16 +143,17 @@ export function CSTCombobox({
                     onValueChange(currentValue === value ? undefined : currentValue)
                     setOpen(false)
                   }}
+                  className="cursor-pointer"
                 >
                   <Check
                     className={cn(
-                      "mr-2 h-4 w-4",
+                      "mr-2 h-4 w-4 shrink-0",
                       value === cst.id ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  <div className="flex flex-col w-full overflow-hidden">
-                    <span className="font-medium">{cst.codigo}</span>
-                    <span className="text-sm text-muted-foreground truncate">
+                  <div className="flex flex-col w-full min-w-0 overflow-hidden" title={`${cst.codigo} - ${cst.descricao}`}>
+                    <span className="font-medium text-sm">{cst.codigo}</span>
+                    <span className="text-xs text-muted-foreground truncate">
                       {cst.descricao}
                     </span>
                   </div>

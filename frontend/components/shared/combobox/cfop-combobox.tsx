@@ -109,17 +109,12 @@ export function CFOPCombobox({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn("w-full justify-between h-9 overflow-hidden", className)}
+          className={cn("w-full justify-between !flex", className)}
           disabled={disabled}
         >
-          <span className="truncate flex-1 text-left overflow-hidden whitespace-nowrap">
+          <span className="truncate flex-1 text-left" title={selectedCFOP ? `${selectedCFOP.codigo} - ${selectedCFOP.descricao}` : undefined}>
             {selectedCFOP ? (
-              <span className="inline-flex items-center gap-1 overflow-hidden w-full" title={`${selectedCFOP.codigo} - ${selectedCFOP.descricao}`}>
-                <span className="font-medium shrink-0">{selectedCFOP.codigo}</span>
-                <span className="text-muted-foreground truncate">
-                  - {selectedCFOP.descricao}
-                </span>
-              </span>
+              `${selectedCFOP.codigo} - ${selectedCFOP.descricao}`
             ) : (
               <span className="text-muted-foreground">{placeholder}</span>
             )}

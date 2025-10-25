@@ -96,19 +96,12 @@ export function CSOSNCombobox({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn("w-full justify-between", className)}
+          className={cn("w-full justify-between !flex", className)}
           disabled={disabled}
         >
-          <span className="truncate flex-1 text-left">
+          <span className="truncate flex-1 text-left" title={selectedCSOSN ? `${selectedCSOSN.codigo} - ${selectedCSOSN.descricao}` : undefined}>
             {selectedCSOSN ? (
-              <>
-                <span className="font-medium">{selectedCSOSN.codigo}</span>
-                <span className="text-muted-foreground ml-2">
-                  {selectedCSOSN.descricao.length > 40
-                    ? selectedCSOSN.descricao.substring(0, 40) + "..."
-                    : selectedCSOSN.descricao}
-                </span>
-              </>
+              `${selectedCSOSN.codigo} - ${selectedCSOSN.descricao}`
             ) : (
               <span className="text-muted-foreground">{placeholder}</span>
             )}
@@ -141,16 +134,17 @@ export function CSOSNCombobox({
                     onValueChange(currentValue === value ? undefined : currentValue)
                     setOpen(false)
                   }}
+                  className="cursor-pointer"
                 >
                   <Check
                     className={cn(
-                      "mr-2 h-4 w-4",
+                      "mr-2 h-4 w-4 shrink-0",
                       value === csosn.id ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  <div className="flex flex-col">
-                    <span className="font-medium">{csosn.codigo}</span>
-                    <span className="text-sm text-muted-foreground truncate">
+                  <div className="flex flex-col w-full min-w-0 overflow-hidden" title={`${csosn.codigo} - ${csosn.descricao}`}>
+                    <span className="font-medium text-sm">{csosn.codigo}</span>
+                    <span className="text-xs text-muted-foreground truncate">
                       {csosn.descricao}
                     </span>
                   </div>

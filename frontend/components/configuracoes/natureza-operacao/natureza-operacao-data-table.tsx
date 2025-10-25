@@ -63,7 +63,9 @@ import {
   IconChevronRight,
   IconChevronsLeft,
   IconChevronsRight,
+  IconPlus,
 } from "@tabler/icons-react"
+import { useRouter } from "next/navigation"
 import { NaturezaOperacao, NaturezaOperacaoService } from "@/lib/services/natureza-operacao.service"
 import { toast } from "sonner"
 
@@ -72,6 +74,7 @@ interface NaturezaOperacaoDataTableProps {
 }
 
 export function NaturezaOperacaoDataTable({ onEdit }: NaturezaOperacaoDataTableProps = {}) {
+  const router = useRouter()
   const [data, setData] = useState<NaturezaOperacao[]>([])
   const [loading, setLoading] = useState(true)
   const [rowSelection, setRowSelection] = useState({})
@@ -282,9 +285,9 @@ export function NaturezaOperacaoDataTable({ onEdit }: NaturezaOperacaoDataTableP
   })
 
   return (
-    <div className="space-y-4">
-      {/* Toolbar */}
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-4 px-4 lg:px-6">
+      {/* Header com filtros e ações */}
+      <div className="flex items-center justify-between gap-4">
         <div className="flex flex-1 items-center space-x-2">
           <Input
             placeholder="Filtrar por código ou descrição..."
@@ -295,33 +298,43 @@ export function NaturezaOperacaoDataTable({ onEdit }: NaturezaOperacaoDataTableP
             className="h-8 w-[150px] lg:w-[250px]"
           />
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="ml-auto h-8">
-              <IconLayoutColumns className="mr-2 h-4 w-4" />
-              Colunas
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                )
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="h-7">
+                <IconLayoutColumns className="size-4" />
+                <span className="hidden lg:inline">Colunas</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .map((column) => {
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      className="capitalize"
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) =>
+                        column.toggleVisibility(!!value)
+                      }
+                    >
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  )
+                })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Button
+            variant="outline"
+            className="h-7"
+            onClick={() => router.push("/configuracoes/naturezas-operacao/nova")}
+          >
+            <IconPlus className="size-4" />
+            <span className="hidden lg:inline">Nova Natureza</span>
+          </Button>
+        </div>
       </div>
 
       {/* Table */}

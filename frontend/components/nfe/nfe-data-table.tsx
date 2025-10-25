@@ -271,7 +271,7 @@ export function NfeDataTable({ nfes, onRefresh }: NfeDataTableProps) {
       <div className="flex items-center justify-end space-x-2 py-4">
         <Button
           variant="outline"
-          size="sm"
+          className="h-7"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
@@ -279,7 +279,7 @@ export function NfeDataTable({ nfes, onRefresh }: NfeDataTableProps) {
         </Button>
         <Button
           variant="outline"
-          size="sm"
+          className="h-7"
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
         >

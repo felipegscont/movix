@@ -85,7 +85,7 @@ export function ClienteCombobox({
 
   return (
     <>
-      <div className="flex gap-2 items-start">
+      <div className="flex gap-2 items-center w-full">
         <div className="flex-1 min-w-0">
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
@@ -93,16 +93,16 @@ export function ClienteCombobox({
                 variant="outline"
                 role="combobox"
                 aria-expanded={open}
-                className={cn("w-full justify-between", className)}
+                className={cn("w-full justify-between !flex", className)}
                 disabled={disabled || loading}
               >
-                {selectedCliente ? (
-                  <span className="truncate">
-                    {selectedCliente.nome} - {selectedCliente.documento}
-                  </span>
-                ) : (
-                  <span className="text-muted-foreground">{placeholder}</span>
-                )}
+                <span className="truncate flex-1 text-left">
+                  {selectedCliente ? (
+                    `${selectedCliente.nome} - ${selectedCliente.documento}`
+                  ) : (
+                    <span className="text-muted-foreground">{placeholder}</span>
+                  )}
+                </span>
                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>

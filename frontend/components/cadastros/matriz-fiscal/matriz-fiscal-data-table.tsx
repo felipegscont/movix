@@ -27,7 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { IconEdit, IconTrash, IconLoader2, IconSearch } from "@tabler/icons-react"
+import { IconEdit, IconTrash, IconLoader2, IconSearch, IconPlus } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { MatrizFiscalService, type MatrizFiscal } from "@/lib/services/matriz-fiscal.service"
 
@@ -282,20 +282,21 @@ export function MatrizFiscalDataTable() {
   }
 
   return (
-    <div className="space-y-4">
-      {/* Filtros */}
-      <div className="flex items-center gap-4">
-        <div className="flex-1">
-          <div className="relative">
-            <IconSearch className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por código ou descrição..."
-              value={searchCodigo}
-              onChange={(e) => setSearchCodigo(e.target.value)}
-              className="pl-8"
-            />
+    <div className="flex flex-col gap-4 px-4 lg:px-6">
+      {/* Header com filtros e ações */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-1 items-center gap-4">
+          <div className="flex-1">
+            <div className="relative">
+              <IconSearch className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por código ou descrição..."
+                value={searchCodigo}
+                onChange={(e) => setSearchCodigo(e.target.value)}
+                className="pl-8"
+              />
+            </div>
           </div>
-        </div>
         <Select value={filterImposto || "todos"} onValueChange={(value) => setFilterImposto(value === "todos" ? "" : value)}>
           <SelectTrigger className="w-[150px]">
             <SelectValue placeholder="Imposto" />
@@ -327,16 +328,27 @@ export function MatrizFiscalDataTable() {
             <SelectItem value="CE">CE</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={filterAtivo} onValueChange={setFilterAtivo}>
-          <SelectTrigger className="w-[120px]">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos</SelectItem>
-            <SelectItem value="true">Ativos</SelectItem>
-            <SelectItem value="false">Inativos</SelectItem>
-          </SelectContent>
-        </Select>
+          <Select value={filterAtivo} onValueChange={setFilterAtivo}>
+            <SelectTrigger className="w-[120px]">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos</SelectItem>
+              <SelectItem value="true">Ativos</SelectItem>
+              <SelectItem value="false">Inativos</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            className="h-7"
+            onClick={() => router.push("/matrizes-fiscais/nova")}
+          >
+            <IconPlus className="size-4" />
+            <span className="hidden lg:inline">Nova Matriz</span>
+          </Button>
+        </div>
       </div>
 
       {/* Tabela */}
@@ -397,7 +409,7 @@ export function MatrizFiscalDataTable() {
         <div className="flex items-center space-x-2">
           <Button
             variant="outline"
-            size="sm"
+            className="h-7"
             onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
             disabled={currentPage === 1}
           >
@@ -405,7 +417,7 @@ export function MatrizFiscalDataTable() {
           </Button>
           <Button
             variant="outline"
-            size="sm"
+            className="h-7"
             onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
             disabled={currentPage === totalPages}
           >

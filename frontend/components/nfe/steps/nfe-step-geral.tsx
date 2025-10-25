@@ -78,10 +78,12 @@ export function NfeStepGeral({ form, emitente }: NfeStepGeralProps) {
               control={form.control}
               name="clienteId"
               render={({ field }) => (
-                <FormItem className="space-y-1">
+                <FormItem className="space-y-1 min-w-0 overflow-hidden">
                   <FormLabel className="text-xs font-medium">Cliente *</FormLabel>
                   <FormControl>
-                    <ClienteCombobox value={field.value} onValueChange={field.onChange} />
+                    <div className="overflow-hidden">
+                      <ClienteCombobox value={field.value} onValueChange={field.onChange} />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -91,17 +93,19 @@ export function NfeStepGeral({ form, emitente }: NfeStepGeralProps) {
               control={form.control}
               name="naturezaOperacao"
               render={({ field }) => (
-                <FormItem className="space-y-1">
+                <FormItem className="space-y-1 min-w-0 overflow-hidden">
                   <FormLabel className="text-xs font-medium">Natureza da Operação *</FormLabel>
                   <FormControl>
-                    <NaturezaOperacaoCombobox
-                      value={field.value}
-                      onValueChange={(descricao, naturezaId) => {
-                        field.onChange(descricao)
-                        if (naturezaId) form.setValue('naturezaOperacaoId', naturezaId)
-                      }}
-                      allowCustom={true}
-                    />
+                    <div className="overflow-hidden">
+                      <NaturezaOperacaoCombobox
+                        value={field.value}
+                        onValueChange={(descricao, naturezaId) => {
+                          field.onChange(descricao)
+                          if (naturezaId) form.setValue('naturezaOperacaoId', naturezaId)
+                        }}
+                        allowCustom={true}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

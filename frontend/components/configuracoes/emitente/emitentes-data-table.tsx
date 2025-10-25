@@ -240,7 +240,7 @@ export function EmitentesDataTable({ data, onEdit, onRefresh }: EmitentesDataTab
       <div className="flex items-center justify-end space-x-2 py-4">
         <Button
           variant="outline"
-          size="sm"
+          className="h-7"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
@@ -248,7 +248,7 @@ export function EmitentesDataTable({ data, onEdit, onRefresh }: EmitentesDataTab
         </Button>
         <Button
           variant="outline"
-          size="sm"
+          className="h-7"
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
         >
