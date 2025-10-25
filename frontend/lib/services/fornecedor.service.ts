@@ -86,7 +86,9 @@ export class FornecedorService {
 
     const response = await fetch(`${API_BASE_URL}/fornecedores?${params}`);
     if (!response.ok) {
-      throw new Error('Erro ao buscar fornecedores');
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Erro ao buscar fornecedores:', response.status, errorData);
+      throw new Error(errorData.message || 'Erro ao buscar fornecedores');
     }
     return response.json();
   }

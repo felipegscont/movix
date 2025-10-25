@@ -41,7 +41,7 @@ export class FornecedorService {
           },
           estado: true,
         },
-        skip,
+        skip: skip,
         take: limit,
         orderBy: { nome: 'asc' },
       }),
