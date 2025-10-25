@@ -2,33 +2,16 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
+import { IconChevronLeft, IconChevronRight, IconDeviceFloppy, IconCheck, IconAlertCircle, IconLoader2 } from "@tabler/icons-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Form } from "@/components/ui/form"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import {
-  IconChevronLeft,
-  IconChevronRight,
-  IconDeviceFloppy,
-  IconCheck,
-  IconAlertCircle,
-  IconLoader2
-} from "@tabler/icons-react"
-import { toast } from "sonner"
+import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 import { useNfeForm } from "@/hooks/nfe/use-nfe-form"
-
-// Importar componentes dos steps
 import { NfeStepGeral } from "./steps/nfe-step-geral"
 import { NfeStepItens } from "./steps/nfe-step-itens"
 import { NfeStepCobranca } from "./steps/nfe-step-cobranca"
@@ -202,30 +185,30 @@ export function NfeWizard({ nfeId, onSuccess }: NfeWizardProps) {
   return (
     <>
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        {/* Header com progresso */}
-        <Card>
-          <CardHeader>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        {/* Header com progresso - Compacto */}
+        <Card className="py-3">
+          <CardHeader className="pb-0">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>
+                <CardTitle className="text-lg">
                   {nfeId ? 'Editar NFe' : 'Nova NFe'}
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-xs">
                   Preencha os dados da nota fiscal eletrônica
                 </CardDescription>
               </div>
 
               {/* Resumo rápido */}
               <div className="text-right">
-                <div className="text-sm text-muted-foreground">Total</div>
-                <div className="text-2xl font-bold">
+                <div className="text-xs text-muted-foreground">Total</div>
+                <div className="text-xl font-bold">
                   {totals.valorTotal.toLocaleString('pt-BR', {
                     style: 'currency',
                     currency: 'BRL'
                   })}
                 </div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-xs text-muted-foreground">
                   {form.watch('itens')?.length || 0} {form.watch('itens')?.length === 1 ? 'item' : 'itens'}
                 </div>
               </div>
@@ -233,9 +216,9 @@ export function NfeWizard({ nfeId, onSuccess }: NfeWizardProps) {
           </CardHeader>
         </Card>
 
-        {/* Breadcrumb de navegação */}
-        <Card>
-          <CardContent className="pt-6">
+        {/* Breadcrumb de navegação - Compacto */}
+        <Card className="py-3">
+          <CardContent className="py-3">
             <NfeWizardBreadcrumb
               steps={WIZARD_STEPS}
               currentStep={currentStep}
@@ -250,9 +233,9 @@ export function NfeWizard({ nfeId, onSuccess }: NfeWizardProps) {
           {renderCurrentStep()}
         </div>
 
-        {/* Navegação inferior */}
-        <Card>
-          <CardContent className="pt-6">
+        {/* Navegação inferior - Compacto */}
+        <Card className="py-3">
+          <CardContent className="py-3">
             <div className="flex items-center justify-between">
               {/* Botão Anterior */}
               <Button
@@ -260,7 +243,6 @@ export function NfeWizard({ nfeId, onSuccess }: NfeWizardProps) {
                 variant="outline"
                 onClick={goToPreviousStep}
                 disabled={isFirstStep || loading}
-                size="lg"
               >
                 <IconChevronLeft className="h-4 w-4 mr-2" />
                 Anterior
@@ -268,10 +250,10 @@ export function NfeWizard({ nfeId, onSuccess }: NfeWizardProps) {
 
               {/* Indicador de progresso */}
               <div className="text-center">
-                <div className="text-sm text-muted-foreground">
+                <div className="text-xs text-muted-foreground">
                   Passo {currentStepIndex + 1} de {WIZARD_STEPS.length}
                 </div>
-                <div className="text-xs text-muted-foreground mt-1">
+                <div className="text-xs text-muted-foreground mt-0.5">
                   {WIZARD_STEPS[currentStepIndex].label}
                 </div>
               </div>

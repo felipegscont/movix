@@ -1,15 +1,15 @@
 "use client"
 
 import { useState } from "react"
+import { UseFormReturn } from "react-hook-form"
+import { IconEdit, IconTrash, IconAlertCircle } from "@tabler/icons-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { IconEdit, IconTrash, IconAlertCircle } from "@tabler/icons-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { type NfeItemFormData } from "@/lib/schemas/nfe.schema"
-import { UseFormReturn } from "react-hook-form"
 import { NfeAddItemQuick } from "../nfe-add-item-quick"
 import { NfeEditItemDialog } from "../nfe-edit-item-dialog"
 
@@ -56,22 +56,22 @@ export function NfeStepItens({ form, addItem, updateItem, removeItem, emitenteRe
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Formulário de adicionar item */}
       <NfeAddItemQuick
         onAddItem={addItem}
         emitenteRegime={emitenteRegime}
       />
 
-      {/* Lista de itens */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Itens Adicionados ({itens.length})</CardTitle>
-          <CardDescription>
+      {/* Lista de itens - Compacto */}
+      <Card className="py-3">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Itens Adicionados ({itens.length})</CardTitle>
+          <CardDescription className="text-xs">
             Lista de produtos e serviços da nota fiscal
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3">
         {form.formState.errors.itens && (
           <Alert variant="destructive">
             <IconAlertCircle className="h-4 w-4" />

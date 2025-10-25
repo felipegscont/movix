@@ -1,18 +1,18 @@
 "use client"
 
 import { useState } from "react"
+import { UseFormReturn } from "react-hook-form"
+import { toast } from "sonner"
+import { IconPlus, IconTrash, IconCash, IconCalendar, IconAlertCircle } from "@tabler/icons-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { IconPlus, IconTrash, IconCash, IconCalendar, IconAlertCircle } from "@tabler/icons-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { UseFormReturn } from "react-hook-form"
-import { toast } from "sonner"
 import { type NfeDuplicataFormData, type NfePagamentoFormData } from "@/lib/schemas/nfe.schema"
 import { FormaPagamentoCombobox } from "@/components/shared/combobox/forma-pagamento-combobox"
 
@@ -148,49 +148,49 @@ export function NfeStepCobranca({ form }: NfeStepCobrancaProps) {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Resumo */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <IconCash className="h-5 w-5" />
+    <div className="space-y-4">
+      {/* Resumo - Compacto */}
+      <Card className="py-3">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <IconCash className="h-4 w-4" />
             Resumo Financeiro
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-3 gap-4">
-            <div className="p-4 bg-muted rounded-lg">
-              <p className="text-sm text-muted-foreground">Valor Total NFe</p>
-              <p className="text-2xl font-bold">{formatCurrency(valorTotalNfe)}</p>
+          <div className="grid grid-cols-3 gap-3">
+            <div className="p-3 bg-muted rounded-lg">
+              <p className="text-xs text-muted-foreground">Valor Total NFe</p>
+              <p className="text-lg font-bold">{formatCurrency(valorTotalNfe)}</p>
             </div>
-            <div className="p-4 bg-muted rounded-lg">
-              <p className="text-sm text-muted-foreground">Total Duplicatas</p>
-              <p className="text-2xl font-bold">{formatCurrency(totalDuplicatas)}</p>
+            <div className="p-3 bg-muted rounded-lg">
+              <p className="text-xs text-muted-foreground">Total Duplicatas</p>
+              <p className="text-lg font-bold">{formatCurrency(totalDuplicatas)}</p>
               {totalDuplicatas !== valorTotalNfe && totalDuplicatas > 0 && (
-                <Badge variant="destructive" className="mt-1">Divergente</Badge>
+                <Badge variant="destructive" className="mt-1 text-xs">Divergente</Badge>
               )}
             </div>
-            <div className="p-4 bg-muted rounded-lg">
-              <p className="text-sm text-muted-foreground">Total Pagamentos</p>
-              <p className="text-2xl font-bold">{formatCurrency(totalPagamentos)}</p>
+            <div className="p-3 bg-muted rounded-lg">
+              <p className="text-xs text-muted-foreground">Total Pagamentos</p>
+              <p className="text-lg font-bold">{formatCurrency(totalPagamentos)}</p>
               {totalPagamentos !== valorTotalNfe && totalPagamentos > 0 && (
-                <Badge variant="destructive" className="mt-1">Divergente</Badge>
+                <Badge variant="destructive" className="mt-1 text-xs">Divergente</Badge>
               )}
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Duplicatas */}
-      <Card>
-        <CardHeader>
+      {/* Duplicatas - Compacto */}
+      <Card className="py-3">
+        <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="flex items-center gap-2">
-                <IconCalendar className="h-5 w-5" />
+              <CardTitle className="flex items-center gap-2 text-base">
+                <IconCalendar className="h-4 w-4" />
                 Duplicatas ({duplicatas.length})
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-xs">
                 Parcelas de cobrança da nota fiscal
               </CardDescription>
             </div>
@@ -204,43 +204,46 @@ export function NfeStepCobranca({ form }: NfeStepCobrancaProps) {
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3">
           {/* Formulário de adicionar */}
-          <div className="grid grid-cols-12 gap-4">
-            <div className="col-span-3 space-y-2">
-              <Label className="text-xs">Número</Label>
+          <div className="grid grid-cols-12 gap-2">
+            <div className="col-span-3 space-y-1">
+              <Label className="text-xs font-medium">Número</Label>
               <Input
                 placeholder="1/3"
                 value={novaDuplicata.numero}
                 onChange={(e) => setNovaDuplicata({ ...novaDuplicata, numero: e.target.value })}
+                className="h-9 text-sm w-full"
               />
             </div>
-            <div className="col-span-3 space-y-2">
-              <Label className="text-xs">Vencimento</Label>
+            <div className="col-span-3 space-y-1">
+              <Label className="text-xs font-medium">Vencimento</Label>
               <Input
                 type="date"
                 value={novaDuplicata.dataVencimento}
                 onChange={(e) => setNovaDuplicata({ ...novaDuplicata, dataVencimento: e.target.value })}
+                className="h-9 text-sm w-full"
               />
             </div>
-            <div className="col-span-4 space-y-2">
-              <Label className="text-xs">Valor</Label>
+            <div className="col-span-4 space-y-1">
+              <Label className="text-xs font-medium">Valor</Label>
               <Input
                 type="number"
                 step="0.01"
                 min="0.01"
                 value={novaDuplicata.valor}
                 onChange={(e) => setNovaDuplicata({ ...novaDuplicata, valor: Number(e.target.value) })}
+                className="h-9 text-sm w-full"
               />
             </div>
             <div className="col-span-2 flex items-end">
               <Button
                 type="button"
                 onClick={handleAddDuplicata}
-                className="w-full"
+                className="w-full h-9"
                 size="sm"
               >
-                <IconPlus className="h-4 w-4 mr-2" />
+                <IconPlus className="h-4 w-4 mr-1" />
                 Adicionar
               </Button>
             </div>
@@ -302,16 +305,16 @@ export function NfeStepCobranca({ form }: NfeStepCobrancaProps) {
             Formas de pagamento aceitas nesta nota
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3">
           {/* Formulário de adicionar */}
-          <div className="grid grid-cols-12 gap-4">
-            <div className="col-span-2 space-y-2">
-              <Label className="text-xs">Indicador</Label>
+          <div className="grid grid-cols-12 gap-2">
+            <div className="col-span-2 space-y-1">
+              <Label className="text-xs font-medium">Indicador</Label>
               <Select
                 value={novoPagamento.indicadorPagamento.toString()}
                 onValueChange={(value) => setNovoPagamento({ ...novoPagamento, indicadorPagamento: parseInt(value) })}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-9 text-sm w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -320,31 +323,32 @@ export function NfeStepCobranca({ form }: NfeStepCobrancaProps) {
                 </SelectContent>
               </Select>
             </div>
-            <div className="col-span-6 space-y-2">
-              <Label className="text-xs">Forma de Pagamento</Label>
+            <div className="col-span-6 space-y-1">
+              <Label className="text-xs font-medium">Forma de Pagamento</Label>
               <FormaPagamentoCombobox
                 value={novoPagamento.formaPagamentoId}
                 onValueChange={(value) => setNovoPagamento({ ...novoPagamento, formaPagamentoId: value || "" })}
               />
             </div>
-            <div className="col-span-2 space-y-2">
-              <Label className="text-xs">Valor</Label>
+            <div className="col-span-2 space-y-1">
+              <Label className="text-xs font-medium">Valor</Label>
               <Input
                 type="number"
                 step="0.01"
                 min="0.01"
                 value={novoPagamento.valor}
                 onChange={(e) => setNovoPagamento({ ...novoPagamento, valor: Number(e.target.value) })}
+                className="h-9 text-sm w-full"
               />
             </div>
             <div className="col-span-2 flex items-end">
               <Button
                 type="button"
                 onClick={handleAddPagamento}
-                className="w-full"
+                className="w-full h-9"
                 size="sm"
               >
-                <IconPlus className="h-4 w-4 mr-2" />
+                <IconPlus className="h-4 w-4 mr-1" />
                 Adicionar
               </Button>
             </div>

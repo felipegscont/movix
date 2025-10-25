@@ -1,11 +1,11 @@
 "use client"
 
+import { UseFormReturn } from "react-hook-form"
+import { IconBuilding, IconUser, IconPackage, IconCash, IconFileText, IconCheck } from "@tabler/icons-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { IconBuilding, IconUser, IconPackage, IconCash, IconFileText, IconCheck } from "@tabler/icons-react"
-import { UseFormReturn } from "react-hook-form"
 
 interface NfeStepRevisaoProps {
   form: UseFormReturn<any>
@@ -63,48 +63,48 @@ export function NfeStepRevisao({ form, emitente, totals }: NfeStepRevisaoProps) 
   }
 
   return (
-    <div className="space-y-6">
-      {/* Resumo Financeiro */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <IconCheck className="h-5 w-5 text-green-600" />
+    <div className="space-y-4">
+      {/* Resumo Financeiro - Compacto */}
+      <Card className="py-3">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <IconCheck className="h-4 w-4 text-green-600" />
             Resumo da NFe
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-xs">
             Confira todos os dados antes de salvar
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-4 gap-4">
-            <div className="text-center p-4 bg-primary/10 rounded-lg border-2 border-primary">
-              <div className="text-3xl font-bold text-primary">
+          <div className="grid grid-cols-4 gap-3">
+            <div className="text-center p-3 bg-primary/10 rounded-lg border-2 border-primary">
+              <div className="text-xl font-bold text-primary">
                 {formatCurrency(totals.valorTotal)}
               </div>
-              <div className="text-sm text-muted-foreground mt-1">Valor Total</div>
+              <div className="text-xs text-muted-foreground mt-1">Valor Total</div>
             </div>
-            
-            <div className="text-center p-4 bg-muted rounded-lg">
-              <div className="text-2xl font-bold">{itens.length}</div>
-              <div className="text-sm text-muted-foreground mt-1">
+
+            <div className="text-center p-3 bg-muted rounded-lg">
+              <div className="text-lg font-bold">{itens.length}</div>
+              <div className="text-xs text-muted-foreground mt-1">
                 {itens.length === 1 ? 'Item' : 'Itens'}
               </div>
             </div>
 
-            <div className="text-center p-4 bg-muted rounded-lg">
-              <div className="text-2xl font-bold">{duplicatas.length}</div>
-              <div className="text-sm text-muted-foreground mt-1">Duplicatas</div>
+            <div className="text-center p-3 bg-muted rounded-lg">
+              <div className="text-lg font-bold">{duplicatas.length}</div>
+              <div className="text-xs text-muted-foreground mt-1">Duplicatas</div>
             </div>
 
-            <div className="text-center p-4 bg-muted rounded-lg">
-              <div className="text-2xl font-bold">{pagamentos.length}</div>
-              <div className="text-sm text-muted-foreground mt-1">Pagamentos</div>
+            <div className="text-center p-3 bg-muted rounded-lg">
+              <div className="text-lg font-bold">{pagamentos.length}</div>
+              <div className="text-xs text-muted-foreground mt-1">Pagamentos</div>
             </div>
           </div>
 
           {/* Impostos */}
-          <Separator className="my-4" />
-          <div className="grid grid-cols-4 gap-4 text-sm">
+          <Separator className="my-3" />
+          <div className="grid grid-cols-4 gap-3 text-xs">
             <div>
               <span className="text-muted-foreground">ICMS:</span>
               <span className="font-medium ml-2">{formatCurrency(totals.valorICMS)}</span>
