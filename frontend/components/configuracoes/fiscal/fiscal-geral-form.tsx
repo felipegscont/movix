@@ -4,14 +4,25 @@ import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
+import { useRouter } from "next/navigation"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Checkbox } from "@/components/ui/checkbox"
 import { StaticCombobox } from "@/components/shared/combobox/static-combobox"
-import { IconLoader2, IconDeviceFloppy, IconAlertCircle, IconCertificate, IconFileText } from "@tabler/icons-react"
+import { IconLoader2, IconDeviceFloppy, IconAlertCircle, IconCertificate, IconFileText, IconBuilding } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { EmitenteService } from "@/lib/services/emitente.service"
 import { useCertificado } from "@/hooks/emitente/use-certificado"
@@ -32,10 +43,12 @@ const fiscalGeralSchema = z.object({
 type FiscalGeralFormData = z.infer<typeof fiscalGeralSchema>
 
 export function FiscalGeralForm() {
+  const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [loadingData, setLoadingData] = useState(true)
   const [emitenteId, setEmitenteId] = useState<string | null>(null)
   const [certificadoInfoFromDb, setCertificadoInfoFromDb] = useState<any>(null)
+  const [showNoEmitenteDialog, setShowNoEmitenteDialog] = useState(false)
 
   const {
     certificado,
@@ -76,6 +89,9 @@ export function FiscalGeralForm() {
               setCertificadoInfoFromDb(certInfo)
             }
           }
+        } else {
+          // Nenhum emitente encontrado - mostrar dialog
+          setShowNoEmitenteDialog(true)
         }
       } catch (error) {
         console.error("Erro ao carregar emitente:", error)

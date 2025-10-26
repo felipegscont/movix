@@ -21,9 +21,7 @@ export interface Emitente {
   site?: string;
   certificadoPath?: string;
   certificadoPassword?: string;
-  ambienteNfe?: number;
-  proximoNumeroNfe?: number;
-  serieNfe?: number;
+  enviarNotasPorEmail?: boolean;
   ativo: boolean;
   createdAt: string;
   updatedAt: string;

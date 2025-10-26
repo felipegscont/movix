@@ -174,9 +174,9 @@ export interface Emitente {
   telefone?: string
   email?: string
   site?: string
-  ambienteNfe: number
-  serieNfe: number
-  proximoNumeroNfe: number
+  certificadoPath?: string
+  certificadoPassword?: string
+  enviarNotasPorEmail?: boolean
   ativo: boolean
   createdAt: string
   updatedAt: string
