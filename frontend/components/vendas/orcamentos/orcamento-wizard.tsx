@@ -123,8 +123,6 @@ export function OrcamentoWizard({ pedidoId, onSuccess }: OrcamentoWizardProps) {
     // Só permitir submit se estiver no último step
     if (currentStep === STEPS.length) {
       handleSubmit(e)
-    } else {
-      console.log('⚠️ Submit bloqueado - não está no último step')
     }
   }
 
