@@ -69,6 +69,57 @@ import {
 import { useRouter } from "next/navigation"
 import { NaturezaOperacao, NaturezaOperacaoService } from "@/lib/services/natureza-operacao.service"
 import { toast } from "sonner"
+import { DataTableFilter } from "@/components/data-table-filter"
+import { useDataTableFilters } from "@/components/data-table-filter"
+import { createColumnConfigHelper } from "@/components/data-table-filter/core/filters"
+import * as React from "react"
+import {
+  IconFileInvoice,
+  IconHash,
+  IconCircleCheck,
+} from "@tabler/icons-react"
+
+// Configuração dos filtros do Bazza UI
+const dtf = createColumnConfigHelper<NaturezaOperacao>()
+
+const filterColumnsConfig = [
+  dtf
+    .text()
+    .id("codigo")
+    .displayName("Código")
+    .icon(IconHash)
+    .accessor((row) => row.codigo)
+    .build(),
+  dtf
+    .text()
+    .id("descricao")
+    .displayName("Descrição")
+    .icon(IconFileInvoice)
+    .accessor((row) => row.descricao)
+    .build(),
+  dtf
+    .option()
+    .id("tipo")
+    .displayName("Tipo")
+    .icon(IconFileInvoice)
+    .accessor((row) => row.tipo)
+    .options([
+      { value: "ENTRADA", label: "Entrada" },
+      { value: "SAIDA", label: "Saída" },
+    ])
+    .build(),
+  dtf
+    .option()
+    .id("ativo")
+    .displayName("Status")
+    .icon(IconCircleCheck)
+    .accessor((row) => row.ativo ? "true" : "false")
+    .options([
+      { value: "true", label: "Ativo" },
+      { value: "false", label: "Inativo" },
+    ])
+    .build(),
+] as const
 
 interface NaturezaOperacaoDataTableProps {
   onEdit?: (naturezaId: string) => void
@@ -90,6 +141,73 @@ export function NaturezaOperacaoDataTable({ onEdit }: NaturezaOperacaoDataTableP
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
+
+  // Filtros do Bazza UI
+  const {
+    filters: bazzaFilters,
+    columns: bazzaColumns,
+    actions: bazzaActions,
+  } = useDataTableFilters({
+    strategy: "client",
+    data,
+    columnsConfig: filterColumnsConfig,
+  })
+
+  // Aplicar filtros do Bazza UI aos dados
+  const filteredData = React.useMemo(() => {
+    if (bazzaFilters.length === 0) return data
+
+    return data.filter((row) => {
+      return bazzaFilters.every((filter) => {
+        const column = bazzaColumns.find((col) => col.id === filter.columnId)
+        if (!column) return true
+
+        const value = column.accessor(row)
+
+        if (filter.type === 'text') {
+          const textValue = String(value || '').toLowerCase()
+          const filterValue = String(filter.values[0] || '').toLowerCase()
+
+          switch (filter.operator) {
+            case 'contains':
+              return textValue.includes(filterValue)
+            case 'doesNotContain':
+              return !textValue.includes(filterValue)
+            case 'startsWith':
+              return textValue.startsWith(filterValue)
+            case 'endsWith':
+              return textValue.endsWith(filterValue)
+            case 'isEmpty':
+              return !textValue
+            case 'isNotEmpty':
+              return !!textValue
+            default:
+              return true
+          }
+        }
+
+        if (filter.type === 'option') {
+          const optionValue = String(value)
+          const filterValues = filter.values.map(String)
+
+          switch (filter.operator) {
+            case 'is':
+              return filterValues.includes(optionValue)
+            case 'isNot':
+              return !filterValues.includes(optionValue)
+            case 'isAnyOf':
+              return filterValues.includes(optionValue)
+            case 'isNoneOf':
+              return !filterValues.includes(optionValue)
+            default:
+              return true
+          }
+        }
+
+        return true
+      })
+    })
+  }, [data, bazzaFilters, bazzaColumns])
 
   useEffect(() => {
     loadData()
@@ -262,7 +380,7 @@ export function NaturezaOperacaoDataTable({ onEdit }: NaturezaOperacaoDataTableP
   ]
 
   const table = useReactTable({
-    data,
+    data: filteredData,
     columns,
     state: {
       sorting,
@@ -339,13 +457,10 @@ export function NaturezaOperacaoDataTable({ onEdit }: NaturezaOperacaoDataTableP
       {/* Header com filtros e ações */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex flex-1 items-center space-x-2">
-          <Input
-            placeholder="Filtrar por código ou descrição..."
-            value={(table.getColumn("codigo")?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-              table.getColumn("codigo")?.setFilterValue(event.target.value)
-            }
-            className="h-8 w-[150px] lg:w-[250px]"
+          <DataTableFilter
+            filters={bazzaFilters}
+            columns={bazzaColumns}
+            actions={bazzaActions}
           />
         </div>
         <div className="flex items-center gap-2">

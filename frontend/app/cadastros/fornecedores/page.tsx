@@ -4,7 +4,7 @@ import Link from "next/link"
 import { AppSidebar } from "@/components/layout"
 import { Separator } from "@/components/ui/separator"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
-import { FornecedoresSectionCards, FornecedoresDataTable } from "@/components/cadastros/fornecedores"
+import { FornecedoresDataTable } from "@/components/cadastros/fornecedores"
 
 import {
   Breadcrumb,
@@ -35,7 +35,6 @@ export default function FornecedoresPage() {
           </Breadcrumb>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4">
-          <FornecedoresSectionCards />
           <FornecedoresDataTable />
         </div>
       </SidebarInset>

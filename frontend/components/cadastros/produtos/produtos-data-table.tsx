@@ -40,6 +40,7 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
@@ -69,6 +70,57 @@ import {
 
 import { ProdutoService, type Produto } from "@/lib/services/produto.service"
 import { ProdutoFormDialog } from "./produto-form-dialog"
+import { DataTableFilter } from "@/components/data-table-filter"
+import { useDataTableFilters } from "@/components/data-table-filter"
+import { createColumnConfigHelper } from "@/components/data-table-filter/core/filters"
+import {
+  IconPackage,
+  IconBarcode,
+  IconCurrencyReal,
+  IconCircleCheck,
+} from "@tabler/icons-react"
+
+// Configuração dos filtros do Bazza UI
+const dtf = createColumnConfigHelper<Produto>()
+
+const filterColumnsConfig = [
+  dtf
+    .text()
+    .id("descricao")
+    .displayName("Descrição")
+    .icon(IconPackage)
+    .accessor((row) => row.descricao)
+    .build(),
+  dtf
+    .text()
+    .id("codigo")
+    .displayName("Código")
+    .icon(IconBarcode)
+    .accessor((row) => row.codigo || "")
+    .build(),
+  dtf
+    .option()
+    .id("tipo")
+    .displayName("Tipo")
+    .icon(IconPackage)
+    .accessor((row) => row.tipo)
+    .options([
+      { value: "PRODUTO", label: "Produto" },
+      { value: "SERVICO", label: "Serviço" },
+    ])
+    .build(),
+  dtf
+    .option()
+    .id("ativo")
+    .displayName("Status")
+    .icon(IconCircleCheck)
+    .accessor((row) => row.ativo ? "true" : "false")
+    .options([
+      { value: "true", label: "Ativo" },
+      { value: "false", label: "Inativo" },
+    ])
+    .build(),
+] as const
 
 export function ProdutosDataTable() {
   const [data, setData] = useState<Produto[]>([])
@@ -83,6 +135,73 @@ export function ProdutosDataTable() {
   })
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingProdutoId, setEditingProdutoId] = useState<string | undefined>()
+
+  // Filtros do Bazza UI
+  const {
+    filters: bazzaFilters,
+    columns: bazzaColumns,
+    actions: bazzaActions,
+  } = useDataTableFilters({
+    strategy: "client",
+    data,
+    columnsConfig: filterColumnsConfig,
+  })
+
+  // Aplicar filtros do Bazza UI aos dados
+  const filteredData = React.useMemo(() => {
+    if (bazzaFilters.length === 0) return data
+
+    return data.filter((row) => {
+      return bazzaFilters.every((filter) => {
+        const column = bazzaColumns.find((col) => col.id === filter.columnId)
+        if (!column) return true
+
+        const value = column.accessor(row)
+
+        if (filter.type === 'text') {
+          const textValue = String(value || '').toLowerCase()
+          const filterValue = String(filter.values[0] || '').toLowerCase()
+
+          switch (filter.operator) {
+            case 'contains':
+              return textValue.includes(filterValue)
+            case 'doesNotContain':
+              return !textValue.includes(filterValue)
+            case 'startsWith':
+              return textValue.startsWith(filterValue)
+            case 'endsWith':
+              return textValue.endsWith(filterValue)
+            case 'isEmpty':
+              return !textValue
+            case 'isNotEmpty':
+              return !!textValue
+            default:
+              return true
+          }
+        }
+
+        if (filter.type === 'option') {
+          const optionValue = String(value)
+          const filterValues = filter.values.map(String)
+
+          switch (filter.operator) {
+            case 'is':
+              return filterValues.includes(optionValue)
+            case 'isNot':
+              return !filterValues.includes(optionValue)
+            case 'isAnyOf':
+              return filterValues.includes(optionValue)
+            case 'isNoneOf':
+              return !filterValues.includes(optionValue)
+            default:
+              return true
+          }
+        }
+
+        return true
+      })
+    })
+  }, [data, bazzaFilters, bazzaColumns])
 
 const columns: ColumnDef<Produto>[] = [
   {
@@ -214,7 +333,7 @@ const columns: ColumnDef<Produto>[] = [
 ]
 
   const table = useReactTable({
-    data,
+    data: filteredData,
     columns,
     state: {
       sorting,
@@ -346,24 +465,25 @@ const columns: ColumnDef<Produto>[] = [
             Inativos <Badge variant="secondary">58</Badge>
           </TabsTrigger>
         </TabsList>
-        <div className="flex items-center gap-2">
-          <Input
-            placeholder="Buscar produtos..."
-            value={(table.getColumn("descricao")?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-              table.getColumn("descricao")?.setFilterValue(event.target.value)
-            }
-            className="max-w-sm"
+        <div className="flex flex-1 items-center gap-4">
+          <DataTableFilter
+            filters={bazzaFilters}
+            columns={bazzaColumns}
+            actions={bazzaActions}
           />
+        </div>
+        <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                <IconLayoutColumns />
+              <Button variant="outline" className="h-7">
+                <IconLayoutColumns className="size-4" />
                 <span className="hidden lg:inline">Colunas</span>
-                <IconChevronDown />
+                <IconChevronDown className="ml-2 size-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuLabel>Alternar colunas</DropdownMenuLabel>
+              <DropdownMenuSeparator />
               {table
                 .getAllColumns()
                 .filter(
@@ -388,13 +508,14 @@ const columns: ColumnDef<Produto>[] = [
             </DropdownMenuContent>
           </DropdownMenu>
           <Button
-            size="sm"
+            variant="outline"
+            className="h-7"
             onClick={() => {
               setEditingProdutoId(undefined)
               setDialogOpen(true)
             }}
           >
-            <IconPlus />
+            <IconPlus className="size-4" />
             <span className="hidden lg:inline">Novo Produto</span>
           </Button>
         </div>
