@@ -30,8 +30,8 @@ const nfeSchema = z.object({
   numeroInicialInutilizarProducao: z.number().optional(),
   numeroFinalInutilizarProducao: z.number().optional(),
   serieInutilizarProducao: z.number().optional(),
-  anoInutilizarProducao: z.number().optional(),
-  justificativaInutilizarProducao: z.string().optional(),
+  anoInutilizarProducao: z.number().min(2000, "Ano mínimo: 2000").max(2100, "Ano máximo: 2100").optional(),
+  justificativaInutilizarProducao: z.string().min(15, "Justificativa deve ter no mínimo 15 caracteres").optional(),
   serieHomologacao: z.number().min(1).max(999),
   proximoNumeroHomologacao: z.number().min(1),
   tipoFreteHomologacao: z.number().optional(),
@@ -43,16 +43,20 @@ const nfeSchema = z.object({
   numeroInicialInutilizarHomologacao: z.number().optional(),
   numeroFinalInutilizarHomologacao: z.number().optional(),
   serieInutilizarHomologacao: z.number().optional(),
-  anoInutilizarHomologacao: z.number().optional(),
-  justificativaInutilizarHomologacao: z.string().optional(),
+  anoInutilizarHomologacao: z.number().min(2000, "Ano mínimo: 2000").max(2100, "Ano máximo: 2100").optional(),
+  justificativaInutilizarHomologacao: z.string().min(15, "Justificativa deve ter no mínimo 15 caracteres").optional(),
+  modeloNfe: z.enum(["4.00"]).optional(),
 })
 
 type NfeFormData = z.infer<typeof nfeSchema>
 
 export function NfeForm() {
   const [loading, setLoading] = useState(false)
+  const [loadingInutilizacao, setLoadingInutilizacao] = useState(false)
   const [loadingData, setLoadingData] = useState(true)
   const [emitenteId, setEmitenteId] = useState<string | null>(null)
+  const [activeTabConfig, setActiveTabConfig] = useState<"producao" | "homologacao">("homologacao")
+  const [activeTabInutilizacao, setActiveTabInutilizacao] = useState<"producao" | "homologacao">("homologacao")
 
   const form = useForm<NfeFormData>({
     resolver: zodResolver(nfeSchema),
@@ -68,6 +72,7 @@ export function NfeForm() {
       ieSubstitutoHomologacao: "", observacoesHomologacao: "", documentosAutorizadosHomologacao: "",
       numeroInicialInutilizarHomologacao: undefined, numeroFinalInutilizarHomologacao: undefined,
       serieInutilizarHomologacao: undefined, anoInutilizarHomologacao: undefined, justificativaInutilizarHomologacao: "",
+      modeloNfe: "4.00",
     },
   })
 
@@ -99,6 +104,7 @@ export function NfeForm() {
             numeroInicialInutilizarHomologacao: d.numeroInicialInutilizarHomologacao, numeroFinalInutilizarHomologacao: d.numeroFinalInutilizarHomologacao,
             serieInutilizarHomologacao: d.serieInutilizarHomologacao, anoInutilizarHomologacao: d.anoInutilizarHomologacao,
             justificativaInutilizarHomologacao: d.justificativaInutilizarHomologacao || "",
+            modeloNfe: d.modeloNfe || "4.00",
           })
         }
       } catch (error) {
@@ -110,19 +116,89 @@ export function NfeForm() {
     loadData()
   }, [form])
 
-  const onSubmit = async (data: NfeFormData) => {
+  // Não precisa mais sincronizar - cada card é independente
+  const habilitarHomologacao = form.watch("habilitarHomologacao")
+
+  // Salvar apenas configurações de NFe
+  const onSubmitConfig = async () => {
     if (!emitenteId) return toast.error("Configure os dados da empresa primeiro")
+
+    const data = form.getValues()
+    const ambiente = activeTabConfig === "homologacao" ? "Homologacao" : "Producao"
+
     try {
       setLoading(true)
-      // Remover habilitarHomologacao e adicionar ambienteAtivo
-      const { habilitarHomologacao, ...rest } = data
-      const payload = { ...rest, ambienteAtivo: habilitarHomologacao ? 2 : 1 }
+
+      const payload: any = {
+        // Salvar ambiente ativo
+        ambienteAtivo: data.habilitarHomologacao ? 2 : 1,
+        // Salvar modelo NFe
+        modeloNfe: data.modeloNfe || "4.00",
+      }
+
+      // Adicionar campos do ambiente sendo editado
+      if (ambiente === "Producao") {
+        payload.serieProducao = data.serieProducao
+        payload.proximoNumeroProducao = data.proximoNumeroProducao
+        payload.tipoFreteProducao = data.tipoFreteProducao
+        payload.indicadorPresencaProducao = data.indicadorPresencaProducao
+        payload.orientacaoImpressaoProducao = data.orientacaoImpressaoProducao
+        payload.ieSubstitutoProducao = data.ieSubstitutoProducao
+        payload.observacoesProducao = data.observacoesProducao
+        payload.documentosAutorizadosProducao = data.documentosAutorizadosProducao
+      } else {
+        payload.serieHomologacao = data.serieHomologacao
+        payload.proximoNumeroHomologacao = data.proximoNumeroHomologacao
+        payload.tipoFreteHomologacao = data.tipoFreteHomologacao
+        payload.indicadorPresencaHomologacao = data.indicadorPresencaHomologacao
+        payload.orientacaoImpressaoHomologacao = data.orientacaoImpressaoHomologacao
+        payload.ieSubstitutoHomologacao = data.ieSubstitutoHomologacao
+        payload.observacoesHomologacao = data.observacoesHomologacao
+        payload.documentosAutorizadosHomologacao = data.documentosAutorizadosHomologacao
+      }
+
       const response = await ConfiguracaoNfeService.upsert(emitenteId, payload)
-      response.success ? toast.success("Configurações salvas!") : toast.error(response.error || "Erro ao salvar")
+      response.success ? toast.success("Configurações de NFe salvas!") : toast.error(response.error || "Erro ao salvar")
     } catch (error: any) {
       toast.error(error.message || "Erro ao salvar")
     } finally {
       setLoading(false)
+    }
+  }
+
+  // Salvar apenas inutilização
+  const onSubmitInutilizacao = async () => {
+    if (!emitenteId) return toast.error("Configure os dados da empresa primeiro")
+
+    const data = form.getValues()
+    const ambiente = activeTabInutilizacao === "homologacao" ? "Homologacao" : "Producao"
+
+    try {
+      setLoadingInutilizacao(true)
+
+      const payload: any = {}
+
+      // Adicionar campos de inutilização do ambiente ativo
+      if (ambiente === "Producao") {
+        payload.numeroInicialInutilizarProducao = data.numeroInicialInutilizarProducao
+        payload.numeroFinalInutilizarProducao = data.numeroFinalInutilizarProducao
+        payload.serieInutilizarProducao = data.serieInutilizarProducao
+        payload.anoInutilizarProducao = data.anoInutilizarProducao
+        payload.justificativaInutilizarProducao = data.justificativaInutilizarProducao
+      } else {
+        payload.numeroInicialInutilizarHomologacao = data.numeroInicialInutilizarHomologacao
+        payload.numeroFinalInutilizarHomologacao = data.numeroFinalInutilizarHomologacao
+        payload.serieInutilizarHomologacao = data.serieInutilizarHomologacao
+        payload.anoInutilizarHomologacao = data.anoInutilizarHomologacao
+        payload.justificativaInutilizarHomologacao = data.justificativaInutilizarHomologacao
+      }
+
+      const response = await ConfiguracaoNfeService.upsert(emitenteId, payload)
+      response.success ? toast.success("Configurações de inutilização salvas!") : toast.error(response.error || "Erro ao salvar")
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao salvar")
+    } finally {
+      setLoadingInutilizacao(false)
     }
   }
 
@@ -142,116 +218,211 @@ export function NfeForm() {
     )
   }
 
-  const habilitarHomologacao = form.watch("habilitarHomologacao")
-
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {/* Card de Ambiente Ativo */}
-        <Card>
-          <CardContent className="pt-6">
+      <div className="space-y-4">
+        {/* Ambiente Ativo Global - Compacto */}
+        <div className="flex items-center justify-between p-3 rounded-lg border bg-card">
+          <div className="flex items-center gap-2">
             <FormField
               control={form.control}
               name="habilitarHomologacao"
               render={({ field }) => (
-                <FormItem className="flex items-center justify-between space-y-0">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base font-semibold">
-                      Ambiente Ativo
-                    </FormLabel>
-                    <FormDescription>
-                      {habilitarHomologacao ? (
-                        <span className="flex items-center gap-2 text-orange-600">
-                          <IconFlask className="h-4 w-4" />
-                          Homologação - Ambiente de testes
-                        </span>
-                      ) : (
-                        <span className="flex items-center gap-2 text-green-600">
-                          <IconCloud className="h-4 w-4" />
-                          Produção - Notas com validade fiscal
-                        </span>
-                      )}
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch checked={field.value} onCheckedChange={field.onChange} />
-                  </FormControl>
-                </FormItem>
+                <>
+                  {field.value ? (
+                    <span className="flex items-center gap-1.5 text-xs font-medium text-orange-600 dark:text-orange-500">
+                      <IconFlask className="h-3.5 w-3.5" />
+                      Ambiente Ativo: Homologação
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1.5 text-xs font-medium text-green-600 dark:text-green-500">
+                      <IconCloud className="h-3.5 w-3.5" />
+                      Ambiente Ativo: Produção
+                    </span>
+                  )}
+                </>
               )}
             />
-          </CardContent>
-        </Card>
-
-        {/* Card de Configurações com Tabs */}
-        <Card>
-          <CardHeader className="pb-3">
-            <Tabs defaultValue="producao" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="producao" className="flex items-center gap-2">
-                  <IconCloud className="h-4 w-4" />
-                  Produção
-                </TabsTrigger>
-                <TabsTrigger value="homologacao" className="flex items-center gap-2">
-                  <IconFlask className="h-4 w-4" />
-                  Homologação
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="producao" className="w-full">
-              <TabsContent value="producao" className="mt-0">
-                <NfeConfigFields form={form} prefix="Producao" showInutilizacao={false} />
-              </TabsContent>
-
-              <TabsContent value="homologacao" className="mt-0">
-                <NfeConfigFields form={form} prefix="Homologacao" showInutilizacao={false} />
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-
-        {/* Card de Inutilização com Tabs */}
-        <Card>
-          <CardHeader className="pb-3">
-            <Tabs defaultValue="producao" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="producao" className="flex items-center gap-2">
-                  <IconCloud className="h-4 w-4" />
-                  Produção
-                </TabsTrigger>
-                <TabsTrigger value="homologacao" className="flex items-center gap-2">
-                  <IconFlask className="h-4 w-4" />
-                  Homologação
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="producao" className="w-full">
-              <TabsContent value="producao" className="mt-0">
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Inutilizar Numeração de Nota Fiscal</h3>
-                  <NfeInutilizacaoFields form={form} prefix="Producao" />
-                </div>
-              </TabsContent>
-
-              <TabsContent value="homologacao" className="mt-0">
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Inutilizar Numeração de Nota Fiscal</h3>
-                  <NfeInutilizacaoFields form={form} prefix="Homologacao" />
-                </div>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-
-        <div className="flex justify-end">
-          <Button type="submit" disabled={loading} size="lg">
-            {loading ? <><IconLoader2 className="mr-2 h-4 w-4 animate-spin" />Salvando...</> : <><IconDeviceFloppy className="mr-2 h-4 w-4" />Salvar</>}
-          </Button>
+          </div>
+          <FormField
+            control={form.control}
+            name="habilitarHomologacao"
+            render={({ field }) => (
+              <FormControl>
+                <Switch checked={field.value} onCheckedChange={field.onChange} />
+              </FormControl>
+            )}
+          />
         </div>
-      </form>
+
+        {/* Configurações */}
+        <Card className={activeTabConfig === "producao" ? "border-l-4 border-l-green-500" : "border-l-4 border-l-orange-500"}>
+          <CardContent className="pt-4 space-y-3">
+            <div className="flex items-center justify-between pb-3 border-b">
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-medium">Configurações de NFe</h3>
+                {habilitarHomologacao === (activeTabConfig === "homologacao") && (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
+                    Ambiente Ativo
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">
+                  {activeTabConfig === "producao" ? "Produção" : "Homologação"}
+                </span>
+                <Switch
+                  checked={activeTabConfig === "homologacao"}
+                  onCheckedChange={(checked) => setActiveTabConfig(checked ? "homologacao" : "producao")}
+                />
+              </div>
+            </div>
+
+            <Tabs value={activeTabConfig} onValueChange={(value) => setActiveTabConfig(value as "producao" | "homologacao")} className="w-full">
+              <TabsList className="grid w-full grid-cols-2 h-8">
+                <TabsTrigger
+                  value="producao"
+                  className="text-xs gap-1.5 data-[state=active]:bg-green-500 data-[state=active]:text-white"
+                >
+                  <IconCloud className="h-3 w-3" />
+                  Produção
+                </TabsTrigger>
+                <TabsTrigger
+                  value="homologacao"
+                  className="text-xs gap-1.5 data-[state=active]:bg-orange-500 data-[state=active]:text-white"
+                >
+                  <IconFlask className="h-3 w-3" />
+                  Homologação
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="producao" className="mt-4">
+                <div className="rounded-md border-l-2 border-l-green-500 bg-green-50/50 dark:bg-green-950/20 p-3">
+                  <NfeConfigFields form={form} prefix="Producao" showInutilizacao={false} />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="homologacao" className="mt-4">
+                <div className="rounded-md border-l-2 border-l-orange-500 bg-orange-50/50 dark:bg-orange-950/20 p-3">
+                  <NfeConfigFields form={form} prefix="Homologacao" showInutilizacao={false} />
+                </div>
+              </TabsContent>
+            </Tabs>
+
+            <div className="flex justify-end pt-3 border-t">
+              <Button
+                type="button"
+                onClick={onSubmitConfig}
+                disabled={loading}
+                size="sm"
+                className={activeTabConfig === "producao"
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "bg-orange-600 hover:bg-orange-700"
+                }
+              >
+                {loading ? (
+                  <>
+                    <IconLoader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                    Salvando...
+                  </>
+                ) : (
+                  <>
+                    <IconDeviceFloppy className="mr-1.5 h-3.5 w-3.5" />
+                    Salvar
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Inutilização */}
+        <Card className={activeTabInutilizacao === "producao" ? "border-l-4 border-l-green-500" : "border-l-4 border-l-orange-500"}>
+          <CardContent className="pt-4 space-y-3">
+            <div className="flex items-center justify-between pb-3 border-b">
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-medium">Inutilizar Numeração</h3>
+                {habilitarHomologacao === (activeTabInutilizacao === "homologacao") && (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
+                    Ambiente Ativo
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">
+                  {activeTabInutilizacao === "producao" ? "Produção" : "Homologação"}
+                </span>
+                <Switch
+                  checked={activeTabInutilizacao === "homologacao"}
+                  onCheckedChange={(checked) => setActiveTabInutilizacao(checked ? "homologacao" : "producao")}
+                />
+              </div>
+            </div>
+
+            <Tabs value={activeTabInutilizacao} onValueChange={(value) => setActiveTabInutilizacao(value as "producao" | "homologacao")} className="w-full">
+              <TabsList className="grid w-full grid-cols-2 h-8">
+                <TabsTrigger
+                  value="producao"
+                  className="text-xs gap-1.5 data-[state=active]:bg-green-500 data-[state=active]:text-white"
+                >
+                  <IconCloud className="h-3 w-3" />
+                  Produção
+                </TabsTrigger>
+                <TabsTrigger
+                  value="homologacao"
+                  className="text-xs gap-1.5 data-[state=active]:bg-orange-500 data-[state=active]:text-white"
+                >
+                  <IconFlask className="h-3 w-3" />
+                  Homologação
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="producao" className="mt-4">
+                <div className="rounded-md border-l-2 border-l-green-500 bg-green-50/50 dark:bg-green-950/20 p-3">
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-medium text-green-700 dark:text-green-400">Inutilizar Numeração</h4>
+                    <NfeInutilizacaoFields form={form} prefix="Producao" />
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="homologacao" className="mt-4">
+                <div className="rounded-md border-l-2 border-l-orange-500 bg-orange-50/50 dark:bg-orange-950/20 p-3">
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-medium text-orange-700 dark:text-orange-400">Inutilizar Numeração</h4>
+                    <NfeInutilizacaoFields form={form} prefix="Homologacao" />
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+
+            <div className="flex justify-end pt-3 border-t">
+              <Button
+                type="button"
+                onClick={onSubmitInutilizacao}
+                disabled={loadingInutilizacao}
+                size="sm"
+                className={activeTabInutilizacao === "producao"
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "bg-orange-600 hover:bg-orange-700"
+                }
+              >
+                {loadingInutilizacao ? (
+                  <>
+                    <IconLoader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                    Salvando...
+                  </>
+                ) : (
+                  <>
+                    <IconDeviceFloppy className="mr-1.5 h-3.5 w-3.5" />
+                    Salvar
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </Form>
   )
 }

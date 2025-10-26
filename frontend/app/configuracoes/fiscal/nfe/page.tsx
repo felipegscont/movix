@@ -24,7 +24,7 @@ export default function NfePage() {
     <SidebarProvider style={{ "--sidebar-width": "350px" } as React.CSSProperties}>
       <AppSidebar />
       <SidebarInset>
-        <header className="bg-background sticky top-0 flex shrink-0 items-center gap-2 border-b p-4">
+        <header className="bg-background sticky top-0 flex shrink-0 items-center gap-2 border-b px-3 py-2">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
           <Breadcrumb>
@@ -32,15 +32,15 @@ export default function NfePage() {
               <BreadcrumbItem className="hidden md:block">
                 <BreadcrumbLink asChild>
                   <Link href="/dashboard">
-                    <IconHome className="h-4 w-4" />
+                    <IconHome className="h-3.5 w-3.5" />
                   </Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem className="hidden md:block">
                 <BreadcrumbLink asChild>
-                  <Link href="/configuracoes" className="flex items-center gap-1.5">
-                    <IconSettings className="h-4 w-4" />
+                  <Link href="/configuracoes" className="flex items-center gap-1 text-sm">
+                    <IconSettings className="h-3.5 w-3.5" />
                     Configurações
                   </Link>
                 </BreadcrumbLink>
@@ -48,13 +48,13 @@ export default function NfePage() {
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem className="hidden md:block">
                 <BreadcrumbLink asChild>
-                  <Link href="/configuracoes/fiscal">Fiscal</Link>
+                  <Link href="/configuracoes/fiscal" className="text-sm">Fiscal</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage className="flex items-center gap-1.5">
-                  <IconFileText className="h-4 w-4" />
+                <BreadcrumbPage className="flex items-center gap-1 text-sm">
+                  <IconFileText className="h-3.5 w-3.5" />
                   NF-e
                 </BreadcrumbPage>
               </BreadcrumbItem>
@@ -63,15 +63,8 @@ export default function NfePage() {
         </header>
 
         <div className="flex flex-1 flex-col">
-          <div className="@container/main flex flex-1 flex-col gap-2">
-            <div className="flex flex-col gap-4 py-4 px-4 md:gap-6 md:py-6 md:px-6">
-              <div className="space-y-2">
-                <h1 className="text-3xl font-bold tracking-tight">Configurações de NF-e</h1>
-                <p className="text-muted-foreground">
-                  Configure ambiente, série, numeração e parâmetros da Nota Fiscal Eletrônica.
-                </p>
-              </div>
-
+          <div className="@container/main flex flex-1 flex-col">
+            <div className="flex flex-col gap-3 p-3 md:p-4">
               <NfeForm />
             </div>
           </div>

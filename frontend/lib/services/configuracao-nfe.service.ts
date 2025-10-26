@@ -28,11 +28,13 @@ export interface ConfiguracaoNfeData {
   serieInutilizarHomologacao?: number
   anoInutilizarHomologacao?: number
   justificativaInutilizarHomologacao?: string
+  modeloNfe?: string
 }
 
 export interface ConfiguracaoNfe extends ConfiguracaoNfeData {
   id: string
   emitenteId: string
+  modeloNfe: string
   ativo: boolean
   createdAt: string
   updatedAt: string

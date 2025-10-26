@@ -17,6 +17,7 @@ import { MatrizFiscalModule } from './modules/matriz-fiscal/matriz-fiscal.module
 import { OrcamentoModule } from './modules/orcamento/orcamento.module';
 import { PedidoModule } from './modules/pedido/pedido.module';
 import { ConfiguracaoNfeModule } from './modules/configuracao-nfe/configuracao-nfe.module';
+import { InutilizacaoNfeModule } from './modules/inutilizacao-nfe/inutilizacao-nfe.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -40,6 +41,7 @@ import configuration from './config/configuration';
     OrcamentoModule,
     PedidoModule,
     ConfiguracaoNfeModule,
+    InutilizacaoNfeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

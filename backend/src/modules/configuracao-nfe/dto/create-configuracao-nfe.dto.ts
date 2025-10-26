@@ -1,4 +1,4 @@
-import { IsInt, IsOptional, IsString, Min, Max } from 'class-validator';
+import { IsInt, IsOptional, IsString, Min, Max, MinLength, IsIn } from 'class-validator';
 
 export class CreateConfiguracaoNfeDto {
   @IsInt()
@@ -43,26 +43,6 @@ export class CreateConfiguracaoNfeDto {
   @IsOptional()
   documentosAutorizadosProducao?: string;
 
-  @IsInt()
-  @IsOptional()
-  numeroInicialInutilizarProducao?: number;
-
-  @IsInt()
-  @IsOptional()
-  numeroFinalInutilizarProducao?: number;
-
-  @IsInt()
-  @IsOptional()
-  serieInutilizarProducao?: number;
-
-  @IsInt()
-  @IsOptional()
-  anoInutilizarProducao?: number;
-
-  @IsString()
-  @IsOptional()
-  justificativaInutilizarProducao?: string;
-
   // Homologação
   @IsInt()
   @Min(1)
@@ -99,24 +79,10 @@ export class CreateConfiguracaoNfeDto {
   @IsOptional()
   documentosAutorizadosHomologacao?: string;
 
-  @IsInt()
-  @IsOptional()
-  numeroInicialInutilizarHomologacao?: number;
-
-  @IsInt()
-  @IsOptional()
-  numeroFinalInutilizarHomologacao?: number;
-
-  @IsInt()
-  @IsOptional()
-  serieInutilizarHomologacao?: number;
-
-  @IsInt()
-  @IsOptional()
-  anoInutilizarHomologacao?: number;
-
+  // Modelo NFe
   @IsString()
+  @IsIn(['4.00'], { message: 'Modelo deve ser 4.00' })
   @IsOptional()
-  justificativaInutilizarHomologacao?: string;
+  modeloNfe?: string;
 }
 

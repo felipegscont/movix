@@ -192,14 +192,15 @@ model Emitente {
   updatedAt DateTime @updatedAt
 
   // Relacionamentos
-  municipio        Municipio            @relation(fields: [municipioId], references: [id])
-  estado           Estado               @relation(fields: [estadoId], references: [id])
-  nfes             Nfe[]
-  certificados     CertificadoDigital[]
-  configuracaoNfe  ConfiguracaoNfe?
-  configuracaoNfce ConfiguracaoNfce?
-  configuracaoCte  ConfiguracaoCte?
-  configuracaoNfse ConfiguracaoNfse?
+  municipio         Municipio            @relation(fields: [municipioId], references: [id])
+  estado            Estado               @relation(fields: [estadoId], references: [id])
+  nfes              Nfe[]
+  certificados      CertificadoDigital[]
+  configuracaoNfe   ConfiguracaoNfe?
+  inutilizacaoNfe   InutilizacaoNfe?
+  configuracaoNfce  ConfiguracaoNfce?
+  configuracaoCte   ConfiguracaoCte?
+  configuracaoNfse  ConfiguracaoNfse?
 
   @@map("emitentes")
 }
@@ -212,22 +213,17 @@ model ConfiguracaoNfe {
   // Ambiente Ativo
   ambienteAtivo Int @default(2) // 1=Produção, 2=Homologação
 
-  // Configurações PRODUÇÃO
-  serieProducao                    Int     @default(1)
-  proximoNumeroProducao            Int     @default(1)
-  tipoFreteProducao                Int?    @default(1)
-  indicadorPresencaProducao        Int?    @default(2)
-  orientacaoImpressaoProducao      Int?    @default(1)
-  ieSubstitutoProducao             String? @db.VarChar(20)
-  observacoesProducao              String? @db.Text
-  documentosAutorizadosProducao    String? @db.Text
-  numeroInicialInutilizarProducao  Int?
-  numeroFinalInutilizarProducao    Int?
-  serieInutilizarProducao          Int?
-  anoInutilizarProducao            Int?
-  justificativaInutilizarProducao  String? @db.Text
+  // Configurações NFe PRODUÇÃO
+  serieProducao                 Int     @default(1)
+  proximoNumeroProducao         Int     @default(1)
+  tipoFreteProducao             Int?    @default(1)
+  indicadorPresencaProducao     Int?    @default(2)
+  orientacaoImpressaoProducao   Int?    @default(1)
+  ieSubstitutoProducao          String? @db.VarChar(20)
+  observacoesProducao           String? @db.Text
+  documentosAutorizadosProducao String? @db.Text
 
-  // Configurações HOMOLOGAÇÃO
+  // Configurações NFe HOMOLOGAÇÃO
   serieHomologacao                 Int     @default(1)
   proximoNumeroHomologacao         Int     @default(1)
   tipoFreteHomologacao             Int?    @default(1)
@@ -236,11 +232,6 @@ model ConfiguracaoNfe {
   ieSubstitutoHomologacao          String? @db.VarChar(20)
   observacoesHomologacao           String? @db.Text
   documentosAutorizadosHomologacao String? @db.Text
-  numeroInicialInutilizarHomologacao Int?
-  numeroFinalInutilizarHomologacao   Int?
-  serieInutilizarHomologacao         Int?
-  anoInutilizarHomologacao           Int?
-  justificativaInutilizarHomologacao String? @db.Text
 
   // Modelo (comum para ambos)
   modeloNfe String @default("4.00") @db.VarChar(10)
@@ -254,6 +245,36 @@ model ConfiguracaoNfe {
   emitente Emitente @relation(fields: [emitenteId], references: [id], onDelete: Cascade)
 
   @@map("configuracoes_nfe")
+}
+
+// Inutilização de NF-e
+model InutilizacaoNfe {
+  id         String @id @default(cuid())
+  emitenteId String @unique
+
+  // Inutilização PRODUÇÃO
+  numeroInicialInutilizarProducao Int?
+  numeroFinalInutilizarProducao   Int?
+  serieInutilizarProducao         Int?
+  anoInutilizarProducao           Int?
+  justificativaInutilizarProducao String? @db.Text
+
+  // Inutilização HOMOLOGAÇÃO
+  numeroInicialInutilizarHomologacao Int?
+  numeroFinalInutilizarHomologacao   Int?
+  serieInutilizarHomologacao         Int?
+  anoInutilizarHomologacao           Int?
+  justificativaInutilizarHomologacao String? @db.Text
+
+  // Controle
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relacionamento
+  emitente Emitente @relation(fields: [emitenteId], references: [id], onDelete: Cascade)
+
+  @@map("inutilizacoes_nfe")
 }
 
 // Configuração de NFC-e
