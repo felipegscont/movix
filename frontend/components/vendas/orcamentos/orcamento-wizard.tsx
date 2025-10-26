@@ -11,7 +11,7 @@ import { OrcamentoStepItens } from "./steps/orcamento-step-itens"
 import { OrcamentoStepTotais } from "./steps/orcamento-step-totais"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { IconAlertCircle } from "@tabler/icons-react"
-import { WizardProgressBar } from "../shared/wizard-progress-bar"
+import { WizardProgressBar } from "@/components/shared/wizard-progress-bar"
 
 interface OrcamentoWizardProps {
   pedidoId?: string

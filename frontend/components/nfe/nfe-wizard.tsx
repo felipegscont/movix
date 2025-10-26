@@ -16,7 +16,7 @@ import { NfeStepGeral } from "./steps/nfe-step-geral"
 import { NfeStepItens } from "./steps/nfe-step-itens"
 import { NfeStepCobranca } from "./steps/nfe-step-cobranca"
 import { NfeStepRevisao } from "./steps/nfe-step-revisao"
-import { WizardProgressBar } from "../vendas/shared/wizard-progress-bar"
+import { WizardProgressBar } from "@/components/shared/wizard-progress-bar"
 
 interface NfeWizardProps {
   nfeId?: string

@@ -11,7 +11,7 @@ import { PedidoStepItens } from "./steps/pedido-step-itens"
 import { PedidoStepTotais } from "./steps/pedido-step-totais"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { IconAlertCircle, IconCheck } from "@tabler/icons-react"
-import { WizardProgressBar } from "../shared/wizard-progress-bar"
+import { WizardProgressBar } from "@/components/shared/wizard-progress-bar"
 
 interface PedidoWizardProps {
   pedidoId?: string
