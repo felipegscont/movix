@@ -49,6 +49,13 @@ const data = {
       items: [],
     },
     {
+      title: "Fornecedores",
+      url: "/fornecedores",
+      icon: Building2,
+      isActive: false,
+      items: [],
+    },
+    {
       title: "Vendas",
       url: "/vendas",
       icon: ShoppingCart,
@@ -127,6 +134,10 @@ const data = {
           url: "/produtos/unidades",
         },
         {
+          title: "Etiquetas",
+          url: "/produtos/etiquetas",
+        },
+        {
           title: "Lista de Preços",
           url: "/produtos/precos",
         },
@@ -156,24 +167,9 @@ const data = {
       items: [
         {
           title: "Notas Fiscais (NFe)",
-          url: "/fiscal/nfe",
-        },
-        {
-          title: "Naturezas de Operação",
-          url: "/fiscal/naturezas",
-        },
-        {
-          title: "Matrizes Fiscais",
-          url: "/fiscal/matrizes",
+          url: "/fiscal/nfe/nfes",
         },
       ],
-    },
-    {
-      title: "Fornecedores",
-      url: "/fornecedores",
-      icon: Building2,
-      isActive: false,
-      items: [],
     },
     {
       title: "Configurações",
@@ -184,6 +180,14 @@ const data = {
         {
           title: "Emitente",
           url: "/configuracoes/emitente",
+        },
+        {
+          title: "Naturezas de Operação",
+          url: "/configuracoes/fiscal/naturezas-operacao",
+        },
+        {
+          title: "Matrizes Fiscais",
+          url: "/configuracoes/fiscal/matrizes-fiscais",
         },
       ],
     },
