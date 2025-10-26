@@ -28,24 +28,21 @@ export function TotaisSection({
   }
 
   return (
-    <div className="space-y-4">
-      {/* Totais */}
-      <Card className="py-3">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Totais</CardTitle>
-          <CardDescription className="text-xs">
-            Valores adicionais e total do documento
-          </CardDescription>
+    <div className="space-y-3">
+      {/* Totais - Compacto */}
+      <Card>
+        <CardHeader className="pb-2 pt-3">
+          <CardTitle className="text-sm">Totais</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
+        <CardContent className="space-y-2 pb-3">
+          <div className="grid grid-cols-2 gap-2">
             {/* Subtotal (readonly) */}
             <div className="space-y-1">
-              <label className="text-xs font-medium text-muted-foreground">
+              <label className="text-xs text-muted-foreground">
                 Subtotal
               </label>
-              <div className="h-9 px-3 py-2 bg-muted rounded-md border border-input flex items-center">
-                <span className="text-sm font-semibold">
+              <div className="h-8 px-2.5 py-1.5 bg-muted rounded-md border border-input flex items-center">
+                <span className="text-xs font-semibold">
                   {subtotal.toLocaleString('pt-BR', {
                     style: 'currency',
                     currency: 'BRL'
@@ -60,14 +57,14 @@ export function TotaisSection({
               name="valorDesconto"
               render={({ field }) => (
                 <FormItem className="space-y-1">
-                  <FormLabel className="text-xs font-medium">Desconto</FormLabel>
+                  <FormLabel className="text-xs">Desconto</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
                       step="0.01"
                       min="0"
                       placeholder="0,00"
-                      className="h-9 text-sm"
+                      className="h-8 text-xs"
                       onKeyDown={handleKeyDown}
                       {...field}
                     />
@@ -83,14 +80,14 @@ export function TotaisSection({
               name="valorFrete"
               render={({ field }) => (
                 <FormItem className="space-y-1">
-                  <FormLabel className="text-xs font-medium">Frete</FormLabel>
+                  <FormLabel className="text-xs">Frete</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
                       step="0.01"
                       min="0"
                       placeholder="0,00"
-                      className="h-9 text-sm"
+                      className="h-8 text-xs"
                       onKeyDown={handleKeyDown}
                       {...field}
                     />
@@ -106,14 +103,14 @@ export function TotaisSection({
               name="valorOutros"
               render={({ field }) => (
                 <FormItem className="space-y-1">
-                  <FormLabel className="text-xs font-medium">Outros</FormLabel>
+                  <FormLabel className="text-xs">Outros</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
                       step="0.01"
                       min="0"
                       placeholder="0,00"
-                      className="h-9 text-sm"
+                      className="h-8 text-xs"
                       onKeyDown={handleKeyDown}
                       {...field}
                     />
@@ -124,15 +121,15 @@ export function TotaisSection({
             />
           </div>
 
-          <Separator />
+          <Separator className="my-2" />
 
-          {/* Total (readonly) */}
+          {/* Total (readonly) - Compacto */}
           <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">
+            <label className="text-xs text-muted-foreground">
               Valor Total
             </label>
-            <div className="h-12 px-4 py-3 bg-primary/5 rounded-md border-2 border-primary/20 flex items-center">
-              <span className="text-2xl font-bold text-primary">
+            <div className="h-10 px-3 py-2 bg-primary/5 rounded-md border-2 border-primary/20 flex items-center">
+              <span className="text-lg font-bold text-primary">
                 {valorTotal.toLocaleString('pt-BR', {
                   style: 'currency',
                   currency: 'BRL'
@@ -143,16 +140,13 @@ export function TotaisSection({
         </CardContent>
       </Card>
 
-      {/* Observações */}
+      {/* Observações - Compacto */}
       {showObservacoes && (
-        <Card className="py-3">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Observações</CardTitle>
-            <CardDescription className="text-xs">
-              Informações adicionais sobre o documento
-            </CardDescription>
+        <Card>
+          <CardHeader className="pb-2 pt-3">
+            <CardTitle className="text-sm">Observações</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pb-3">
             <FormField
               control={form.control}
               name="observacoes"
@@ -160,8 +154,8 @@ export function TotaisSection({
                 <FormItem className="space-y-1">
                   <FormControl>
                     <Textarea
-                      placeholder="Digite observações adicionais..."
-                      className="min-h-[100px] text-sm resize-none"
+                      placeholder="Observações adicionais..."
+                      className="min-h-[80px] text-xs resize-none"
                       {...field}
                       value={field.value || ''}
                     />

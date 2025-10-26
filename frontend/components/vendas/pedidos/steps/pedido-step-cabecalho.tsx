@@ -20,31 +20,26 @@ export function PedidoStepCabecalho({ form, proximoNumero }: PedidoStepCabecalho
   }
 
   return (
-    <div className="space-y-4">
-      {/* Informações Gerais */}
-      <Card className="py-3">
-        <CardHeader className="pb-2">
+    <div className="space-y-3">
+      {/* Informações Gerais - Compacto */}
+      <Card>
+        <CardHeader className="pb-2 pt-3">
           <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-base">Informações Gerais</CardTitle>
-              <CardDescription className="text-xs">
-                Dados principais do pedido
-              </CardDescription>
-            </div>
-            <Badge variant="outline" className="text-xs">
-              Pedido #{proximoNumero || form.watch('numero') || '...'}
+            <CardTitle className="text-sm">Informações Gerais</CardTitle>
+            <Badge variant="outline" className="h-5 text-xs">
+              #{proximoNumero || form.watch('numero') || '...'}
             </Badge>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <CardContent className="space-y-2 pb-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             {/* Número (readonly) */}
             <div className="space-y-1">
               <label className="text-xs font-medium text-muted-foreground">
-                Número do Pedido
+                Número
               </label>
-              <div className="h-9 px-3 py-2 bg-muted rounded-md border border-input flex items-center">
-                <span className="text-sm font-semibold">
+              <div className="h-8 px-2.5 py-1.5 bg-muted rounded-md border border-input flex items-center">
+                <span className="text-xs font-semibold">
                   #{proximoNumero || form.watch('numero') || '...'}
                 </span>
               </div>
@@ -56,11 +51,11 @@ export function PedidoStepCabecalho({ form, proximoNumero }: PedidoStepCabecalho
               name="dataEmissao"
               render={({ field }) => (
                 <FormItem className="space-y-1">
-                  <FormLabel className="text-xs font-medium">Data de Emissão *</FormLabel>
+                  <FormLabel className="text-xs">Data de Emissão *</FormLabel>
                   <FormControl>
                     <Input
                       type="date"
-                      className="h-9 text-sm"
+                      className="h-8 text-xs"
                       onKeyDown={handleKeyDown}
                       {...field}
                     />
@@ -73,21 +68,21 @@ export function PedidoStepCabecalho({ form, proximoNumero }: PedidoStepCabecalho
         </CardContent>
       </Card>
 
-      {/* Cliente */}
-      <Card className="py-3">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Cliente</CardTitle>
-          <CardDescription className="text-xs">
+      {/* Cliente - Compacto */}
+      <Card>
+        <CardHeader className="pb-2 pt-3">
+          <CardTitle className="text-sm">Cliente</CardTitle>
+          <CardDescription className="text-xs hidden">
             Selecione o cliente para este pedido
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pb-3">
           <FormField
             control={form.control}
             name="clienteId"
             render={({ field }) => (
               <FormItem className="space-y-1">
-                <FormLabel className="text-xs font-medium">Cliente *</FormLabel>
+                <FormLabel className="text-xs">Cliente *</FormLabel>
                 <FormControl>
                   <ClienteCombobox
                     value={field.value}
@@ -101,25 +96,22 @@ export function PedidoStepCabecalho({ form, proximoNumero }: PedidoStepCabecalho
         </CardContent>
       </Card>
 
-      {/* Vendedor */}
-      <Card className="py-3">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Vendedor</CardTitle>
-          <CardDescription className="text-xs">
-            Nome do vendedor responsável (opcional)
-          </CardDescription>
+      {/* Vendedor - Compacto */}
+      <Card>
+        <CardHeader className="pb-2 pt-3">
+          <CardTitle className="text-sm">Vendedor</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pb-3">
           <FormField
             control={form.control}
             name="vendedorNome"
             render={({ field }) => (
               <FormItem className="space-y-1">
-                <FormLabel className="text-xs font-medium">Nome do Vendedor</FormLabel>
+                <FormLabel className="text-xs">Nome do Vendedor</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Digite o nome do vendedor..."
-                    className="h-9 text-sm"
+                    placeholder="Nome do vendedor..."
+                    className="h-8 text-xs"
                     onKeyDown={handleKeyDown}
                     {...field}
                     value={field.value || ''}

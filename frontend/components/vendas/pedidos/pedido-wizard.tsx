@@ -129,8 +129,8 @@ export function PedidoWizard({ pedidoId, onSuccess }: PedidoWizardProps) {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Barra de Progresso Visual */}
+    <div className="space-y-4">
+      {/* Barra de Progresso Visual - Compacta */}
       <WizardProgressBar
         steps={STEPS}
         currentStep={currentStep}
@@ -143,7 +143,7 @@ export function PedidoWizard({ pedidoId, onSuccess }: PedidoWizardProps) {
 
       {/* Formulário */}
       <Form {...form}>
-        <form onSubmit={handleFormSubmit} className="space-y-6">
+        <form onSubmit={handleFormSubmit} className="space-y-4">
           {/* Step 1: Cabeçalho */}
           {currentStep === 1 && (
             <PedidoStepCabecalho form={form} proximoNumero={proximoNumero} />
@@ -168,47 +168,50 @@ export function PedidoWizard({ pedidoId, onSuccess }: PedidoWizardProps) {
             />
           )}
 
-          {/* Botões de navegação */}
-          <Card className="py-3">
+          {/* Botões de navegação - Compactos */}
+          <Card>
             <CardContent className="py-3">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-4">
                 <Button
                   type="button"
                   variant="outline"
+                  size="sm"
                   onClick={handlePrevious}
                   disabled={currentStep === 1 || loading}
                 >
-                  <IconArrowLeft className="mr-2 h-4 w-4" />
+                  <IconArrowLeft className="mr-1.5 h-3.5 w-3.5" />
                   Anterior
                 </Button>
 
-                <div className="text-sm text-muted-foreground">
-                  Passo {currentStep} de {STEPS.length}
+                <div className="text-xs text-muted-foreground">
+                  {currentStep} / {STEPS.length}
                 </div>
 
                 {currentStep < STEPS.length ? (
                   <Button
                     type="button"
+                    size="sm"
                     onClick={handleNext}
                     disabled={loading}
                   >
                     Próximo
-                    <IconArrowRight className="ml-2 h-4 w-4" />
+                    <IconArrowRight className="ml-1.5 h-3.5 w-3.5" />
                   </Button>
                 ) : (
                   <Button
                     type="submit"
+                    size="sm"
                     disabled={loading}
                   >
                     {loading ? (
                       <>
-                        <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <IconLoader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
                         Salvando...
                       </>
                     ) : (
                       <>
-                        <IconDeviceFloppy className="mr-2 h-4 w-4" />
-                        Salvar Pedido
+                        <IconDeviceFloppy className="mr-1.5 h-3.5 w-3.5" />
+                        Salvar
                       </>
                     )}
                   </Button>
@@ -217,11 +220,11 @@ export function PedidoWizard({ pedidoId, onSuccess }: PedidoWizardProps) {
             </CardContent>
           </Card>
 
-          {/* Erros do formulário */}
+          {/* Erros do formulário - Compacto */}
           {Object.keys(form.formState.errors).length > 0 && (
-            <Alert variant="destructive">
-              <IconAlertCircle className="h-4 w-4" />
-              <AlertDescription>
+            <Alert variant="destructive" className="py-2">
+              <IconAlertCircle className="h-3.5 w-3.5" />
+              <AlertDescription className="text-xs">
                 Corrija os erros no formulário antes de continuar
               </AlertDescription>
             </Alert>

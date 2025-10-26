@@ -33,73 +33,8 @@ interface WizardProgressBarProps {
   className?: string
 }
 
-interface CircleStepIndicatorProps {
-  currentStep: number
-  totalSteps: number
-  size?: number
-  strokeWidth?: number
-}
-
 // ============================================================================
-// Circle Step Indicator Component
-// ============================================================================
-
-const CircleStepIndicator = ({
-  currentStep,
-  totalSteps,
-  size = 80,
-  strokeWidth = 6,
-}: CircleStepIndicatorProps) => {
-  const radius = (size - strokeWidth) / 2
-  const circumference = radius * 2 * Math.PI
-  const fillPercentage = (currentStep / totalSteps) * 100
-  const dashOffset = circumference - (circumference * fillPercentage) / 100
-
-  return (
-    <div
-      role="progressbar"
-      aria-valuenow={currentStep}
-      aria-valuemin={1}
-      aria-valuemax={totalSteps}
-      className="relative inline-flex items-center justify-center"
-    >
-      <svg width={size} height={size}>
-        <title>Step Indicator</title>
-        {/* Background circle */}
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={strokeWidth}
-          className="text-muted"
-        />
-        {/* Progress circle */}
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={strokeWidth}
-          strokeDasharray={circumference}
-          strokeDashoffset={dashOffset}
-          className="text-primary transition-all duration-300 ease-in-out"
-          transform={`rotate(-90 ${size / 2} ${size / 2})`}
-        />
-      </svg>
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-sm font-medium" aria-live="polite">
-          {currentStep} / {totalSteps}
-        </span>
-      </div>
-    </div>
-  )
-}
-
-// ============================================================================
-// Main Component - Using circular progress indicator
+// Main Component - Círculos Padrão
 // ============================================================================
 
 export function WizardProgressBar({
@@ -117,10 +52,10 @@ export function WizardProgressBar({
 
   return (
     <Card className={cn("", className)}>
-      <CardContent className="pt-6 pb-6">
-        {/* Barra de Steps - Círculos Padrão */}
-        <div className="w-full mb-4" role="navigation" aria-label="Progress">
-          <ol className="flex items-center justify-between w-full">
+      <CardContent className="py-3">
+        <div className="flex items-center justify-between gap-4">
+          {/* Steps - Compactos */}
+          <ol className="flex items-center gap-2" role="navigation" aria-label="Progress">
             {steps.map((step, index) => {
               const stepId = step.id ?? step.key ?? index + 1
               const stepLabel = step.name ?? step.label ?? `Step ${index + 1}`
@@ -131,57 +66,48 @@ export function WizardProgressBar({
               const isClickable = isActive || isCompleted
 
               return (
-                <li key={stepId} className="flex flex-col items-center gap-2 flex-1 relative">
-                  {/* Linha conectora */}
-                  {index < steps.length - 1 && (
-                    <div
+                <React.Fragment key={stepId}>
+                  <li className="flex items-center gap-1.5">
+                    {/* Círculo do Step - Compacto */}
+                    <button
+                      type="button"
+                      onClick={() => isClickable && onStepClick(stepId)}
+                      disabled={!isClickable}
                       className={cn(
-                        "absolute top-5 left-[calc(50%+20px)] right-[calc(-50%+20px)] h-0.5 transition-all duration-300",
-                        isCompleted ? "bg-primary" : "bg-muted"
+                        "flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold transition-all",
+                        isCurrent && "bg-primary text-primary-foreground shadow-md ring-2 ring-primary/30",
+                        isCompleted && !isCurrent && "bg-primary text-primary-foreground hover:bg-primary/90",
+                        !isActive && !isCompleted && "bg-muted text-muted-foreground border border-muted-foreground/30",
+                        isClickable && "cursor-pointer hover:scale-105",
+                        !isClickable && "cursor-not-allowed"
                       )}
-                    />
-                  )}
+                      aria-current={isCurrent ? "step" : undefined}
+                      aria-disabled={!isClickable}
+                      title={`${stepLabel}: ${step.description}`}
+                    >
+                      {isCompleted && !isCurrent ? (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="3"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      ) : (
+                        index + 1
+                      )}
+                    </button>
 
-                  {/* Círculo do Step */}
-                  <button
-                    type="button"
-                    onClick={() => isClickable && onStepClick(stepId)}
-                    disabled={!isClickable}
-                    className={cn(
-                      "relative z-10 flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold transition-all duration-300",
-                      isCurrent && "bg-primary text-primary-foreground shadow-lg ring-4 ring-primary/20",
-                      isCompleted && !isCurrent && "bg-primary text-primary-foreground hover:bg-primary/90",
-                      !isActive && !isCompleted && "bg-muted text-muted-foreground border-2 border-muted-foreground/30",
-                      isClickable && "cursor-pointer hover:scale-110",
-                      !isClickable && "cursor-not-allowed"
-                    )}
-                    aria-current={isCurrent ? "step" : undefined}
-                    aria-disabled={!isClickable}
-                  >
-                    {isCompleted && !isCurrent ? (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                    ) : (
-                      index + 1
-                    )}
-                  </button>
-
-                  {/* Label */}
-                  <div className="flex flex-col items-center gap-1 text-center">
+                    {/* Label - Compacto */}
                     <span
                       className={cn(
-                        "text-sm font-medium transition-colors",
+                        "text-xs font-medium transition-colors hidden sm:inline",
                         isCurrent && "text-primary",
                         isCompleted && !isCurrent && "text-primary",
                         !isActive && !isCompleted && "text-muted-foreground"
@@ -189,30 +115,32 @@ export function WizardProgressBar({
                     >
                       {stepLabel}
                     </span>
-                    <span className="text-xs text-muted-foreground hidden sm:block">
-                      {step.description}
-                    </span>
-                  </div>
-                </li>
+                  </li>
+
+                  {/* Linha conectora - Compacta */}
+                  {index < steps.length - 1 && (
+                    <div
+                      className={cn(
+                        "h-px w-4 transition-all",
+                        isCompleted ? "bg-primary" : "bg-muted"
+                      )}
+                    />
+                  )}
+                </React.Fragment>
               )
             })}
           </ol>
-        </div>
 
-        {/* Resumo rápido */}
-        <div className="flex items-center justify-between text-sm">
-          <div className="text-muted-foreground">
-            {steps[currentStepIndex]?.description}
-          </div>
-          <div className="flex items-center gap-4">
-            <Badge variant="secondary" className="font-normal">
+          {/* Resumo - Compacto */}
+          <div className="flex items-center gap-3 text-xs">
+            <Badge variant="secondary" className="h-6 px-2 font-normal">
               <span className="text-muted-foreground">Itens:</span>
-              <span className="ml-1 font-semibold text-foreground">{itemsCount}</span>
+              <span className="ml-1 font-semibold">{itemsCount}</span>
             </Badge>
-            <Separator orientation="vertical" className="h-4" />
-            <Badge variant="secondary" className="font-normal">
+            <Separator orientation="vertical" className="h-3" />
+            <Badge variant="secondary" className="h-6 px-2 font-normal">
               <span className="text-muted-foreground">Total:</span>
-              <span className="ml-1 font-semibold text-foreground">
+              <span className="ml-1 font-semibold">
                 {totals.valorTotal.toLocaleString("pt-BR", {
                   style: "currency",
                   currency: "BRL",
