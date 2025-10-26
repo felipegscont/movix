@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { AppSidebar } from "@/components/layout"
 import { Separator } from "@/components/ui/separator"
 import {
@@ -22,6 +22,8 @@ import { NfeWizard } from "@/components/nfe/nfe-wizard"
 
 export default function NovaFePage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const pedidoId = searchParams.get('pedidoId')
 
   const handleSuccess = () => {
     router.push('/fiscal/nfe')
@@ -63,7 +65,10 @@ export default function NovaFePage() {
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 px-4 md:gap-6 md:py-6 md:px-6">
-              <NfeWizard onSuccess={handleSuccess} />
+              <NfeWizard
+                pedidoId={pedidoId || undefined}
+                onSuccess={handleSuccess}
+              />
             </div>
           </div>
         </div>

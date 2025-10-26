@@ -20,6 +20,7 @@ import { WizardProgressBar } from "@/components/shared/wizard-progress-bar"
 
 interface NfeWizardProps {
   nfeId?: string
+  pedidoId?: string
   onSuccess?: () => void
 }
 
@@ -32,7 +33,7 @@ const WIZARD_STEPS: { key: WizardStep; label: string; description: string }[] = 
   { key: 'revisao', label: 'Revisão', description: 'Conferir dados antes de salvar' }
 ]
 
-export function NfeWizard({ nfeId, onSuccess }: NfeWizardProps) {
+export function NfeWizard({ nfeId, pedidoId, onSuccess }: NfeWizardProps) {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState<WizardStep>('geral')
   const [completedSteps, setCompletedSteps] = useState<WizardStep[]>([])
@@ -49,7 +50,7 @@ export function NfeWizard({ nfeId, onSuccess }: NfeWizardProps) {
     removeItem,
     calculateTotals,
     alertDialog,
-  } = useNfeForm({ nfeId, onSuccess })
+  } = useNfeForm({ nfeId, pedidoId, onSuccess })
 
   const totals = calculateTotals()
 

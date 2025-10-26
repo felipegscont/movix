@@ -8,6 +8,16 @@ export class CreatePedidoPagamentoDto {
   @IsString()
   formaPagamentoId: string;
 
+  @Transform(({ value }) => {
+    if (!value) return value;
+    // Se já for ISO completo, retorna como está
+    if (value.includes('T')) return value;
+    // Se for apenas data (YYYY-MM-DD), adiciona hora
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      return `${value}T00:00:00.000Z`;
+    }
+    return value;
+  })
   @IsDateString()
   dataVencimento: string;
 

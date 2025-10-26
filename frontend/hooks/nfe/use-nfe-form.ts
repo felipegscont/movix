@@ -5,17 +5,19 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
-import { 
-  nfeFormSchema, 
+import {
+  nfeFormSchema,
   type NfeFormData,
   type NfeItemFormData,
-  defaultNfeFormData 
+  defaultNfeFormData
 } from "@/lib/schemas/nfe.schema"
 import { NfeService } from "@/lib/services/nfe.service"
 import { EmitenteService } from "@/lib/services/emitente.service"
+import { PedidoService } from "@/lib/services/pedido.service"
 
 interface UseNfeFormProps {
   nfeId?: string
+  pedidoId?: string
   onSuccess?: () => void
 }
 
@@ -65,10 +67,10 @@ interface UseNfeFormReturn {
   }
 }
 
-export function useNfeForm({ nfeId, onSuccess }: UseNfeFormProps = {}): UseNfeFormReturn {
+export function useNfeForm({ nfeId, pedidoId, onSuccess }: UseNfeFormProps = {}): UseNfeFormReturn {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const [loadingNfe, setLoadingNfe] = useState(!!nfeId)
+  const [loadingNfe, setLoadingNfe] = useState(!!nfeId || !!pedidoId)
   const [loadingEmitente, setLoadingEmitente] = useState(true)
   const [emitente, setEmitente] = useState<any>(null)
   const [nfe, setNfe] = useState<any>(null)
@@ -100,6 +102,13 @@ export function useNfeForm({ nfeId, onSuccess }: UseNfeFormProps = {}): UseNfeFo
       loadNfe()
     }
   }, [nfeId])
+
+  // Carregar dados do pedido se fornecido
+  useEffect(() => {
+    if (pedidoId && !nfeId) {
+      loadPedidoData()
+    }
+  }, [pedidoId, nfeId])
 
   const loadEmitente = async () => {
     try {
@@ -195,6 +204,87 @@ export function useNfeForm({ nfeId, onSuccess }: UseNfeFormProps = {}): UseNfeFo
     } catch (error) {
       console.error("Erro ao carregar NFe:", error)
       toast.error("Erro ao carregar NFe")
+    } finally {
+      setLoadingNfe(false)
+    }
+  }
+
+  const loadPedidoData = async () => {
+    if (!pedidoId) return
+
+    try {
+      setLoadingNfe(true)
+      const pedido = await PedidoService.getById(pedidoId)
+
+      toast.success("Dados do pedido carregados! Preencha os dados fiscais e transmita a NFe.")
+
+      // Preencher formulário com dados do pedido
+      form.reset({
+        ...defaultNfeFormData,
+        dataEmissao: new Date().toISOString().split('T')[0],
+        clienteId: pedido.clienteId,
+        naturezaOperacao: '', // Usuário deve selecionar
+        tipoOperacao: 1, // Saída
+        finalidade: 0, // Normal
+        consumidorFinal: 1, // Sim
+        presencaComprador: 1, // Operação presencial
+        modalidadeFrete: pedido.valorFrete > 0 ? 0 : 9, // Se tem frete, assume CIF, senão sem frete
+        valorFrete: pedido.valorFrete || 0,
+        valorDesconto: pedido.valorDesconto || 0,
+        valorOutros: pedido.valorOutros || 0,
+        informacoesAdicionais: pedido.observacoes || '',
+        // Itens do pedido
+        itens: pedido.itens?.map((item, index) => ({
+          numeroItem: index + 1,
+          produtoId: item.produtoId,
+          codigo: item.codigo,
+          descricao: item.descricao,
+          ncm: '', // Será preenchido ao selecionar o produto
+          cfop: '', // Será calculado pela matriz fiscal
+          unidade: item.unidade,
+          quantidade: item.quantidade,
+          valorUnitario: item.valorUnitario,
+          valorDesconto: item.valorDesconto || 0,
+          valorTotal: item.valorTotal,
+          // Impostos serão calculados automaticamente
+          icms: {
+            origem: 0,
+            cst: '',
+            modalidadeBC: 0,
+            valorBC: 0,
+            aliquota: 0,
+            valor: 0,
+          },
+          ipi: {
+            cst: '',
+            valorBC: 0,
+            aliquota: 0,
+            valor: 0,
+          },
+          pis: {
+            cst: '',
+            valorBC: 0,
+            aliquota: 0,
+            valor: 0,
+          },
+          cofins: {
+            cst: '',
+            valorBC: 0,
+            aliquota: 0,
+            valor: 0,
+          },
+        })) || [],
+        // Pagamentos do pedido
+        pagamentos: pedido.pagamentos?.map((pag) => ({
+          formaPagamento: pag.formaPagamentoId,
+          valor: pag.valor,
+          descricaoPagamento: pag.observacoes || '',
+        })) || [],
+      })
+    } catch (error) {
+      console.error("Erro ao carregar pedido:", error)
+      toast.error("Erro ao carregar dados do pedido")
+      router.push('/fiscal/nfe/nova')
     } finally {
       setLoadingNfe(false)
     }

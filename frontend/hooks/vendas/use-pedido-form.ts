@@ -31,6 +31,8 @@ interface UsePedidoFormReturn {
 
   // Actions
   handleSubmit: any
+  handleConcluirVenda: (data: PedidoFormData) => Promise<boolean>
+  handleConsignar: (data: PedidoFormData) => Promise<boolean>
   loadPedido: () => Promise<void>
   resetForm: () => void
 
@@ -241,37 +243,35 @@ export function usePedidoForm({ pedidoId, onSuccess }: UsePedidoFormProps = {}):
     }
   }, [form])
 
-  // Submit
+  // Função auxiliar para preparar dados
+  const prepareData = (data: PedidoFormData) => {
+    const totals = calculateTotals()
+    return {
+      ...data,
+      subtotal: totals.subtotal,
+      valorTotal: totals.valorTotal,
+      valorDesconto: Number(data.valorDesconto) || 0,
+      valorFrete: Number(data.valorFrete) || 0,
+      valorOutros: Number(data.valorOutros) || 0,
+      vendedorNome: data.vendedorNome || undefined,
+      observacoes: data.observacoes || undefined,
+      dataEntrega: data.dataEntrega || undefined,
+      horaEntrega: data.horaEntrega || undefined,
+      enderecoEntrega: data.enderecoEntrega || undefined,
+      usarHoraEntrega: undefined,
+    }
+  }
+
+  // Submit normal
   const handleSubmit = form.handleSubmit(async (data: PedidoFormData) => {
     try {
       setLoading(true)
-
-      // Recalcular totais antes de salvar
-      const totals = calculateTotals()
-      data.subtotal = totals.subtotal
-      data.valorTotal = totals.valorTotal
-
-      // Garantir que valores opcionais sejam números (não strings vazias ou null)
-      const cleanData = {
-        ...data,
-        valorDesconto: Number(data.valorDesconto) || 0,
-        valorFrete: Number(data.valorFrete) || 0,
-        valorOutros: Number(data.valorOutros) || 0,
-        vendedorNome: data.vendedorNome || undefined,
-        observacoes: data.observacoes || undefined,
-        dataEntrega: data.dataEntrega || undefined,
-        horaEntrega: data.horaEntrega || undefined,
-        enderecoEntrega: data.enderecoEntrega || undefined,
-        // Remover campos que não devem ser enviados ao backend
-        usarHoraEntrega: undefined,
-      }
+      const cleanData = prepareData(data)
 
       if (pedidoId) {
-        // Atualizar
         await PedidoService.update(pedidoId, cleanData)
         toast.success("Pedido atualizado com sucesso!")
       } else {
-        // Criar
         await PedidoService.create(cleanData)
         toast.success("Pedido criado com sucesso!")
       }
@@ -281,13 +281,79 @@ export function usePedidoForm({ pedidoId, onSuccess }: UsePedidoFormProps = {}):
       } else {
         router.push('/vendas/pedidos')
       }
+      return true
     } catch (error: any) {
       console.error("Erro ao salvar pedido:", error)
       toast.error(error.message || "Erro ao salvar pedido")
+      return false
     } finally {
       setLoading(false)
     }
   })
+
+  // Concluir Venda - Salva pedido e redireciona para emissão de NFe
+  const handleConcluirVenda = async (data: PedidoFormData): Promise<boolean> => {
+    try {
+      setLoading(true)
+      const cleanData = prepareData(data)
+
+      let pedidoSalvo: any
+
+      if (pedidoId) {
+        pedidoSalvo = await PedidoService.update(pedidoId, cleanData)
+      } else {
+        pedidoSalvo = await PedidoService.create(cleanData)
+      }
+
+      toast.success("Pedido salvo! Redirecionando para emissão de NFe...")
+
+      // Redirecionar para emissão de NFe com dados do pedido
+      setTimeout(() => {
+        router.push(`/fiscal/nfe/novo?pedidoId=${pedidoSalvo.id}`)
+      }, 500)
+
+      return true
+    } catch (error: any) {
+      console.error("Erro ao concluir venda:", error)
+      toast.error(error.message || "Erro ao concluir venda")
+      return false
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Consignar - Salva pedido como consignação
+  const handleConsignar = async (data: PedidoFormData): Promise<boolean> => {
+    try {
+      setLoading(true)
+      const cleanData = prepareData(data)
+
+      // TODO: Implementar lógica específica de consignação
+      // Por enquanto, apenas salva o pedido normalmente
+
+      if (pedidoId) {
+        await PedidoService.update(pedidoId, cleanData)
+        toast.success("Pedido consignado com sucesso!")
+      } else {
+        await PedidoService.create(cleanData)
+        toast.success("Pedido consignado com sucesso!")
+      }
+
+      if (onSuccess) {
+        onSuccess()
+      } else {
+        router.push('/vendas/pedidos')
+      }
+
+      return true
+    } catch (error: any) {
+      console.error("Erro ao consignar pedido:", error)
+      toast.error(error.message || "Erro ao consignar pedido")
+      return false
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return {
     form,
@@ -296,6 +362,8 @@ export function usePedidoForm({ pedidoId, onSuccess }: UsePedidoFormProps = {}):
     pedido,
     proximoNumero,
     handleSubmit,
+    handleConcluirVenda,
+    handleConsignar,
     loadPedido,
     resetForm,
     addItem,

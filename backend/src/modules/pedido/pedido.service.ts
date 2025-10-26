@@ -8,6 +8,21 @@ export class PedidoService {
   constructor(private prisma: PrismaService) {}
 
   /**
+   * Converter data string para DateTime ISO
+   */
+  private convertToDateTime(dateString: string | undefined): Date | undefined {
+    if (!dateString) return undefined;
+
+    // Se já é uma data ISO completa, retorna
+    if (dateString.includes('T')) {
+      return new Date(dateString);
+    }
+
+    // Se é apenas data (YYYY-MM-DD), adiciona hora
+    return new Date(`${dateString}T00:00:00.000Z`);
+  }
+
+  /**
    * Criar novo pedido
    */
   async create(createPedidoDto: CreatePedidoDto) {
@@ -32,15 +47,50 @@ export class PedidoService {
     // Criar pedido com itens e pagamentos
     const { itens, pagamentos, ...pedidoData } = createPedidoDto;
 
+    // Validar e converter datas de pagamento para DateTime
+    const pagamentosFormatados = pagamentos?.map(pag => {
+      const dataVencimento = this.convertToDateTime(pag.dataVencimento as any);
+      if (!dataVencimento) {
+        throw new BadRequestException('Data de vencimento inválida');
+      }
+      return {
+        parcela: pag.parcela,
+        formaPagamentoId: pag.formaPagamentoId,
+        dataVencimento,
+        valor: pag.valor,
+        observacoes: pag.observacoes,
+      };
+    });
+
+    // Validar se todas as formas de pagamento existem
+    if (pagamentosFormatados && pagamentosFormatados.length > 0) {
+      const formasPagamentoIds = pagamentosFormatados.map(p => p.formaPagamentoId);
+      const formasPagamento = await this.prisma.formaPagamento.findMany({
+        where: { id: { in: formasPagamentoIds } },
+      });
+
+      if (formasPagamento.length !== formasPagamentoIds.length) {
+        const idsEncontrados = formasPagamento.map(f => f.id);
+        const idsNaoEncontrados = formasPagamentoIds.filter(id => !idsEncontrados.includes(id));
+        throw new BadRequestException(
+          `Forma(s) de pagamento não encontrada(s): ${idsNaoEncontrados.join(', ')}`
+        );
+      }
+    }
+
     return this.prisma.pedido.create({
         data: {
           ...pedidoData,
+          dataEmissao: this.convertToDateTime(pedidoData.dataEmissao as any) || new Date(),
+          dataEntrega: pedidoData.dataEntrega
+            ? this.convertToDateTime(pedidoData.dataEntrega as any)
+            : undefined,
           itens: {
             create: itens,
           },
-          pagamentos: pagamentos
+          pagamentos: pagamentosFormatados
             ? {
-                create: pagamentos,
+                create: pagamentosFormatados,
               }
             : undefined,
         },
@@ -219,26 +269,79 @@ export class PedidoService {
 
     const { itens, pagamentos, ...pedidoData } = updatePedidoDto;
 
+    // Validar e converter datas de pagamento para DateTime
+    const pagamentosFormatados = pagamentos?.map(pag => {
+      const dataVencimento = this.convertToDateTime(pag.dataVencimento as any);
+      if (!dataVencimento) {
+        throw new BadRequestException('Data de vencimento inválida');
+      }
+      return {
+        parcela: pag.parcela,
+        formaPagamentoId: pag.formaPagamentoId,
+        dataVencimento,
+        valor: pag.valor,
+        observacoes: pag.observacoes,
+      };
+    });
+
+    // Validar se todas as formas de pagamento existem
+    if (pagamentosFormatados && pagamentosFormatados.length > 0) {
+      const formasPagamentoIds = pagamentosFormatados.map(p => p.formaPagamentoId);
+      const formasPagamento = await this.prisma.formaPagamento.findMany({
+        where: { id: { in: formasPagamentoIds } },
+      });
+
+      if (formasPagamento.length !== formasPagamentoIds.length) {
+        const idsEncontrados = formasPagamento.map(f => f.id);
+        const idsNaoEncontrados = formasPagamentoIds.filter(id => !idsEncontrados.includes(id));
+        throw new BadRequestException(
+          `Forma(s) de pagamento não encontrada(s): ${idsNaoEncontrados.join(', ')}`
+        );
+      }
+    }
+
+    // Preparar dados para atualização
+    const updateData: any = {};
+
+    // Adicionar campos simples
+    if (pedidoData.status !== undefined) updateData.status = pedidoData.status;
+    if (pedidoData.vendedorNome !== undefined) updateData.vendedorNome = pedidoData.vendedorNome;
+    if (pedidoData.enderecoEntrega !== undefined) updateData.enderecoEntrega = pedidoData.enderecoEntrega;
+    if (pedidoData.subtotal !== undefined) updateData.subtotal = pedidoData.subtotal;
+    if (pedidoData.valorDesconto !== undefined) updateData.valorDesconto = pedidoData.valorDesconto;
+    if (pedidoData.valorFrete !== undefined) updateData.valorFrete = pedidoData.valorFrete;
+    if (pedidoData.valorOutros !== undefined) updateData.valorOutros = pedidoData.valorOutros;
+    if (pedidoData.valorTotal !== undefined) updateData.valorTotal = pedidoData.valorTotal;
+    if (pedidoData.observacoes !== undefined) updateData.observacoes = pedidoData.observacoes;
+
+    // Converter datas
+    if (pedidoData.dataEmissao) {
+      updateData.dataEmissao = this.convertToDateTime(pedidoData.dataEmissao as any);
+    }
+    if (pedidoData.dataEntrega) {
+      updateData.dataEntrega = this.convertToDateTime(pedidoData.dataEntrega as any);
+    }
+
+    // Se tiver itens, deletar os antigos e criar novos
+    if (itens) {
+      updateData.itens = {
+        deleteMany: {},
+        create: itens,
+      };
+    }
+
+    // Se tiver pagamentos, deletar os antigos e criar novos
+    if (pagamentosFormatados) {
+      updateData.pagamentos = {
+        deleteMany: {},
+        create: pagamentosFormatados,
+      };
+    }
+
     // Atualizar pedido
     return this.prisma.pedido.update({
       where: { id },
-      data: {
-        ...pedidoData,
-        // Se tiver itens, deletar os antigos e criar novos
-        ...(itens && {
-          itens: {
-            deleteMany: {},
-            create: itens,
-          },
-        }),
-        // Se tiver pagamentos, deletar os antigos e criar novos
-        ...(pagamentos && {
-          pagamentos: {
-            deleteMany: {},
-            create: pagamentos,
-          },
-        }),
-      },
+      data: updateData,
       include: {
         cliente: true,
         itens: {

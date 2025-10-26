@@ -4,14 +4,15 @@ import { useState, useEffect } from "react"
 import { Form } from "@/components/ui/form"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { IconArrowLeft, IconArrowRight, IconDeviceFloppy, IconLoader2 } from "@tabler/icons-react"
+import { IconArrowLeft, IconArrowRight, IconDeviceFloppy, IconLoader2, IconX, IconFileInvoice, IconCheck, IconArrowBack } from "@tabler/icons-react"
 import { usePedidoForm } from "@/hooks/vendas/use-pedido-form"
 import { PedidoStepCabecalho } from "./steps/pedido-step-cabecalho"
 import { PedidoStepItens } from "./steps/pedido-step-itens"
 import { PedidoStepTotais } from "./steps/pedido-step-totais"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { IconAlertCircle, IconCheck } from "@tabler/icons-react"
+import { IconAlertCircle } from "@tabler/icons-react"
 import { WizardProgressBar } from "@/components/shared/wizard-progress-bar"
+import { useRouter } from "next/navigation"
 
 interface PedidoWizardProps {
   pedidoId?: string
@@ -27,6 +28,8 @@ const STEPS = [
 export function PedidoWizard({ pedidoId, onSuccess }: PedidoWizardProps) {
   const [currentStep, setCurrentStep] = useState(1)
   const [completedSteps, setCompletedSteps] = useState<number[]>([])
+  const [actionLoading, setActionLoading] = useState<string | null>(null)
+  const router = useRouter()
 
   const {
     form,
@@ -34,6 +37,8 @@ export function PedidoWizard({ pedidoId, onSuccess }: PedidoWizardProps) {
     loadingPedido,
     proximoNumero,
     handleSubmit,
+    handleConcluirVenda,
+    handleConsignar,
     addItem,
     updateItem,
     removeItem,
@@ -177,7 +182,7 @@ export function PedidoWizard({ pedidoId, onSuccess }: PedidoWizardProps) {
                   variant="outline"
                   size="sm"
                   onClick={handlePrevious}
-                  disabled={currentStep === 1 || loading}
+                  disabled={currentStep === 1 || loading || actionLoading !== null}
                 >
                   <IconArrowLeft className="mr-1.5 h-3.5 w-3.5" />
                   Anterior
@@ -187,21 +192,95 @@ export function PedidoWizard({ pedidoId, onSuccess }: PedidoWizardProps) {
                   {currentStep} / {STEPS.length}
                 </div>
 
-                {currentStep < STEPS.length ? (
+                {currentStep < STEPS.length && (
                   <Button
                     type="button"
                     size="sm"
                     onClick={handleNext}
-                    disabled={loading}
+                    disabled={loading || actionLoading !== null}
                   >
                     Próximo
                     <IconArrowRight className="ml-1.5 h-3.5 w-3.5" />
                   </Button>
-                ) : (
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Botões de Ação - Apenas na última etapa */}
+          {currentStep === STEPS.length && (
+            <Card>
+              <CardContent className="py-3">
+                <div className="flex flex-wrap items-center justify-end gap-2">
+                  {/* Cancelar */}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => router.push('/vendas/pedidos')}
+                    disabled={loading || actionLoading !== null}
+                  >
+                    <IconX className="mr-1.5 h-3.5 w-3.5" />
+                    Cancelar
+                  </Button>
+
+                  {/* Consignar */}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={async () => {
+                      setActionLoading('consignar')
+                      await handleConsignar(form.getValues())
+                      setActionLoading(null)
+                    }}
+                    disabled={loading || actionLoading !== null}
+                  >
+                    {actionLoading === 'consignar' ? (
+                      <>
+                        <IconLoader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                        Consignando...
+                      </>
+                    ) : (
+                      <>
+                        <IconFileInvoice className="mr-1.5 h-3.5 w-3.5" />
+                        Consignar
+                      </>
+                    )}
+                  </Button>
+
+                  {/* Concluir Venda */}
+                  <Button
+                    type="button"
+                    variant="default"
+                    size="sm"
+                    onClick={async () => {
+                      setActionLoading('concluir')
+                      await handleConcluirVenda(form.getValues())
+                      setActionLoading(null)
+                    }}
+                    disabled={loading || actionLoading !== null}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    {actionLoading === 'concluir' ? (
+                      <>
+                        <IconLoader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                        Concluindo...
+                      </>
+                    ) : (
+                      <>
+                        <IconCheck className="mr-1.5 h-3.5 w-3.5" />
+                        Concluir Venda
+                      </>
+                    )}
+                  </Button>
+
+                  {/* Salvar */}
                   <Button
                     type="submit"
+                    variant="default"
                     size="sm"
-                    disabled={loading}
+                    disabled={loading || actionLoading !== null}
                   >
                     {loading ? (
                       <>
@@ -215,10 +294,38 @@ export function PedidoWizard({ pedidoId, onSuccess }: PedidoWizardProps) {
                       </>
                     )}
                   </Button>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+
+                  {/* Salvar e Voltar */}
+                  <Button
+                    type="button"
+                    variant="default"
+                    size="sm"
+                    onClick={async () => {
+                      setActionLoading('salvar-voltar')
+                      const success = await handleSubmit(form.getValues())
+                      if (success) {
+                        router.push('/vendas/pedidos')
+                      }
+                      setActionLoading(null)
+                    }}
+                    disabled={loading || actionLoading !== null}
+                  >
+                    {actionLoading === 'salvar-voltar' ? (
+                      <>
+                        <IconLoader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                        Salvando...
+                      </>
+                    ) : (
+                      <>
+                        <IconArrowBack className="mr-1.5 h-3.5 w-3.5" />
+                        Salvar e Voltar
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Erros do formulário - Compacto */}
           {Object.keys(form.formState.errors).length > 0 && (
