@@ -18,7 +18,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { NaturezaOperacaoDataTable } from "@/components/configuracoes/natureza-operacao/natureza-operacao-data-table"
-import { IconHome, IconFileInvoice } from "@tabler/icons-react"
+import { IconHome, IconFileInvoice, IconSettings } from "@tabler/icons-react"
 
 export default function NaturezasOperacaoPage() {
   const router = useRouter()
@@ -44,6 +44,15 @@ export default function NaturezasOperacaoPage() {
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link href="/configuracoes" className="flex items-center gap-1.5">
+                      <IconSettings className="h-4 w-4" />
+                      Configurações
+                    </Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
                 <BreadcrumbItem>
                   <BreadcrumbPage className="flex items-center gap-1.5">
                     <IconFileInvoice className="h-4 w-4" />

@@ -17,7 +17,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { MatrizFiscalDataTable } from "@/components/cadastros/matriz-fiscal/matriz-fiscal-data-table"
-import { IconHome, IconTable } from "@tabler/icons-react"
+import { IconHome, IconTable, IconSettings } from "@tabler/icons-react"
 
 export default function MatrizesFiscaisPage() {
 
@@ -38,6 +38,15 @@ export default function MatrizesFiscaisPage() {
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link href="/configuracoes" className="flex items-center gap-1.5">
+                      <IconSettings className="h-4 w-4" />
+                      Configurações
+                    </Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
                 <BreadcrumbItem>
                   <BreadcrumbPage className="flex items-center gap-1.5">
                     <IconTable className="h-4 w-4" />
