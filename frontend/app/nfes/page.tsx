@@ -21,7 +21,7 @@ import { IconPlus, IconSearch, IconHome, IconFileInvoice } from "@tabler/icons-r
 import { NfeDataTable } from "@/components/nfe/nfe-data-table"
 import { NfeService, Nfe } from "@/lib/services/nfe.service"
 import { toast } from "sonner"
-import { Skeleton } from "@/components/ui/skeleton"
+import { DataTableSkeleton } from "@/components/ui/data-table-skeleton"
 
 export default function NfesPage() {
   const router = useRouter()

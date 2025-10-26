@@ -40,6 +40,7 @@ import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -445,10 +446,55 @@ export function ClientesDataTable() {
   if (loading) {
     return (
       <div className="flex flex-col gap-4 px-4 lg:px-6">
-        <div className="flex h-32 items-center justify-center rounded-lg border">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-            <span>Carregando clientes...</span>
+        <div className="flex items-center justify-between gap-4">
+          <Skeleton className="h-9 w-64" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-9 w-24" />
+            <Skeleton className="h-9 w-32" />
+          </div>
+        </div>
+        <div className="overflow-hidden rounded-lg border">
+          <Table>
+            <TableHeader className="bg-muted">
+              <TableRow>
+                <TableHead className="w-12"><Skeleton className="h-3 w-3" /></TableHead>
+                <TableHead><Skeleton className="h-3 w-16" /></TableHead>
+                <TableHead><Skeleton className="h-3 w-24" /></TableHead>
+                <TableHead><Skeleton className="h-3 w-20" /></TableHead>
+                <TableHead><Skeleton className="h-3 w-20" /></TableHead>
+                <TableHead><Skeleton className="h-3 w-24" /></TableHead>
+                <TableHead><Skeleton className="h-3 w-16" /></TableHead>
+                <TableHead className="w-12"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {[...Array(10)].map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell className="py-2"><Skeleton className="h-3 w-3" /></TableCell>
+                  <TableCell className="py-2"><Skeleton className="h-5 w-12" /></TableCell>
+                  <TableCell className="py-2"><Skeleton className="h-3 w-28" /></TableCell>
+                  <TableCell className="py-2">
+                    <div className="space-y-1">
+                      <Skeleton className="h-3 w-32" />
+                      <Skeleton className="h-2 w-24" />
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-2"><Skeleton className="h-3 w-24" /></TableCell>
+                  <TableCell className="py-2"><Skeleton className="h-3 w-20" /></TableCell>
+                  <TableCell className="py-2"><Skeleton className="h-5 w-16" /></TableCell>
+                  <TableCell className="py-2"><Skeleton className="h-6 w-6 rounded" /></TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+        <div className="flex items-center justify-between px-4">
+          <Skeleton className="h-3 w-48" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-8 w-8" />
+            <Skeleton className="h-8 w-8" />
+            <Skeleton className="h-8 w-8" />
+            <Skeleton className="h-8 w-8" />
           </div>
         </div>
       </div>

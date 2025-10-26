@@ -407,10 +407,10 @@ export function NaturezaOperacaoDataTable({ onEdit }: NaturezaOperacaoDataTableP
     return (
       <div className="flex flex-col gap-4 px-4 lg:px-6">
         <div className="flex items-center justify-between gap-4">
-          <Skeleton className="h-8 w-64" />
+          <Skeleton className="h-9 w-64" />
           <div className="flex items-center gap-2">
-            <Skeleton className="h-7 w-24" />
-            <Skeleton className="h-7 w-32" />
+            <Skeleton className="h-9 w-24" />
+            <Skeleton className="h-9 w-32" />
           </div>
         </div>
         <div className="overflow-hidden rounded-lg border">
