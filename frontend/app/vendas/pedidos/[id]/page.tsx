@@ -407,7 +407,9 @@ export default function PedidoDetalhesPage() {
                       {pedido.nfes.map((nfe: any) => (
                         <div key={nfe.id} className="flex items-center justify-between p-3 border rounded-lg">
                           <div>
-                            <p className="font-medium">NFe #{nfe.numero} - Série {nfe.serie}</p>
+                            <p className="font-medium">
+                              NFe #{nfe.numero} - Série {nfe.serie}
+                            </p>
                             <p className="text-sm text-muted-foreground">
                               {nfe.chave || "Chave não disponível"}
                             </p>
@@ -415,7 +417,7 @@ export default function PedidoDetalhesPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => router.push(`/nfes/${nfe.id}`)}
+                            onClick={() => router.push(`/fiscal/nfe/${nfe.id}`)}
                           >
                             Ver Detalhes
                           </Button>

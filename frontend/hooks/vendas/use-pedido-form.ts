@@ -61,9 +61,13 @@ export function usePedidoForm({ pedidoId, onSuccess }: UsePedidoFormProps = {}):
     defaultValues: {
       numero: 0,
       dataEmissao: new Date().toISOString().split('T')[0],
+      dataEntrega: '',
+      horaEntrega: '',
+      usarHoraEntrega: false,
       status: 'ABERTO',
       clienteId: '',
       vendedorNome: '',
+      enderecoEntrega: '',
       subtotal: 0,
       valorDesconto: 0,
       valorFrete: 0,
@@ -71,6 +75,7 @@ export function usePedidoForm({ pedidoId, onSuccess }: UsePedidoFormProps = {}):
       valorTotal: 0,
       observacoes: '',
       itens: [],
+      pagamentos: [],
     } as PedidoFormData,
   })
 
@@ -111,9 +116,13 @@ export function usePedidoForm({ pedidoId, onSuccess }: UsePedidoFormProps = {}):
       form.reset({
         numero: pedidoData.numero,
         dataEmissao: pedidoData.dataEmissao?.split('T')[0],
+        dataEntrega: pedidoData.dataEntrega?.split('T')[0] || '',
+        horaEntrega: '',
+        usarHoraEntrega: false,
         status: pedidoData.status,
         clienteId: pedidoData.clienteId,
         vendedorNome: pedidoData.vendedorNome || '',
+        enderecoEntrega: pedidoData.enderecoEntrega || '',
         subtotal: pedidoData.subtotal,
         valorDesconto: pedidoData.valorDesconto || 0,
         valorFrete: pedidoData.valorFrete || 0,
@@ -121,6 +130,7 @@ export function usePedidoForm({ pedidoId, onSuccess }: UsePedidoFormProps = {}):
         valorTotal: pedidoData.valorTotal,
         observacoes: pedidoData.observacoes || '',
         itens: pedidoData.itens || [],
+        pagamentos: pedidoData.pagamentos || [],
       })
     } catch (error) {
       console.error("Erro ao carregar pedido:", error)
@@ -134,9 +144,13 @@ export function usePedidoForm({ pedidoId, onSuccess }: UsePedidoFormProps = {}):
     form.reset({
       numero: proximoNumero || 0,
       dataEmissao: new Date().toISOString().split('T')[0],
+      dataEntrega: '',
+      horaEntrega: '',
+      usarHoraEntrega: false,
       status: 'ABERTO',
       clienteId: '',
       vendedorNome: '',
+      enderecoEntrega: '',
       subtotal: 0,
       valorDesconto: 0,
       valorFrete: 0,
@@ -144,6 +158,7 @@ export function usePedidoForm({ pedidoId, onSuccess }: UsePedidoFormProps = {}):
       valorTotal: 0,
       observacoes: '',
       itens: [],
+      pagamentos: [],
     })
   }
 
@@ -245,7 +260,10 @@ export function usePedidoForm({ pedidoId, onSuccess }: UsePedidoFormProps = {}):
         vendedorNome: data.vendedorNome || undefined,
         observacoes: data.observacoes || undefined,
         dataEntrega: data.dataEntrega || undefined,
+        horaEntrega: data.horaEntrega || undefined,
         enderecoEntrega: data.enderecoEntrega || undefined,
+        // Remover campos que não devem ser enviados ao backend
+        usarHoraEntrega: undefined,
       }
 
       if (pedidoId) {
