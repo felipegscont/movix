@@ -38,9 +38,9 @@ export const nfeItemICMSSchema = z.object({
   valorFCPSTRetido: z.coerce.number().min(0).optional().nullable(),
 })
 
-// Schema para IPI
+// Schema para IPI (opcional - só valida se fornecido)
 export const nfeItemIPISchema = z.object({
-  cstId: z.string().min(1, "CST do IPI é obrigatório"),
+  cstId: z.string().optional().nullable(),
   baseCalculo: z.coerce.number().min(0).default(0),
   aliquota: z.coerce.number().min(0).max(100).default(0),
   valor: z.coerce.number().min(0).default(0),
@@ -50,9 +50,9 @@ export const nfeItemIPISchema = z.object({
   quantidadeSeloControle: z.coerce.number().int().optional().nullable(),
 })
 
-// Schema para PIS
+// Schema para PIS (opcional - será validado na emissão)
 export const nfeItemPISSchema = z.object({
-  cstId: z.string().min(1, "CST do PIS é obrigatório"),
+  cstId: z.string().optional().nullable(),
   baseCalculo: z.coerce.number().min(0).default(0),
   aliquota: z.coerce.number().min(0).max(100).default(0),
   valor: z.coerce.number().min(0).default(0),
@@ -60,9 +60,9 @@ export const nfeItemPISSchema = z.object({
   aliquotaReais: z.coerce.number().min(0).optional().nullable(),
 })
 
-// Schema para COFINS
+// Schema para COFINS (opcional - será validado na emissão)
 export const nfeItemCOFINSSchema = z.object({
-  cstId: z.string().min(1, "CST do COFINS é obrigatório"),
+  cstId: z.string().optional().nullable(),
   baseCalculo: z.coerce.number().min(0).default(0),
   aliquota: z.coerce.number().min(0).max(100).default(0),
   valor: z.coerce.number().min(0).default(0),
@@ -83,7 +83,7 @@ export const nfeItemSchema = z.object({
 
   // Classificação Fiscal
   ncmId: z.string().min(1, "NCM é obrigatório"),
-  cfopId: z.string().min(1, "CFOP é obrigatório"),
+  cfopId: z.string().optional().nullable(), // Será definido na emissão
 
   // Matriz Fiscal Aplicada (rastreabilidade)
   matrizFiscalId: z.string().optional().nullable(),

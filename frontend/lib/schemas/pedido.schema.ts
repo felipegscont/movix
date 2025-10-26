@@ -36,23 +36,25 @@ export const pedidoFormSchema = z.object({
   numero: z.coerce.number().int().min(1, "Número é obrigatório"),
   dataEmissao: z.string().min(1, "Data de emissão é obrigatória"),
   dataEntrega: z.string().optional().or(z.literal('')).nullable(),
+  horaEntrega: z.string().optional().or(z.literal('')).nullable(),
+  usarHoraEntrega: z.boolean().default(false),
   status: z.enum(['ABERTO', 'FATURADO', 'CANCELADO']).default('ABERTO'),
   clienteId: z.string().min(1, "Cliente é obrigatório"),
   vendedorNome: z.string().optional().or(z.literal('')).nullable(),
   enderecoEntrega: z.string().optional().or(z.literal('')).nullable(),
-  
+
   // Valores
   subtotal: z.coerce.number().min(0, "Subtotal deve ser positivo"),
   valorDesconto: z.coerce.number().min(0, "Desconto deve ser positivo").optional().or(z.literal('')),
   valorFrete: z.coerce.number().min(0, "Frete deve ser positivo").optional().or(z.literal('')),
   valorOutros: z.coerce.number().min(0, "Outros valores devem ser positivos").optional().or(z.literal('')),
   valorTotal: z.coerce.number().min(0, "Valor total deve ser positivo"),
-  
+
   observacoes: z.string().optional().or(z.literal('')).nullable(),
-  
+
   // Itens
   itens: z.array(pedidoItemFormSchema).min(1, "Adicione pelo menos um item"),
-  
+
   // Pagamentos (opcional)
   pagamentos: z.array(pedidoPagamentoFormSchema).optional(),
 })

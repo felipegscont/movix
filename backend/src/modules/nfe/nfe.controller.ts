@@ -54,6 +54,23 @@ export class NfeController {
     return this.nfeIntegrationService.checkSefazStatus();
   }
 
+  /**
+   * POST /nfes/buscar-matriz-fiscal
+   * Buscar matriz fiscal aplicável para um item da NFe
+   */
+  @Post('buscar-matriz-fiscal')
+  @HttpCode(HttpStatus.OK)
+  buscarMatrizFiscal(
+    @Body()
+    params: {
+      naturezaOperacaoId: string;
+      clienteId: string;
+      produtoId: string;
+    },
+  ) {
+    return this.nfeService.buscarMatrizFiscalParaItem(params);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.nfeService.findOne(id);
@@ -62,6 +79,34 @@ export class NfeController {
   @Patch(':id')
   update(@Param('id') id: string, @Body(ValidationPipe) updateNfeDto: UpdateNfeDto) {
     return this.nfeService.update(id, updateNfeDto);
+  }
+
+  /**
+   * POST /nfes/:id/aplicar-matriz-fiscal
+   * Aplicar matriz fiscal em todos os itens da NFe
+   */
+  @Post(':id/aplicar-matriz-fiscal')
+  @HttpCode(HttpStatus.OK)
+  aplicarMatrizFiscal(
+    @Param('id') id: string,
+    @Body()
+    params: {
+      naturezaOperacaoId: string;
+      naturezaOperacao: string;
+      cfopId: string;
+    },
+  ) {
+    return this.nfeService.aplicarMatrizFiscal(id, params);
+  }
+
+  /**
+   * POST /nfes/:id/emitir
+   * Emitir NFe para SEFAZ
+   */
+  @Post(':id/emitir')
+  @HttpCode(HttpStatus.OK)
+  emitir(@Param('id') id: string) {
+    return this.nfeService.emitir(id);
   }
 
   @Post(':id/transmitir')
@@ -158,22 +203,5 @@ export class NfeController {
     }
 
     return this.nfeService.getFileInfo(nfe.chave);
-  }
-
-  /**
-   * POST /nfes/buscar-matriz-fiscal
-   * Buscar matriz fiscal aplicável para um item da NFe
-   */
-  @Post('buscar-matriz-fiscal')
-  @HttpCode(HttpStatus.OK)
-  buscarMatrizFiscal(
-    @Body()
-    params: {
-      naturezaOperacaoId: string;
-      clienteId: string;
-      produtoId: string;
-    },
-  ) {
-    return this.nfeService.buscarMatrizFiscalParaItem(params);
   }
 }

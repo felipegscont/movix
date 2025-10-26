@@ -486,4 +486,47 @@ export class NfeService {
 
     return response.json();
   }
+
+  /**
+   * Aplicar matriz fiscal em todos os itens da NFe
+   */
+  static async aplicarMatrizFiscal(nfeId: string, params: {
+    naturezaOperacaoId: string;
+    naturezaOperacao: string;
+    cfopId: string;
+  }): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/nfes/${nfeId}/aplicar-matriz-fiscal`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(params),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Erro ao aplicar matriz fiscal');
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Emitir NFe para SEFAZ
+   */
+  static async emitir(nfeId: string): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/nfes/${nfeId}/emitir`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Erro ao emitir NFe');
+    }
+
+    return response.json();
+  }
 }

@@ -35,28 +35,25 @@ export function NfeStepGeral({ form, emitente }: NfeStepGeralProps) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Card do Emitente - Compacto */}
-      <Card className="py-3">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Emitente</CardTitle>
-          <CardDescription className="text-xs">
-            Dados da empresa que está emitindo a NFe
-          </CardDescription>
+      <Card>
+        <CardHeader className="pb-2 pt-3">
+          <CardTitle className="text-sm">Emitente</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="p-3 bg-muted rounded-lg border">
+        <CardContent className="pb-3">
+          <div className="p-2 bg-muted rounded-md border">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-medium text-muted-foreground">Emitente</p>
-                <p className="text-sm font-semibold">{emitente.razaoSocial}</p>
+                <p className="text-xs text-muted-foreground">Emitente</p>
+                <p className="text-xs font-semibold">{emitente.razaoSocial}</p>
                 <p className="text-xs text-muted-foreground">
                   CNPJ: {emitente.cnpj?.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5')}
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-xs font-medium text-muted-foreground">Série NFe</p>
-                <p className="text-xl font-bold">{emitente.serieNfe || 1}</p>
+                <p className="text-xs text-muted-foreground">Série</p>
+                <p className="text-lg font-bold">{emitente.serieNfe || 1}</p>
               </div>
             </div>
           </div>
@@ -64,28 +61,25 @@ export function NfeStepGeral({ form, emitente }: NfeStepGeralProps) {
       </Card>
 
       {/* Card de Dados Gerais - Compacto */}
-      <Card className="py-3">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Dados Gerais</CardTitle>
-          <CardDescription className="text-xs">
-            Informações básicas da nota fiscal
-          </CardDescription>
+      <Card>
+        <CardHeader className="pb-2 pt-3">
+          <CardTitle className="text-sm">Dados Gerais</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2.5">
+        <CardContent className="space-y-2 pb-3">
           {/* Cliente e Natureza da Operação */}
-          <div className="grid grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-2 gap-2">
             <FormField
               control={form.control}
               name="clienteId"
               render={({ field }) => (
                 <FormItem className="space-y-1 min-w-0 overflow-hidden">
-                  <FormLabel className="text-xs font-medium">Cliente *</FormLabel>
+                  <FormLabel className="text-xs">Cliente *</FormLabel>
                   <FormControl>
                     <div className="overflow-hidden">
                       <ClienteCombobox value={field.value} onValueChange={field.onChange} />
                     </div>
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
@@ -94,7 +88,7 @@ export function NfeStepGeral({ form, emitente }: NfeStepGeralProps) {
               name="naturezaOperacao"
               render={({ field }) => (
                 <FormItem className="space-y-1 min-w-0 overflow-hidden">
-                  <FormLabel className="text-xs font-medium">Natureza da Operação *</FormLabel>
+                  <FormLabel className="text-xs">Natureza da Operação *</FormLabel>
                   <FormControl>
                     <div className="overflow-hidden">
                       <NaturezaOperacaoCombobox
@@ -120,10 +114,10 @@ export function NfeStepGeral({ form, emitente }: NfeStepGeralProps) {
               name="tipoOperacao"
               render={({ field }) => (
                 <FormItem className="space-y-1">
-                  <FormLabel className="text-xs font-medium">Tipo *</FormLabel>
+                  <FormLabel className="text-xs">Tipo *</FormLabel>
                   <Select value={field.value?.toString()} onValueChange={(value) => field.onChange(parseInt(value))}>
                     <FormControl>
-                      <SelectTrigger className="h-9 text-sm w-full">
+                      <SelectTrigger className="h-8 text-xs w-full">
                         <SelectValue />
                       </SelectTrigger>
                     </FormControl>
@@ -132,7 +126,7 @@ export function NfeStepGeral({ form, emitente }: NfeStepGeralProps) {
                       <SelectItem value="1">Saída</SelectItem>
                     </SelectContent>
                   </Select>
-                  <FormMessage />
+                  <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
@@ -141,10 +135,10 @@ export function NfeStepGeral({ form, emitente }: NfeStepGeralProps) {
               name="finalidade"
               render={({ field }) => (
                 <FormItem className="space-y-1">
-                  <FormLabel className="text-xs font-medium">Finalidade *</FormLabel>
+                  <FormLabel className="text-xs">Finalidade *</FormLabel>
                   <Select value={field.value?.toString()} onValueChange={(value) => field.onChange(parseInt(value))}>
                     <FormControl>
-                      <SelectTrigger className="h-9 text-sm w-full">
+                      <SelectTrigger className="h-8 text-xs w-full">
                         <SelectValue />
                       </SelectTrigger>
                     </FormControl>
@@ -156,7 +150,7 @@ export function NfeStepGeral({ form, emitente }: NfeStepGeralProps) {
                       <SelectItem value="4">Devolução de Mercadoria</SelectItem>
                     </SelectContent>
                   </Select>
-                  <FormMessage />
+                  <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
@@ -165,10 +159,10 @@ export function NfeStepGeral({ form, emitente }: NfeStepGeralProps) {
               name="consumidorFinal"
               render={({ field }) => (
                 <FormItem className="space-y-1">
-                  <FormLabel className="text-xs font-medium">Cons. Final *</FormLabel>
+                  <FormLabel className="text-xs">Cons. Final *</FormLabel>
                   <Select value={field.value?.toString()} onValueChange={(value) => field.onChange(parseInt(value))}>
                     <FormControl>
-                      <SelectTrigger className="h-9 text-sm w-full">
+                      <SelectTrigger className="h-8 text-xs w-full">
                         <SelectValue />
                       </SelectTrigger>
                     </FormControl>
@@ -177,7 +171,7 @@ export function NfeStepGeral({ form, emitente }: NfeStepGeralProps) {
                       <SelectItem value="1">Sim</SelectItem>
                     </SelectContent>
                   </Select>
-                  <FormMessage />
+                  <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
@@ -186,10 +180,10 @@ export function NfeStepGeral({ form, emitente }: NfeStepGeralProps) {
               name="presencaComprador"
               render={({ field }) => (
                 <FormItem className="space-y-1">
-                  <FormLabel className="text-xs font-medium">Presença *</FormLabel>
+                  <FormLabel className="text-xs">Presença *</FormLabel>
                   <Select value={field.value?.toString()} onValueChange={(value) => field.onChange(parseInt(value))}>
                     <FormControl>
-                      <SelectTrigger className="h-9 text-sm w-full">
+                      <SelectTrigger className="h-8 text-xs w-full">
                         <SelectValue />
                       </SelectTrigger>
                     </FormControl>
@@ -202,7 +196,7 @@ export function NfeStepGeral({ form, emitente }: NfeStepGeralProps) {
                       <SelectItem value="9">Outros</SelectItem>
                     </SelectContent>
                   </Select>
-                  <FormMessage />
+                  <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />

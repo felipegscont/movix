@@ -639,47 +639,299 @@ export class NfeService {
       tipoCliente = 'nao_contribuinte'; // Default
     }
 
-    // Buscar matriz fiscal aplicável
-    const matriz = await this.matrizFiscalService.buscarMatrizAplicavel({
-      naturezaOperacaoId: params.naturezaOperacaoId,
-      ufOrigem: estadoEmitente.uf,
-      ufDestino: cliente.estado.uf,
-      tipoCliente,
-      ncmId: produto.ncmId,
-      regimeTributario: emitente.regimeTributario,
+    // Buscar TODAS as matrizes fiscais aplicáveis (ICMS, PIS, COFINS, IPI)
+    const matrizes = await this.prisma.matrizFiscal.findMany({
+      where: {
+        ativo: true,
+        AND: [
+          // CFOP específico
+          { cfopId: { not: null } },
+          // Regime: específico OU qualquer
+          {
+            OR: [
+              { regimeTributario: emitente.regimeTributario },
+              { regimeTributario: null },
+            ],
+          },
+          // UF Destino: específica OU qualquer
+          {
+            OR: [{ ufDestino: cliente.estado.uf }, { ufDestino: null }],
+          },
+          // Tipo Item: específico OU qualquer
+          {
+            OR: [{ tipoItem: produto.tipoItem }, { tipoItem: null }],
+          },
+        ],
+      },
+      include: {
+        cfop: true,
+        cst: true,
+        csosn: true,
+        icmsCst: true,
+        icmsCsosn: true,
+        pisCst: true,
+        cofinsCst: true,
+        ipiCst: true,
+      },
+      orderBy: { prioridade: 'desc' },
     });
 
-    // Se não encontrou matriz, lançar erro (tributação obrigatória via matriz)
-    if (!matriz) {
+    if (!matrizes || matrizes.length === 0) {
       throw new BadRequestException(
         `Matriz fiscal não encontrada para o produto ${produto.codigo}. ` +
-        `Configure uma matriz fiscal para: Natureza=${params.naturezaOperacaoId}, ` +
-        `Cliente=${params.clienteId}, NCM=${produto.ncm.codigo}, TipoItem=${produto.tipoItem}`
+          `Configure matrizes fiscais (ICMS, PIS, COFINS) para: ` +
+          `Regime=${emitente.regimeTributario}, UF Destino=${cliente.estado.uf}, TipoItem=${produto.tipoItem}`,
       );
     }
 
-    // Retornar dados da matriz
-    return {
+    // Consolidar dados de todas as matrizes
+    const resultado: any = {
       fonte: 'matriz',
-      matrizId: matriz.id,
-      matrizCodigo: matriz.codigo,
-      matrizDescricao: matriz.descricao,
-      cfopId: matriz.cfopId,
-      icmsCstId: matriz.icmsCstId,
-      icmsCsosnId: matriz.icmsCsosnId,
-      icmsAliquota: matriz.icmsAliquota,
-      icmsReducao: matriz.icmsReducao,
-      icmsModalidadeBC: matriz.icmsModalidadeBC,
-      icmsStAliquota: matriz.icmsStAliquota,
-      icmsStReducao: matriz.icmsStReducao,
-      icmsStModalidadeBC: matriz.icmsStModalidadeBC,
-      icmsStMva: matriz.icmsStMva,
-      pisCstId: matriz.pisCstId,
-      pisAliquota: matriz.pisAliquota,
-      cofinsCstId: matriz.cofinsCstId,
-      cofinsAliquota: matriz.cofinsAliquota,
-      ipiCstId: matriz.ipiCstId,
-      ipiAliquota: matriz.ipiAliquota,
+      matrizes: matrizes.map((m) => ({
+        id: m.id,
+        codigo: m.codigo,
+        descricao: m.descricao,
+      })),
     };
+
+    // Buscar matriz de cada tipo
+    const matrizICMS = matrizes.find((m) => m.codigo === 'ICMS');
+    const matrizPIS = matrizes.find((m) => m.codigo === 'PIS');
+    const matrizCOFINS = matrizes.find((m) => m.codigo === 'COFINS');
+    const matrizIPI = matrizes.find((m) => m.codigo === 'IPI');
+
+    // CFOP (pegar da primeira matriz que tiver)
+    resultado.cfopId =
+      matrizICMS?.cfopId ||
+      matrizPIS?.cfopId ||
+      matrizCOFINS?.cfopId ||
+      matrizIPI?.cfopId;
+
+    // ICMS
+    if (matrizICMS) {
+      resultado.matrizId = matrizICMS.id;
+      resultado.icmsCstId = matrizICMS.cstId || matrizICMS.icmsCstId;
+      resultado.icmsCsosnId = matrizICMS.csosnId || matrizICMS.icmsCsosnId;
+      resultado.icmsAliquota = matrizICMS.aliquota || matrizICMS.icmsAliquota;
+      resultado.icmsReducao = matrizICMS.reducaoBC || matrizICMS.icmsReducao;
+      resultado.icmsModalidadeBC = matrizICMS.icmsModalidadeBC;
+      resultado.icmsStAliquota = matrizICMS.icmsStAliquota;
+      resultado.icmsStReducao = matrizICMS.icmsStReducao;
+      resultado.icmsStModalidadeBC = matrizICMS.icmsStModalidadeBC;
+      resultado.icmsStMva = matrizICMS.icmsStMva;
+    }
+
+    // PIS
+    if (matrizPIS) {
+      resultado.pisCstId = matrizPIS.cstId || matrizPIS.pisCstId;
+      resultado.pisAliquota = matrizPIS.aliquota || matrizPIS.pisAliquota;
+    }
+
+    // COFINS
+    if (matrizCOFINS) {
+      resultado.cofinsCstId = matrizCOFINS.cstId || matrizCOFINS.cofinsCstId;
+      resultado.cofinsAliquota =
+        matrizCOFINS.aliquota || matrizCOFINS.cofinsAliquota;
+    }
+
+    // IPI
+    if (matrizIPI) {
+      resultado.ipiCstId = matrizIPI.cstId || matrizIPI.ipiCstId;
+      resultado.ipiAliquota = matrizIPI.aliquota || matrizIPI.ipiAliquota;
+    }
+
+    // Nota: PIS e COFINS serão validados apenas na emissão da NFe
+    // Aqui apenas retornamos os dados disponíveis da matriz fiscal
+
+    return resultado;
+  }
+
+  /**
+   * Aplicar matriz fiscal em todos os itens da NFe
+   */
+  async aplicarMatrizFiscal(
+    nfeId: string,
+    params: {
+      naturezaOperacaoId: string;
+      naturezaOperacao: string;
+      cfopId: string;
+    },
+  ) {
+    // Buscar NFe com itens
+    const nfe = await this.prisma.nfe.findUnique({
+      where: { id: nfeId },
+      include: {
+        itens: {
+          include: {
+            produto: {
+              include: {
+                ncm: true,
+              },
+            },
+            icms: true,
+            pis: true,
+            cofins: true,
+            ipi: true,
+          },
+        },
+        cliente: {
+          include: {
+            estado: true,
+          },
+        },
+        emitente: {
+          include: {
+            estado: true,
+          },
+        },
+      },
+    });
+
+    if (!nfe) {
+      throw new NotFoundException('NFe não encontrada');
+    }
+
+    const erros: string[] = [];
+    const itensAtualizados: any[] = [];
+
+    // Aplicar matriz fiscal para cada item
+    for (const item of nfe.itens) {
+      try {
+        if (!item.produtoId) {
+          erros.push(`Item ${item.codigo}: Produto não informado`);
+          continue;
+        }
+
+        // Buscar matriz fiscal para o item
+        const matriz = await this.buscarMatrizFiscalParaItem({
+          naturezaOperacaoId: params.naturezaOperacaoId,
+          clienteId: nfe.clienteId,
+          produtoId: item.produtoId,
+        });
+
+        // Atualizar CFOP do item
+        await this.prisma.nfeItem.update({
+          where: { id: item.id },
+          data: {
+            cfopId: params.cfopId,
+          },
+        });
+
+        // Atualizar ou criar ICMS
+        if (item.icms?.id) {
+          await this.prisma.nfeItemICMS.update({
+            where: { id: item.icms.id },
+            data: {
+              cstId: matriz.icmsCstId || null,
+              csosnId: matriz.icmsCsosnId || null,
+              aliquota: matriz.icmsAliquota || null,
+              percentualReducao: matriz.icmsReducao || null,
+              modalidadeBC: matriz.icmsModalidadeBC || null,
+              aliquotaST: matriz.icmsStAliquota || null,
+              percentualReducaoST: matriz.icmsStReducao || null,
+              modalidadeBCST: matriz.icmsStModalidadeBC || null,
+              percentualMVAST: matriz.icmsStMva || null,
+            },
+          });
+        }
+
+        // Atualizar ou criar PIS
+        if (item.pis?.id) {
+          await this.prisma.nfeItemPIS.update({
+            where: { id: item.pis.id },
+            data: {
+              cstId: matriz.pisCstId || null,
+              aliquota: matriz.pisAliquota || null,
+            },
+          });
+        }
+
+        // Atualizar ou criar COFINS
+        if (item.cofins?.id) {
+          await this.prisma.nfeItemCOFINS.update({
+            where: { id: item.cofins.id },
+            data: {
+              cstId: matriz.cofinsCstId || null,
+              aliquota: matriz.cofinsAliquota || null,
+            },
+          });
+        }
+
+        // Atualizar ou criar IPI (se houver)
+        if (matriz.ipiCstId && item.ipi?.id) {
+          await this.prisma.nfeItemIPI.update({
+            where: { id: item.ipi.id },
+            data: {
+              cstId: matriz.ipiCstId || null,
+              aliquota: matriz.ipiAliquota || null,
+            },
+          });
+        }
+
+        itensAtualizados.push(item);
+      } catch (error) {
+        erros.push(
+          `Item ${item.codigo}: ${error.message || 'Erro ao aplicar matriz fiscal'}`,
+        );
+      }
+    }
+
+    // Atualizar natureza de operação na NFe
+    await this.prisma.nfe.update({
+      where: { id: nfeId },
+      data: {
+        naturezaOperacao: params.naturezaOperacao,
+      },
+    });
+
+    return {
+      sucesso: erros.length === 0,
+      itensAtualizados: itensAtualizados.length,
+      totalItens: nfe.itens.length,
+      erros,
+    };
+  }
+
+  /**
+   * Emitir NFe para SEFAZ
+   */
+  async emitir(nfeId: string) {
+    // Buscar NFe
+    const nfe = await this.findOne(nfeId);
+
+    if (nfe.status !== 'DIGITACAO') {
+      throw new BadRequestException(
+        'Apenas NFes em digitação podem ser emitidas',
+      );
+    }
+
+    // Validar campos obrigatórios
+    if (!nfe.naturezaOperacao) {
+      throw new BadRequestException('Natureza de operação é obrigatória');
+    }
+
+    // Validar itens
+    for (const item of nfe.itens) {
+      if (!item.cfopId) {
+        throw new BadRequestException(
+          `Item ${item.codigo}: CFOP é obrigatório`,
+        );
+      }
+      if (!item.pis || !item.pis.cstId) {
+        throw new BadRequestException(
+          `Item ${item.codigo}: CST do PIS é obrigatório`,
+        );
+      }
+      if (!item.cofins || !item.cofins.cstId) {
+        throw new BadRequestException(
+          `Item ${item.codigo}: CST do COFINS é obrigatório`,
+        );
+      }
+    }
+
+    // Emitir para SEFAZ (usando o método transmitir existente)
+    const resultado = await this.transmitir(nfeId);
+
+    return resultado;
   }
 }

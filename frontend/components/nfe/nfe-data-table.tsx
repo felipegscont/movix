@@ -29,7 +29,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { IconDotsVertical, IconEye, IconEdit, IconTrash, IconFileDownload } from "@tabler/icons-react"
+import { IconDotsVertical, IconEye, IconEdit, IconTrash, IconFileDownload, IconSend } from "@tabler/icons-react"
+import { NfeEmitirDialog } from "./nfe-emitir-dialog"
 import { Nfe, NfeService } from "@/lib/services/nfe.service"
 import { toast } from "sonner"
 import {
@@ -54,6 +55,8 @@ export function NfeDataTable({ nfes, onRefresh }: NfeDataTableProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [nfeToDelete, setNfeToDelete] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [emitirDialogOpen, setEmitirDialogOpen] = useState(false)
+  const [nfeToEmitir, setNfeToEmitir] = useState<Nfe | null>(null)
 
   const statusColors = {
     DIGITACAO: "bg-yellow-500",
@@ -138,6 +141,7 @@ export function NfeDataTable({ nfes, onRefresh }: NfeDataTableProps) {
         const nfe = row.original
         const podeEditar = nfe.status === 'DIGITACAO'
         const podeExcluir = nfe.status === 'DIGITACAO'
+        const podeEmitir = nfe.status === 'DIGITACAO'
 
         return (
           <DropdownMenu>
@@ -159,11 +163,29 @@ export function NfeDataTable({ nfes, onRefresh }: NfeDataTableProps) {
                   Editar
                 </DropdownMenuItem>
               )}
+              {podeEmitir && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setNfeToEmitir(nfe)
+                      setEmitirDialogOpen(true)
+                    }}
+                    className="text-green-600"
+                  >
+                    <IconSend className="mr-2 h-4 w-4" />
+                    Emitir NFe
+                  </DropdownMenuItem>
+                </>
+              )}
               {nfe.xmlAutorizado && (
-                <DropdownMenuItem onClick={() => handleDownloadXml(nfe.id)}>
-                  <IconFileDownload className="mr-2 h-4 w-4" />
-                  Baixar XML
-                </DropdownMenuItem>
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => handleDownloadXml(nfe.id)}>
+                    <IconFileDownload className="mr-2 h-4 w-4" />
+                    Baixar XML
+                  </DropdownMenuItem>
+                </>
               )}
               <DropdownMenuSeparator />
               {podeExcluir && (
@@ -303,6 +325,19 @@ export function NfeDataTable({ nfes, onRefresh }: NfeDataTableProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Dialog de Emitir NFe */}
+      {nfeToEmitir && (
+        <NfeEmitirDialog
+          open={emitirDialogOpen}
+          onOpenChange={setEmitirDialogOpen}
+          nfe={nfeToEmitir}
+          onSuccess={() => {
+            setNfeToEmitir(null)
+            onRefresh()
+          }}
+        />
+      )}
     </>
   )
 }

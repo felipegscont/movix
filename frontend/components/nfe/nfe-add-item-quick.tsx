@@ -67,7 +67,7 @@ export function NfeAddItemQuick({
       // Preencher valor unitário do cadastro
       setValorUnitario(Number(produtoData.valorUnitario) || 0)
 
-      // Buscar matriz fiscal se temos natureza e cliente
+      // Buscar matriz fiscal se temos natureza e cliente (opcional)
       if (naturezaOperacaoId && clienteId) {
         try {
           const matriz = await NfeService.buscarMatrizFiscal({
@@ -88,16 +88,15 @@ export function NfeAddItemQuick({
             _matrizFiscal: matriz, // Dados da matriz fiscal aplicada
           })
         } catch (error: any) {
-          console.error("Erro ao buscar matriz fiscal:", error)
-          toast.error(error.message || "Matriz fiscal não encontrada para este produto")
-          setProduto(null)
-          setProdutoId("")
+          console.warn("Matriz fiscal não encontrada:", error)
+          // Permitir adicionar item sem matriz fiscal
+          // A matriz será aplicada na etapa de emissão
+          setProduto(produtoData)
         }
       } else {
-        // Sem natureza ou cliente, não pode buscar matriz
-        toast.warning("Selecione a natureza de operação e o cliente antes de adicionar itens")
-        setProduto(null)
-        setProdutoId("")
+        // Sem natureza ou cliente, permite adicionar sem matriz
+        // A matriz será aplicada na etapa de emissão
+        setProduto(produtoData)
       }
     } catch (error) {
       console.error("Erro ao carregar produto:", error)
@@ -127,23 +126,18 @@ export function NfeAddItemQuick({
       return
     }
 
-    // Validar se temos matriz fiscal
-    if (!produto._matrizFiscal) {
-      toast.error("Matriz fiscal não encontrada. Verifique a natureza de operação e o cliente.")
-      return
-    }
-
+    // Matriz fiscal é opcional - será aplicada na emissão
     const matriz = produto._matrizFiscal
 
-    // Montar item com dados da matriz fiscal
+    // Montar item (com ou sem matriz fiscal)
     const item: NfeItemFormData = {
       produtoId: produto.id,
       codigo: produto.codigo,
       codigoBarras: produto.codigoBarras || undefined,
       descricao: produto.descricao,
       ncmId: produto.ncmId,
-      cfopId: matriz.cfopId, // CFOP da matriz fiscal
-      matrizFiscalId: matriz.matrizId, // ID da matriz aplicada (rastreabilidade)
+      cfopId: matriz?.cfopId || undefined, // CFOP da matriz (opcional)
+      matrizFiscalId: matriz?.matrizId || undefined, // ID da matriz aplicada (rastreabilidade)
       unidadeComercial: produto.unidade,
       quantidadeComercial: quantidade,
       valorUnitario: valorUnitario, // Valor editado pelo usuário
@@ -155,25 +149,25 @@ export function NfeAddItemQuick({
       origem: produto.origem || "0",
       incluiTotal: true,
 
-      // Impostos da matriz fiscal (podem ser editados pelo usuário)
+      // Impostos da matriz fiscal (opcionais - serão aplicados na emissão)
       icms: {
         origem: produto.origem || "0",
-        cstId: emitenteRegime === 1 ? undefined : matriz.icmsCstId,
-        csosnId: emitenteRegime === 1 ? matriz.icmsCsosnId : undefined,
+        cstId: emitenteRegime === 1 ? undefined : matriz?.icmsCstId,
+        csosnId: emitenteRegime === 1 ? matriz?.icmsCsosnId : undefined,
         baseCalculo: 0,
         aliquota: icmsAliquota, // Alíquota da matriz (editável)
         valor: 0,
       },
 
       pis: {
-        cstId: matriz.pisCstId || "",
+        cstId: matriz?.pisCstId || undefined,
         baseCalculo: 0,
         aliquota: pisAliquota, // Alíquota da matriz (editável)
         valor: 0,
       },
 
       cofins: {
-        cstId: matriz.cofinsCstId || "",
+        cstId: matriz?.cofinsCstId || undefined,
         baseCalculo: 0,
         aliquota: cofinsAliquota, // Alíquota da matriz (editável)
         valor: 0,
@@ -181,9 +175,9 @@ export function NfeAddItemQuick({
     }
 
     // Adicionar IPI se houver na matriz
-    if (matriz.ipiCstId || ipiAliquota > 0) {
+    if (matriz?.ipiCstId || ipiAliquota > 0) {
       item.ipi = {
-        cstId: matriz.ipiCstId || "",
+        cstId: matriz?.ipiCstId || undefined,
         baseCalculo: 0,
         aliquota: ipiAliquota, // Alíquota da matriz (editável)
         valor: 0,

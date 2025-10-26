@@ -202,37 +202,7 @@ export function NfeWizard({ nfeId, onSuccess }: NfeWizardProps) {
     <>
     <Form {...form}>
       <form onSubmit={handleFormSubmit} className="space-y-4">
-        {/* Header com progresso - Compacto */}
-        <Card className="py-3">
-          <CardHeader className="pb-0">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-lg">
-                  {nfeId ? 'Editar NFe' : 'Nova NFe'}
-                </CardTitle>
-                <CardDescription className="text-xs">
-                  Preencha os dados da nota fiscal eletrônica
-                </CardDescription>
-              </div>
-
-              {/* Resumo rápido */}
-              <div className="text-right">
-                <div className="text-xs text-muted-foreground">Total</div>
-                <div className="text-xl font-bold">
-                  {totals.valorTotal.toLocaleString('pt-BR', {
-                    style: 'currency',
-                    currency: 'BRL'
-                  })}
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  {form.watch('itens')?.length || 0} {form.watch('itens')?.length === 1 ? 'item' : 'itens'}
-                </div>
-              </div>
-            </div>
-          </CardHeader>
-        </Card>
-
-        {/* Barra de Progresso Visual */}
+        {/* Barra de Progresso Visual - Compacta */}
         <WizardProgressBar
           steps={WIZARD_STEPS.map(s => ({
             key: s.key,
@@ -252,82 +222,65 @@ export function NfeWizard({ nfeId, onSuccess }: NfeWizardProps) {
           {renderCurrentStep()}
         </div>
 
-        {/* Navegação inferior - Compacto */}
-        <Card className="py-3">
+        {/* Navegação inferior - Compacta */}
+        <Card>
           <CardContent className="py-3">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-4">
               {/* Botão Anterior */}
               <Button
                 type="button"
                 variant="outline"
+                size="sm"
                 onClick={goToPreviousStep}
                 disabled={isFirstStep || loading}
               >
-                <IconChevronLeft className="h-4 w-4 mr-2" />
+                <IconChevronLeft className="h-3.5 w-3.5 mr-1.5" />
                 Anterior
               </Button>
 
               {/* Indicador de progresso */}
-              <div className="text-center">
-                <div className="text-xs text-muted-foreground">
-                  Passo {currentStepIndex + 1} de {WIZARD_STEPS.length}
-                </div>
-                <div className="text-xs text-muted-foreground mt-0.5">
-                  {WIZARD_STEPS[currentStepIndex].label}
-                </div>
+              <div className="text-xs text-muted-foreground">
+                {currentStepIndex + 1} / {WIZARD_STEPS.length}
               </div>
 
               {/* Botão Próximo/Salvar */}
-              <div className="flex gap-2">
-                {isLastStep ? (
-                  <Button
-                    type="submit"
-                    disabled={!canAdvance() || loading}
-                    size="lg"
-                    className="min-w-[180px]"
-                  >
-                    {loading ? (
-                      <>
-                        <IconLoader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Salvando...
-                      </>
-                    ) : (
-                      <>
-                        <IconDeviceFloppy className="h-4 w-4 mr-2" />
-                        {nfeId ? 'Atualizar NFe' : 'Criar NFe'}
-                      </>
-                    )}
-                  </Button>
-                ) : (
-                  <Button
-                    type="button"
-                    onClick={goToNextStep}
-                    disabled={!canAdvance() || loading}
-                    size="lg"
-                    className="min-w-[150px]"
-                  >
-                    Próximo
-                    <IconChevronRight className="h-4 w-4 ml-2" />
-                  </Button>
-                )}
-              </div>
+              {isLastStep ? (
+                <Button
+                  type="submit"
+                  size="sm"
+                  disabled={!canAdvance() || loading}
+                >
+                  {loading ? (
+                    <>
+                      <IconLoader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                      Salvando...
+                    </>
+                  ) : (
+                    <>
+                      <IconDeviceFloppy className="h-3.5 w-3.5 mr-1.5" />
+                      {nfeId ? 'Atualizar' : 'Criar NFe'}
+                    </>
+                  )}
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={goToNextStep}
+                  disabled={!canAdvance() || loading}
+                >
+                  Próximo
+                  <IconChevronRight className="h-3.5 w-3.5 ml-1.5" />
+                </Button>
+              )}
             </div>
 
-            {/* Mensagem de validação */}
+            {/* Mensagem de validação - Compacta */}
             {!canAdvance() && !isLastStep && (
-              <div className="mt-4 text-center">
-                <p className="text-sm text-amber-600">
+              <div className="mt-2 text-center">
+                <p className="text-xs text-amber-600">
                   {getValidationMessages()[0]}
                 </p>
-              </div>
-            )}
-
-            {/* Debug info (remover depois) */}
-            {process.env.NODE_ENV === 'development' && (
-              <div className="mt-4 text-xs text-muted-foreground text-center">
-                Cliente: {clienteId || 'não selecionado'} |
-                Natureza: {naturezaOperacao || 'não preenchida'} |
-                Pode avançar: {canAdvance() ? 'Sim' : 'Não'}
               </div>
             )}
           </CardContent>
