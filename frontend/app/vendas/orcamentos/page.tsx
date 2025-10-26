@@ -29,7 +29,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { IconPlus, IconFileText, IconFileInvoice } from "@tabler/icons-react"
+import { IconPlus, IconFileText, IconFileInvoice, IconHome, IconShoppingCart } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { OrcamentoService, type Orcamento } from "@/lib/services/orcamento.service"
 import { formatCurrency } from "@/lib/utils"
@@ -97,11 +97,18 @@ export default function OrcamentosPage() {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+                <BreadcrumbLink asChild>
+                  <Link href="/dashboard">
+                    <IconHome className="h-4 w-4" />
+                  </Link>
+                </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage>Orçamentos</BreadcrumbPage>
+                <BreadcrumbPage className="flex items-center gap-1.5">
+                  <IconFileText className="h-4 w-4" />
+                  Orçamentos
+                </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>

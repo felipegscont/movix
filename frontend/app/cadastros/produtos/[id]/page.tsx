@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
+import Link from "next/link"
 import {
   IconArrowLeft,
   IconBox,
@@ -21,6 +22,7 @@ import {
   IconPackage,
   IconFileText,
   IconScale,
+  IconHome,
 } from "@tabler/icons-react"
 import { AppSidebar } from "@/components/layout/app-sidebar"
 import { Button } from "@/components/ui/button"
@@ -28,6 +30,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import { ProdutoService, type Produto } from "@/lib/services/produto.service"
 import { toast } from "sonner"
 
@@ -117,16 +127,32 @@ export default function ProdutoViewPage() {
         <header className="bg-background sticky top-0 flex shrink-0 items-center gap-2 border-b p-4 z-10">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.push("/cadastros/produtos")}
-            >
-              <IconArrowLeft className="mr-2 h-4 w-4" />
-              Voltar
-            </Button>
-          </div>
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem className="hidden md:block">
+                <BreadcrumbLink asChild>
+                  <Link href="/dashboard">
+                    <IconHome className="h-4 w-4" />
+                  </Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="hidden md:block" />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="/cadastros/produtos" className="flex items-center gap-1.5">
+                    <IconPackage className="h-4 w-4" />
+                    Produtos
+                  </Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>
+                  {produto?.descricao || "Detalhes"}
+                </BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
         </header>
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-4 p-4 md:gap-6 md:p-6">
