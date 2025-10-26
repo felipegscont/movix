@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
   LayoutDashboard,
@@ -203,62 +204,62 @@ const data = {
       isActive: false,
       items: [
         {
-          title: "Empresa",
-          url: "/configuracoes/empresa",
-          isGroup: true,
-          items: [
-            {
-              title: "Geral",
-              url: "/configuracoes/empresa/geral",
-            },
-            {
-              title: "Funcionários",
-              url: "/configuracoes/empresa/funcionarios",
-            },
-            {
-              title: "Usuários",
-              url: "/configuracoes/empresa/usuarios",
-            },
-            {
-              title: "Permissões",
-              url: "/configuracoes/empresa/permissoes",
-            },
-          ],
+          title: "EMPRESA",
+          url: "",
+          isSectionHeader: true,
         },
         {
-          title: "Fiscal",
-          url: "/configuracoes/fiscal",
-          isGroup: true,
-          items: [
-            {
-              title: "Geral",
-              url: "/configuracoes/fiscal/geral",
-            },
-            {
-              title: "NF-e",
-              url: "/configuracoes/fiscal/nfe",
-            },
-            {
-              title: "NFC-e",
-              url: "/configuracoes/fiscal/nfce",
-            },
-            {
-              title: "CT-e",
-              url: "/configuracoes/fiscal/cte",
-            },
-            {
-              title: "NFS-e",
-              url: "/configuracoes/fiscal/nfse",
-            },
-            {
-              title: "Matrizes Fiscais",
-              url: "/configuracoes/fiscal/matrizes-fiscais",
-            },
-            {
-              title: "Naturezas de Operação",
-              url: "/configuracoes/fiscal/naturezas-operacao",
-            },
-          ],
+          title: "Dados da Empresa",
+          url: "/configuracoes/empresa/geral",
+        },
+        {
+          title: "Funcionários",
+          url: "/configuracoes/empresa/funcionarios",
+        },
+        {
+          title: "Usuários",
+          url: "/configuracoes/empresa/usuarios",
+        },
+        {
+          title: "Permissões",
+          url: "/configuracoes/empresa/permissoes",
+        },
+        {
+          title: "FISCAL",
+          url: "",
+          isSectionHeader: true,
+        },
+        {
+          title: "Configurações Fiscais",
+          url: "/configuracoes/fiscal/geral",
+        },
+        {
+          title: "NF-e",
+          url: "/configuracoes/fiscal/nfe",
+        },
+        {
+          title: "NFC-e",
+          url: "/configuracoes/fiscal/nfce",
+        },
+        {
+          title: "CT-e",
+          url: "/configuracoes/fiscal/cte",
+        },
+        {
+          title: "MDF-e",
+          url: "/configuracoes/fiscal/mdfe",
+        },
+        {
+          title: "NFS-e",
+          url: "/configuracoes/fiscal/nfse",
+        },
+        {
+          title: "Matrizes Fiscais",
+          url: "/configuracoes/fiscal/matrizes-fiscais",
+        },
+        {
+          title: "Naturezas de Operação",
+          url: "/configuracoes/fiscal/naturezas-operacao",
         },
       ],
     },
@@ -380,7 +381,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton size="lg" asChild className="md:h-8 md:p-0">
-                <a href="/">
+                <Link href="/">
                   <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                     <Command className="size-4" />
                   </div>
@@ -388,7 +389,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <span className="truncate font-medium">Movix</span>
                     <span className="truncate text-xs">Sistema</span>
                   </div>
-                </a>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -413,10 +414,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       asChild={item.items.length === 0}
                     >
                       {item.items.length === 0 ? (
-                        <a href={item.url}>
+                        <Link href={item.url}>
                           <item.icon />
                           <span>{item.title}</span>
-                        </a>
+                        </Link>
                       ) : (
                         <>
                           <item.icon />
@@ -465,7 +466,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
                       return (
                         <Collapsible
-                          key={subItem.title}
+                          key={subItem.url || `group-${subItem.title}`}
                           open={isOpen}
                           onOpenChange={handleToggle}
                           className="group/collapsible"
@@ -505,14 +506,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                   const isActive = (exactMatch || childMatch) && !hasMoreSpecificMatch
 
                                   return (
-                                    <SidebarMenuItem key={nestedItem.title}>
+                                    <SidebarMenuItem key={nestedItem.url || `nested-${nestedItem.title}`}>
                                       <SidebarMenuButton asChild isActive={isActive}>
-                                        <a
+                                        <Link
                                           href={nestedItem.url}
                                           className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex items-center gap-2 py-3 pl-3 pr-4 text-sm leading-tight"
                                         >
                                           <span>{nestedItem.title}</span>
-                                        </a>
+                                        </Link>
                                       </SidebarMenuButton>
                                     </SidebarMenuItem>
                                   )
@@ -524,18 +525,45 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       )
                     }
 
+                    // Cabeçalho de seção
+                    if (subItem.isSectionHeader) {
+                      return (
+                        <div key={`section-${subItem.title}`} className="px-4 pt-4 pb-2">
+                          <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                            {subItem.title}
+                          </div>
+                        </div>
+                      )
+                    }
+
                     // Subitem normal (sem grupo)
-                    // Comparação exata ou se o pathname começa com a URL seguida de /
-                    const isActive = pathname === subItem.url || pathname.startsWith(subItem.url + '/')
+                    // Lógica de ativação mais precisa:
+                    // 1. Comparação exata com a URL
+                    // 2. OU pathname começa com a URL + '/' (para rotas filhas)
+                    // 3. MAS não ativa se houver uma URL mais específica que também combina
+                    const exactMatch = pathname === subItem.url
+                    const childMatch = pathname.startsWith(subItem.url + '/')
+
+                    // Verifica se existe outro item com URL mais específica que também combina
+                    const hasMoreSpecificMatch = activeItem.items.some(
+                      (otherItem) =>
+                        !otherItem.isSectionHeader &&
+                        otherItem.url !== subItem.url &&
+                        otherItem.url.startsWith(subItem.url) &&
+                        (pathname === otherItem.url || pathname.startsWith(otherItem.url + '/'))
+                    )
+
+                    const isActive = (exactMatch || childMatch) && !hasMoreSpecificMatch
+
                     return (
-                      <SidebarMenuItem key={subItem.title}>
+                      <SidebarMenuItem key={subItem.url || `item-${subItem.title}`}>
                         <SidebarMenuButton asChild isActive={isActive}>
-                          <a
+                          <Link
                             href={subItem.url}
                             className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex items-center gap-2 border-b px-4 py-3 text-sm leading-tight last:border-b-0"
                           >
                             <span className="font-medium">{subItem.title}</span>
-                          </a>
+                          </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
                     )

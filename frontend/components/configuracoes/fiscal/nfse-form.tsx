@@ -15,7 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { IconLoader2, IconDeviceFloppy, IconAlertCircle, IconAlertTriangle, IconCloud, IconFlask } from "@tabler/icons-react"
 import { EmitenteService } from "@/lib/services/emitente.service"
 import { ConfiguracaoNfseService } from "@/lib/services/configuracao-nfse.service"
-import { InutilizacaoNfseService } from "@/lib/services/inutilizacao-nfse.service"
+// import { InutilizacaoNfseService } from "@/lib/services/inutilizacao-nfse.service"
 import { NfseConfigFields, NfseInutilizacaoFields } from "./nfse-form-tabs"
 
 // Schema para Configurações NFe
@@ -99,10 +99,10 @@ export function NfseForm() {
         // Buscar configurações NFe
         const responseConfig = await ConfiguracaoNfseService.getByEmitente(emitente.id)
         // Buscar inutilizações NFe
-        const responseInutilizacao = await InutilizacaoNfseService.getByEmitente(emitente.id)
+        // const responseInutilizacao = await InutilizacaoNfseService.getByEmitente(emitente.id)
 
         const config = responseConfig.success && responseConfig.data ? responseConfig.data : null
-        const inutilizacao = responseInutilizacao.success && responseInutilizacao.data ? responseInutilizacao.data : null
+        const inutilizacao = null // responseInutilizacao.success && responseInutilizacao.data ? responseInutilizacao.data : null
 
         form.reset({
           // Ambientes Ativos
@@ -225,8 +225,9 @@ export function NfseForm() {
         payload.justificativaInutilizarHomologacao = data.justificativaInutilizarHomologacao
       }
 
-      const response = await InutilizacaoNfseService.upsert(emitenteId, payload)
-      response.success ? toast.success("Configurações de inutilização salvas!") : toast.error(response.error || "Erro ao salvar")
+      // const response = await InutilizacaoNfseService.upsert(emitenteId, payload)
+      // response.success ? toast.success("Configurações de inutilização salvas!") : toast.error(response.error || "Erro ao salvar")
+      toast.info("Inutilização não disponível para NFSe")
     } catch (error: any) {
       toast.error(error.message || "Erro ao salvar")
     } finally {
