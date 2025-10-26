@@ -284,7 +284,7 @@ export function ClientesDataTable() {
         return (
           <div className="flex flex-col">
             <button
-              onClick={() => router.push(`/clientes/${clienteId}`)}
+              onClick={() => router.push(`/cadastros/clientes/${clienteId}`)}
               className="font-medium text-left hover:text-primary hover:underline transition-colors"
             >
               {nome}

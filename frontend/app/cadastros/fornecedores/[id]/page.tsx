@@ -50,7 +50,7 @@ export default function FornecedorViewPage() {
     } catch (error) {
       console.error("Erro ao carregar fornecedor:", error)
       toast.error("Erro ao carregar fornecedor")
-      router.push("/fornecedores")
+      router.push("/cadastros/fornecedores")
     } finally {
       setLoading(false)
     }
@@ -66,7 +66,7 @@ export default function FornecedorViewPage() {
     try {
       await FornecedorService.delete(params.id as string)
       toast.success("Fornecedor excluído com sucesso!")
-      router.push("/fornecedores")
+      router.push("/cadastros/fornecedores")
     } catch (error) {
       console.error("Erro ao excluir fornecedor:", error)
       toast.error("Erro ao excluir fornecedor")
@@ -115,20 +115,25 @@ export default function FornecedorViewPage() {
     <SidebarProvider style={{ "--sidebar-width": "350px" } as React.CSSProperties}>
       <AppSidebar />
       <SidebarInset>
+        <header className="bg-background sticky top-0 flex shrink-0 items-center gap-2 border-b p-4 z-10">
+          <SidebarTrigger className="-ml-1" />
+          <Separator orientation="vertical" className="mr-2 h-4" />
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => router.push("/cadastros/fornecedores")}
+            >
+              <IconArrowLeft className="mr-2 h-4 w-4" />
+              Voltar
+            </Button>
+          </div>
+        </header>
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-4 p-4 md:gap-6 md:p-6">
             {/* Header com Avatar */}
             <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
               <div className="flex items-start gap-4">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="mt-1"
-                  onClick={() => router.push("/fornecedores")}
-                >
-                  <IconArrowLeft className="h-5 w-5" />
-                </Button>
-                
                 {/* Avatar com Iniciais */}
                 <div className="flex h-16 w-16 items-center justify-center rounded-full bg-orange-600 text-2xl font-bold text-white">
                   {fornecedor.nome.charAt(0).toUpperCase()}
