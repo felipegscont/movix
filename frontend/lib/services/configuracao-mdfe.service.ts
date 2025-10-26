@@ -1,6 +1,6 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
 
-export interface ConfiguracaoNfeData {
+export interface ConfiguracaoMdfeData {
   ambienteAtivo?: number
   serieProducao?: number
   proximoNumeroProducao?: number
@@ -18,25 +18,25 @@ export interface ConfiguracaoNfeData {
   ieSubstitutoHomologacao?: string
   observacoesHomologacao?: string
   documentosAutorizadosHomologacao?: string
-  modeloNfe?: string
+  modeloMdfe?: string
 }
 
-export interface ConfiguracaoNfe extends ConfiguracaoNfeData {
+export interface ConfiguracaoMdfe extends ConfiguracaoMdfeData {
   id: string
   emitenteId: string
-  modeloNfe: string
+  modeloMdfe: string
   ativo: boolean
   createdAt: string
   updatedAt: string
 }
 
-export class ConfiguracaoNfeService {
+export class ConfiguracaoMdfeService {
   /**
-   * Buscar configuração de NFe por emitente
+   * Buscar configuração de MDF-e por emitente
    */
-  static async getByEmitente(emitenteId: string): Promise<{ success: boolean; data?: ConfiguracaoNfe; error?: string }> {
+  static async getByEmitente(emitenteId: string): Promise<{ success: boolean; data?: ConfiguracaoMdfe; error?: string }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/configuracoes-nfe/${emitenteId}`)
+      const response = await fetch(`${API_BASE_URL}/configuracoes-mdfe/${emitenteId}`)
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -45,27 +45,27 @@ export class ConfiguracaoNfeService {
         const errorData = await response.json().catch(() => ({}))
         return {
           success: false,
-          error: errorData.message || 'Erro ao buscar configuração de NFe',
+          error: errorData.message || 'Erro ao buscar configuração de MDF-e',
         }
       }
 
       const data = await response.json()
       return { success: true, data }
     } catch (error: any) {
-      console.error('Erro ao buscar configuração de NFe:', error)
+      console.error('Erro ao buscar configuração de MDF-e:', error)
       return {
         success: false,
-        error: error.message || 'Erro ao buscar configuração de NFe',
+        error: error.message || 'Erro ao buscar configuração de MDF-e',
       }
     }
   }
 
   /**
-   * Criar ou atualizar configuração de NFe
+   * Criar ou atualizar configuração de MDF-e
    */
-  static async upsert(emitenteId: string, data: ConfiguracaoNfeData): Promise<{ success: boolean; data?: ConfiguracaoNfe; error?: string }> {
+  static async upsert(emitenteId: string, data: ConfiguracaoMdfeData): Promise<{ success: boolean; data?: ConfiguracaoMdfe; error?: string }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/configuracoes-nfe/${emitenteId}`, {
+      const response = await fetch(`${API_BASE_URL}/configuracoes-mdfe/${emitenteId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -77,17 +77,17 @@ export class ConfiguracaoNfeService {
         const errorData = await response.json().catch(() => ({}))
         return {
           success: false,
-          error: errorData.message || 'Erro ao salvar configuração de NFe',
+          error: errorData.message || 'Erro ao salvar configuração de MDF-e',
         }
       }
 
       const result = await response.json()
       return { success: true, data: result }
     } catch (error: any) {
-      console.error('Erro ao salvar configuração de NFe:', error)
+      console.error('Erro ao salvar configuração de MDF-e:', error)
       return {
         success: false,
-        error: error.message || 'Erro ao salvar configuração de NFe',
+        error: error.message || 'Erro ao salvar configuração de MDF-e',
       }
     }
   }
@@ -95,9 +95,9 @@ export class ConfiguracaoNfeService {
   /**
    * Incrementar próximo número
    */
-  static async incrementarNumero(emitenteId: string): Promise<{ success: boolean; data?: ConfiguracaoNfe; error?: string }> {
+  static async incrementarNumero(emitenteId: string): Promise<{ success: boolean; data?: ConfiguracaoMdfe; error?: string }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/configuracoes-nfe/${emitenteId}/incrementar`, {
+      const response = await fetch(`${API_BASE_URL}/configuracoes-mdfe/${emitenteId}/incrementar`, {
         method: 'POST',
       })
 
@@ -125,7 +125,7 @@ export class ConfiguracaoNfeService {
    */
   static async delete(emitenteId: string): Promise<{ success: boolean; error?: string }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/configuracoes-nfe/${emitenteId}`, {
+      const response = await fetch(`${API_BASE_URL}/configuracoes-mdfe/${emitenteId}`, {
         method: 'DELETE',
       })
 
@@ -133,16 +133,16 @@ export class ConfiguracaoNfeService {
         const errorData = await response.json().catch(() => ({}))
         return {
           success: false,
-          error: errorData.message || 'Erro ao deletar configuração de NFe',
+          error: errorData.message || 'Erro ao deletar configuração de MDF-e',
         }
       }
 
       return { success: true }
     } catch (error: any) {
-      console.error('Erro ao deletar configuração de NFe:', error)
+      console.error('Erro ao deletar configuração de MDF-e:', error)
       return {
         success: false,
-        error: error.message || 'Erro ao deletar configuração de NFe',
+        error: error.message || 'Erro ao deletar configuração de MDF-e',
       }
     }
   }

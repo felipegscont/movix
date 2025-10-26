@@ -1,6 +1,6 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
 
-export interface ConfiguracaoNfeData {
+export interface ConfiguracaoNfseData {
   ambienteAtivo?: number
   serieProducao?: number
   proximoNumeroProducao?: number
@@ -18,25 +18,25 @@ export interface ConfiguracaoNfeData {
   ieSubstitutoHomologacao?: string
   observacoesHomologacao?: string
   documentosAutorizadosHomologacao?: string
-  modeloNfe?: string
+  modeloNfse?: string
 }
 
-export interface ConfiguracaoNfe extends ConfiguracaoNfeData {
+export interface ConfiguracaoNfse extends ConfiguracaoNfseData {
   id: string
   emitenteId: string
-  modeloNfe: string
+  modeloNfse: string
   ativo: boolean
   createdAt: string
   updatedAt: string
 }
 
-export class ConfiguracaoNfeService {
+export class ConfiguracaoNfseService {
   /**
-   * Buscar configuração de NFe por emitente
+   * Buscar configuração de NFS-e por emitente
    */
-  static async getByEmitente(emitenteId: string): Promise<{ success: boolean; data?: ConfiguracaoNfe; error?: string }> {
+  static async getByEmitente(emitenteId: string): Promise<{ success: boolean; data?: ConfiguracaoNfse; error?: string }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/configuracoes-nfe/${emitenteId}`)
+      const response = await fetch(`${API_BASE_URL}/configuracoes-nfse/${emitenteId}`)
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -45,27 +45,27 @@ export class ConfiguracaoNfeService {
         const errorData = await response.json().catch(() => ({}))
         return {
           success: false,
-          error: errorData.message || 'Erro ao buscar configuração de NFe',
+          error: errorData.message || 'Erro ao buscar configuração de NFS-e',
         }
       }
 
       const data = await response.json()
       return { success: true, data }
     } catch (error: any) {
-      console.error('Erro ao buscar configuração de NFe:', error)
+      console.error('Erro ao buscar configuração de NFS-e:', error)
       return {
         success: false,
-        error: error.message || 'Erro ao buscar configuração de NFe',
+        error: error.message || 'Erro ao buscar configuração de NFS-e',
       }
     }
   }
 
   /**
-   * Criar ou atualizar configuração de NFe
+   * Criar ou atualizar configuração de NFS-e
    */
-  static async upsert(emitenteId: string, data: ConfiguracaoNfeData): Promise<{ success: boolean; data?: ConfiguracaoNfe; error?: string }> {
+  static async upsert(emitenteId: string, data: ConfiguracaoNfseData): Promise<{ success: boolean; data?: ConfiguracaoNfse; error?: string }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/configuracoes-nfe/${emitenteId}`, {
+      const response = await fetch(`${API_BASE_URL}/configuracoes-nfse/${emitenteId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -77,17 +77,17 @@ export class ConfiguracaoNfeService {
         const errorData = await response.json().catch(() => ({}))
         return {
           success: false,
-          error: errorData.message || 'Erro ao salvar configuração de NFe',
+          error: errorData.message || 'Erro ao salvar configuração de NFS-e',
         }
       }
 
       const result = await response.json()
       return { success: true, data: result }
     } catch (error: any) {
-      console.error('Erro ao salvar configuração de NFe:', error)
+      console.error('Erro ao salvar configuração de NFS-e:', error)
       return {
         success: false,
-        error: error.message || 'Erro ao salvar configuração de NFe',
+        error: error.message || 'Erro ao salvar configuração de NFS-e',
       }
     }
   }
@@ -95,9 +95,9 @@ export class ConfiguracaoNfeService {
   /**
    * Incrementar próximo número
    */
-  static async incrementarNumero(emitenteId: string): Promise<{ success: boolean; data?: ConfiguracaoNfe; error?: string }> {
+  static async incrementarNumero(emitenteId: string): Promise<{ success: boolean; data?: ConfiguracaoNfse; error?: string }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/configuracoes-nfe/${emitenteId}/incrementar`, {
+      const response = await fetch(`${API_BASE_URL}/configuracoes-nfse/${emitenteId}/incrementar`, {
         method: 'POST',
       })
 
@@ -125,7 +125,7 @@ export class ConfiguracaoNfeService {
    */
   static async delete(emitenteId: string): Promise<{ success: boolean; error?: string }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/configuracoes-nfe/${emitenteId}`, {
+      const response = await fetch(`${API_BASE_URL}/configuracoes-nfse/${emitenteId}`, {
         method: 'DELETE',
       })
 
@@ -133,16 +133,16 @@ export class ConfiguracaoNfeService {
         const errorData = await response.json().catch(() => ({}))
         return {
           success: false,
-          error: errorData.message || 'Erro ao deletar configuração de NFe',
+          error: errorData.message || 'Erro ao deletar configuração de NFS-e',
         }
       }
 
       return { success: true }
     } catch (error: any) {
-      console.error('Erro ao deletar configuração de NFe:', error)
+      console.error('Erro ao deletar configuração de NFS-e:', error)
       return {
         success: false,
-        error: error.message || 'Erro ao deletar configuração de NFe',
+        error: error.message || 'Erro ao deletar configuração de NFS-e',
       }
     }
   }

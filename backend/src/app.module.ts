@@ -18,6 +18,13 @@ import { OrcamentoModule } from './modules/orcamento/orcamento.module';
 import { PedidoModule } from './modules/pedido/pedido.module';
 import { ConfiguracaoNfeModule } from './modules/configuracao-nfe/configuracao-nfe.module';
 import { InutilizacaoNfeModule } from './modules/inutilizacao-nfe/inutilizacao-nfe.module';
+import { ConfiguracaoNfceModule } from './modules/configuracao-nfce/configuracao-nfce.module';
+import { InutilizacaoNfceModule } from './modules/inutilizacao-nfce/inutilizacao-nfce.module';
+import { ConfiguracaoCteModule } from './modules/configuracao-cte/configuracao-cte.module';
+import { InutilizacaoCteModule } from './modules/inutilizacao-cte/inutilizacao-cte.module';
+import { ConfiguracaoMdfeModule } from './modules/configuracao-mdfe/configuracao-mdfe.module';
+import { InutilizacaoMdfeModule } from './modules/inutilizacao-mdfe/inutilizacao-mdfe.module';
+import { ConfiguracaoNfseModule } from './modules/configuracao-nfse/configuracao-nfse.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -42,6 +49,13 @@ import configuration from './config/configuration';
     PedidoModule,
     ConfiguracaoNfeModule,
     InutilizacaoNfeModule,
+    ConfiguracaoNfceModule,
+    InutilizacaoNfceModule,
+    ConfiguracaoCteModule,
+    InutilizacaoCteModule,
+    ConfiguracaoMdfeModule,
+    InutilizacaoMdfeModule,
+    ConfiguracaoNfseModule,
   ],
   controllers: [AppController],
   providers: [AppService],

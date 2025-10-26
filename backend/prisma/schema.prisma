@@ -192,15 +192,19 @@ model Emitente {
   updatedAt DateTime @updatedAt
 
   // Relacionamentos
-  municipio         Municipio            @relation(fields: [municipioId], references: [id])
-  estado            Estado               @relation(fields: [estadoId], references: [id])
-  nfes              Nfe[]
-  certificados      CertificadoDigital[]
-  configuracaoNfe   ConfiguracaoNfe?
-  inutilizacaoNfe   InutilizacaoNfe?
-  configuracaoNfce  ConfiguracaoNfce?
-  configuracaoCte   ConfiguracaoCte?
-  configuracaoNfse  ConfiguracaoNfse?
+  municipio          Municipio            @relation(fields: [municipioId], references: [id])
+  estado             Estado               @relation(fields: [estadoId], references: [id])
+  nfes               Nfe[]
+  certificados       CertificadoDigital[]
+  configuracaoNfe    ConfiguracaoNfe?
+  inutilizacaoNfe    InutilizacaoNfe?
+  configuracaoNfce   ConfiguracaoNfce?
+  inutilizacaoNfce   InutilizacaoNfce?
+  configuracaoCte    ConfiguracaoCte?
+  inutilizacaoCte    InutilizacaoCte?
+  configuracaoMdfe   ConfiguracaoMdfe?
+  inutilizacaoMdfe   InutilizacaoMdfe?
+  configuracaoNfse   ConfiguracaoNfse?
 
   @@map("emitentes")
 }
@@ -282,17 +286,27 @@ model ConfiguracaoNfce {
   id         String @id @default(cuid())
   emitenteId String @unique
 
-  // Ambiente e Numeração
-  ambiente      Int @default(2)
-  serie         Int @default(1)
-  proximoNumero Int @default(1)
+  // Ambiente Ativo
+  ambienteAtivo Int @default(2) // 1=Produção, 2=Homologação
 
-  // Configurações Específicas
-  cfopPadrao        String? @db.VarChar(4)
-  formatoImpressao  String? @db.VarChar(10) // 80mm, 58mm
-  cscId             String? @db.VarChar(10)
-  csc               String? @db.VarChar(100)
-  observacoesPadrao String? @db.Text
+  // Configurações NFCe PRODUÇÃO
+  serieProducao                 Int     @default(1)
+  proximoNumeroProducao         Int     @default(1)
+  cscProducao                   String? @db.VarChar(100)
+  cscIdProducao                 Int?    @default(1)
+  formatoImpressaoProducao      String? @db.VarChar(10) // 80mm, 58mm
+  observacoesProducao           String? @db.Text
+
+  // Configurações NFCe HOMOLOGAÇÃO
+  serieHomologacao              Int     @default(1)
+  proximoNumeroHomologacao      Int     @default(1)
+  cscHomologacao                String? @db.VarChar(100)
+  cscIdHomologacao              Int?    @default(1)
+  formatoImpressaoHomologacao   String? @db.VarChar(10)
+  observacoesHomologacao        String? @db.Text
+
+  // Modelo
+  modeloNfce String @default("4.00") @db.VarChar(10)
 
   // Controle
   ativo     Boolean  @default(true)
@@ -305,20 +319,64 @@ model ConfiguracaoNfce {
   @@map("configuracoes_nfce")
 }
 
+// Inutilização de NFC-e
+model InutilizacaoNfce {
+  id         String @id @default(cuid())
+  emitenteId String @unique
+
+  // Inutilização PRODUÇÃO
+  numeroInicialInutilizarProducao Int?
+  numeroFinalInutilizarProducao   Int?
+  serieInutilizarProducao         Int?
+  anoInutilizarProducao           Int?
+  justificativaInutilizarProducao String? @db.Text
+
+  // Inutilização HOMOLOGAÇÃO
+  numeroInicialInutilizarHomologacao Int?
+  numeroFinalInutilizarHomologacao   Int?
+  serieInutilizarHomologacao         Int?
+  anoInutilizarHomologacao           Int?
+  justificativaInutilizarHomologacao String? @db.Text
+
+  // Controle
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relacionamento
+  emitente Emitente @relation(fields: [emitenteId], references: [id], onDelete: Cascade)
+
+  @@map("inutilizacoes_nfce")
+}
+
 // Configuração de CT-e
 model ConfiguracaoCte {
   id         String @id @default(cuid())
   emitenteId String @unique
 
-  // Ambiente e Numeração
-  ambiente      Int @default(2)
-  serie         Int @default(0)
-  proximoNumero Int @default(1)
+  // Ambiente Ativo
+  ambienteAtivo Int @default(2) // 1=Produção, 2=Homologação
 
-  // Configurações
-  orientacaoImpressao    Int?    @default(1)
-  ieSubstitutoTributario String? @db.VarChar(20)
-  observacoesPadrao      String? @db.Text
+  // Configurações CTe PRODUÇÃO
+  serieProducao                Int     @default(1)
+  proximoNumeroProducao        Int     @default(1)
+  tipoServicoProducao          Int?    @default(0) // 0=Normal, 1=Subcontratação, etc
+  modalTransporteProducao      Int?    @default(1) // 01=Rodoviário, 02=Aéreo, etc
+  orientacaoImpressaoProducao  Int?    @default(1)
+  ieSubstitutoProducao         String? @db.VarChar(20)
+  observacoesProducao          String? @db.Text
+
+  // Configurações CTe HOMOLOGAÇÃO
+  serieHomologacao             Int     @default(1)
+  proximoNumeroHomologacao     Int     @default(1)
+  tipoServicoHomologacao       Int?    @default(0)
+  modalTransporteHomologacao   Int?    @default(1)
+  orientacaoImpressaoHomologacao Int?  @default(1)
+  ieSubstitutoHomologacao      String? @db.VarChar(20)
+  observacoesHomologacao       String? @db.Text
+
+  // Modelo
+  modeloCte String @default("4.00") @db.VarChar(10)
 
   // Controle
   ativo     Boolean  @default(true)
@@ -331,19 +389,134 @@ model ConfiguracaoCte {
   @@map("configuracoes_cte")
 }
 
+// Inutilização de CT-e
+model InutilizacaoCte {
+  id         String @id @default(cuid())
+  emitenteId String @unique
+
+  // Inutilização PRODUÇÃO
+  numeroInicialInutilizarProducao Int?
+  numeroFinalInutilizarProducao   Int?
+  serieInutilizarProducao         Int?
+  anoInutilizarProducao           Int?
+  justificativaInutilizarProducao String? @db.Text
+
+  // Inutilização HOMOLOGAÇÃO
+  numeroInicialInutilizarHomologacao Int?
+  numeroFinalInutilizarHomologacao   Int?
+  serieInutilizarHomologacao         Int?
+  anoInutilizarHomologacao           Int?
+  justificativaInutilizarHomologacao String? @db.Text
+
+  // Controle
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relacionamento
+  emitente Emitente @relation(fields: [emitenteId], references: [id], onDelete: Cascade)
+
+  @@map("inutilizacoes_cte")
+}
+
+// Configuração de MDF-e
+model ConfiguracaoMdfe {
+  id         String @id @default(cuid())
+  emitenteId String @unique
+
+  // Ambiente Ativo
+  ambienteAtivo Int @default(2) // 1=Produção, 2=Homologação
+
+  // Configurações MDFe PRODUÇÃO
+  serieProducao                Int     @default(1)
+  proximoNumeroProducao        Int     @default(1)
+  tipoEmitenteProducao         Int?    @default(1) // 1=Prestador, 2=Transportador
+  tipoTransportadorProducao    Int?    @default(1) // 1=ETC, 2=TAC, 3=CTC
+  observacoesProducao          String? @db.Text
+
+  // Configurações MDFe HOMOLOGAÇÃO
+  serieHomologacao             Int     @default(1)
+  proximoNumeroHomologacao     Int     @default(1)
+  tipoEmitenteHomologacao      Int?    @default(1)
+  tipoTransportadorHomologacao Int?    @default(1)
+  observacoesHomologacao       String? @db.Text
+
+  // Modelo
+  modeloMdfe String @default("3.00") @db.VarChar(10)
+
+  // Controle
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relacionamento
+  emitente Emitente @relation(fields: [emitenteId], references: [id], onDelete: Cascade)
+
+  @@map("configuracoes_mdfe")
+}
+
+// Inutilização de MDF-e
+model InutilizacaoMdfe {
+  id         String @id @default(cuid())
+  emitenteId String @unique
+
+  // Inutilização PRODUÇÃO
+  numeroInicialInutilizarProducao Int?
+  numeroFinalInutilizarProducao   Int?
+  serieInutilizarProducao         Int?
+  anoInutilizarProducao           Int?
+  justificativaInutilizarProducao String? @db.Text
+
+  // Inutilização HOMOLOGAÇÃO
+  numeroInicialInutilizarHomologacao Int?
+  numeroFinalInutilizarHomologacao   Int?
+  serieInutilizarHomologacao         Int?
+  anoInutilizarHomologacao           Int?
+  justificativaInutilizarHomologacao String? @db.Text
+
+  // Controle
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relacionamento
+  emitente Emitente @relation(fields: [emitenteId], references: [id], onDelete: Cascade)
+
+  @@map("inutilizacoes_mdfe")
+}
+
 // Configuração de NFS-e
 model ConfiguracaoNfse {
   id         String @id @default(cuid())
   emitenteId String @unique
 
-  // Numeração
-  proximoRps Int @default(1)
-  serie      Int @default(1)
+  // Ambiente Ativo
+  ambienteAtivo Int @default(2) // 1=Produção, 2=Homologação
 
-  // Configurações
-  regimeTributacao  Int? // 1=ME/EPP, 2=Lucro Presumido, etc
-  incentivoFiscal   Boolean @default(false)
-  observacoesPadrao String? @db.Text
+  // Configurações NFSe PRODUÇÃO
+  serieProducao                Int     @default(1)
+  proximoNumeroProducao        Int     @default(1)
+  codigoMunicipioProducao      String? @db.VarChar(7)
+  codigoServicoProducao        String? @db.VarChar(20)
+  aliquotaIssProducao          Decimal? @db.Decimal(5, 2)
+  itemListaServicoProducao     String? @db.VarChar(10)
+  regimeTributacaoProducao     Int?    @default(1) // 1=ME/EPP, 2=Lucro Presumido
+  incentivoFiscalProducao      Boolean @default(false)
+  observacoesProducao          String? @db.Text
+
+  // Configurações NFSe HOMOLOGAÇÃO
+  serieHomologacao             Int     @default(1)
+  proximoNumeroHomologacao     Int     @default(1)
+  codigoMunicipioHomologacao   String? @db.VarChar(7)
+  codigoServicoHomologacao     String? @db.VarChar(20)
+  aliquotaIssHomologacao       Decimal? @db.Decimal(5, 2)
+  itemListaServicoHomologacao  String? @db.VarChar(10)
+  regimeTributacaoHomologacao  Int?    @default(1)
+  incentivoFiscalHomologacao   Boolean @default(false)
+  observacoesHomologacao       String? @db.Text
+
+  // Modelo (varia por município)
+  modeloNfse String @default("1.00") @db.VarChar(10)
 
   // Controle
   ativo     Boolean  @default(true)

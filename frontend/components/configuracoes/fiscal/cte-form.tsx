@@ -14,9 +14,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
 import { IconLoader2, IconDeviceFloppy, IconAlertCircle, IconAlertTriangle, IconCloud, IconFlask } from "@tabler/icons-react"
 import { EmitenteService } from "@/lib/services/emitente.service"
-import { ConfiguracaoNfeService } from "@/lib/services/configuracao-nfe.service"
-import { InutilizacaoNfeService } from "@/lib/services/inutilizacao-nfe.service"
-import { NfeConfigFields, NfeInutilizacaoFields } from "./nfe-form-tabs"
+import { ConfiguracaoCteService } from "@/lib/services/configuracao-cte.service"
+import { InutilizacaoCteService } from "@/lib/services/inutilizacao-cte.service"
+import { NfeConfigFields, NfeInutilizacaoFields } from "./cte-form-tabs"
 
 // Schema para Configurações NFe
 const nfeConfigSchema = z.object({
@@ -37,7 +37,7 @@ const nfeConfigSchema = z.object({
   ieSubstitutoHomologacao: z.string().optional(),
   observacoesHomologacao: z.string().optional(),
   documentosAutorizadosHomologacao: z.string().optional(),
-  modeloNfe: z.enum(["4.00"]).optional(),
+  modeloCte: z.enum(["4.00"]).optional(),
 })
 
 // Schema para Inutilização NFe
@@ -58,9 +58,9 @@ const nfeInutilizacaoSchema = z.object({
 // Schema combinado
 const nfeSchema = nfeConfigSchema.merge(nfeInutilizacaoSchema)
 
-type NfeFormData = z.infer<typeof nfeSchema>
+type CteFormData = z.infer<typeof nfeSchema>
 
-export function NfeForm() {
+export function CteForm() {
   const [loading, setLoading] = useState(false)
   const [loadingInutilizacao, setLoadingInutilizacao] = useState(false)
   const [loadingData, setLoadingData] = useState(true)
@@ -68,7 +68,7 @@ export function NfeForm() {
   const [activeTabConfig, setActiveTabConfig] = useState<"producao" | "homologacao">("homologacao")
   const [activeTabInutilizacao, setActiveTabInutilizacao] = useState<"producao" | "homologacao">("homologacao")
 
-  const form = useForm<NfeFormData>({
+  const form = useForm<CteFormData>({
     resolver: zodResolver(nfeSchema),
     defaultValues: {
       ambienteAtivoConfig: false, // Produção por padrão
@@ -83,7 +83,7 @@ export function NfeForm() {
       ieSubstitutoHomologacao: "", observacoesHomologacao: "", documentosAutorizadosHomologacao: "",
       numeroInicialInutilizarHomologacao: undefined, numeroFinalInutilizarHomologacao: undefined,
       serieInutilizarHomologacao: undefined, anoInutilizarHomologacao: undefined, justificativaInutilizarHomologacao: "",
-      modeloNfe: "4.00",
+      modeloCte: "4.00",
     },
   })
 
@@ -97,9 +97,9 @@ export function NfeForm() {
         setEmitenteId(emitente.id)
 
         // Buscar configurações NFe
-        const responseConfig = await ConfiguracaoNfeService.getByEmitente(emitente.id)
+        const responseConfig = await ConfiguracaoCteService.getByEmitente(emitente.id)
         // Buscar inutilizações NFe
-        const responseInutilizacao = await InutilizacaoNfeService.getByEmitente(emitente.id)
+        const responseInutilizacao = await InutilizacaoCteService.getByEmitente(emitente.id)
 
         const config = responseConfig.success && responseConfig.data ? responseConfig.data : null
         const inutilizacao = responseInutilizacao.success && responseInutilizacao.data ? responseInutilizacao.data : null
@@ -125,7 +125,7 @@ export function NfeForm() {
           ieSubstitutoHomologacao: config?.ieSubstitutoHomologacao || "",
           observacoesHomologacao: config?.observacoesHomologacao || "",
           documentosAutorizadosHomologacao: config?.documentosAutorizadosHomologacao || "",
-          modeloNfe: config?.modeloNfe || "4.00",
+          modeloCte: config?.modeloCte || "4.00",
           // Inutilizações
           numeroInicialInutilizarProducao: inutilizacao?.numeroInicialInutilizarProducao,
           numeroFinalInutilizarProducao: inutilizacao?.numeroFinalInutilizarProducao,
@@ -165,7 +165,7 @@ export function NfeForm() {
         // Salvar ambiente ativo (do switch de Configurações)
         ambienteAtivo: data.ambienteAtivoConfig ? 2 : 1,
         // Salvar modelo NFe
-        modeloNfe: data.modeloNfe || "4.00",
+        modeloCte: data.modeloCte || "4.00",
       }
 
       // Adicionar campos do ambiente sendo editado
@@ -189,7 +189,7 @@ export function NfeForm() {
         payload.documentosAutorizadosHomologacao = data.documentosAutorizadosHomologacao
       }
 
-      const response = await ConfiguracaoNfeService.upsert(emitenteId, payload)
+      const response = await ConfiguracaoCteService.upsert(emitenteId, payload)
       response.success ? toast.success("Configurações de NFe salvas!") : toast.error(response.error || "Erro ao salvar")
     } catch (error: any) {
       toast.error(error.message || "Erro ao salvar")
@@ -225,7 +225,7 @@ export function NfeForm() {
         payload.justificativaInutilizarHomologacao = data.justificativaInutilizarHomologacao
       }
 
-      const response = await InutilizacaoNfeService.upsert(emitenteId, payload)
+      const response = await InutilizacaoCteService.upsert(emitenteId, payload)
       response.success ? toast.success("Configurações de inutilização salvas!") : toast.error(response.error || "Erro ao salvar")
     } catch (error: any) {
       toast.error(error.message || "Erro ao salvar")
