@@ -95,7 +95,7 @@ export default function NfesPage() {
                       onChange={(e) => handleSearch(e.target.value)}
                     />
                   </div>
-                  <Button onClick={() => router.push("/nfes/nova")}>
+                  <Button onClick={() => router.push("/fiscal/nfe/nova")}>
                     <IconPlus className="h-4 w-4 mr-2" />
                     Nova NFe
                   </Button>

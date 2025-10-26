@@ -16,7 +16,7 @@ import { NfeStepGeral } from "./steps/nfe-step-geral"
 import { NfeStepItens } from "./steps/nfe-step-itens"
 import { NfeStepCobranca } from "./steps/nfe-step-cobranca"
 import { NfeStepRevisao } from "./steps/nfe-step-revisao"
-import { NfeWizardBreadcrumb } from "./nfe-wizard-breadcrumb"
+import { WizardProgressBar } from "../vendas/shared/wizard-progress-bar"
 
 interface NfeWizardProps {
   nfeId?: string
@@ -58,7 +58,13 @@ export function NfeWizard({ nfeId, onSuccess }: NfeWizardProps) {
   const isFirstStep = currentStepIndex === 0
   const isLastStep = currentStepIndex === WIZARD_STEPS.length - 1
 
-  const goToNextStep = () => {
+  const goToNextStep = (e?: React.MouseEvent) => {
+    // Prevenir propagação do evento para evitar submit acidental
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+
     // Validar antes de avançar
     if (!canAdvance()) {
       const messages = getValidationMessages()
@@ -94,11 +100,21 @@ export function NfeWizard({ nfeId, onSuccess }: NfeWizardProps) {
     }
   }
 
-  const goToStep = (step: WizardStep) => {
-    setCurrentStep(step)
+  const goToStep = (step: WizardStep | string) => {
+    const stepKey = typeof step === 'string' ? step : step
+    setCurrentStep(stepKey as WizardStep)
 
     // Scroll para o topo
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+
+    // Só permitir submit se estiver no último step
+    if (currentStep === 'revisao') {
+      handleSubmit(e)
+    }
   }
 
   // Watch dos campos para validação em tempo real
@@ -185,7 +201,7 @@ export function NfeWizard({ nfeId, onSuccess }: NfeWizardProps) {
   return (
     <>
     <Form {...form}>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleFormSubmit} className="space-y-4">
         {/* Header com progresso - Compacto */}
         <Card className="py-3">
           <CardHeader className="pb-0">
@@ -216,17 +232,20 @@ export function NfeWizard({ nfeId, onSuccess }: NfeWizardProps) {
           </CardHeader>
         </Card>
 
-        {/* Breadcrumb de navegação - Compacto */}
-        <Card className="py-3">
-          <CardContent className="py-3">
-            <NfeWizardBreadcrumb
-              steps={WIZARD_STEPS}
-              currentStep={currentStep}
-              completedSteps={completedSteps}
-              onStepClick={goToStep}
-            />
-          </CardContent>
-        </Card>
+        {/* Barra de Progresso Visual */}
+        <WizardProgressBar
+          steps={WIZARD_STEPS.map(s => ({
+            key: s.key,
+            label: s.label,
+            description: s.description
+          }))}
+          currentStep={currentStep}
+          completedSteps={completedSteps}
+          onStepClick={goToStep}
+          form={form}
+          totals={totals}
+          itemsCount={form.watch('itens')?.length || 0}
+        />
 
         {/* Conteúdo do step atual */}
         <div>

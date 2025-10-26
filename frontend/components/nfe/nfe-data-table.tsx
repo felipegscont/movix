@@ -149,12 +149,12 @@ export function NfeDataTable({ nfes, onRefresh }: NfeDataTableProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Ações</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => router.push(`/nfes/${nfe.id}`)}>
+              <DropdownMenuItem onClick={() => router.push(`/fiscal/nfe/${nfe.id}`)}>
                 <IconEye className="mr-2 h-4 w-4" />
                 Visualizar
               </DropdownMenuItem>
               {podeEditar && (
-                <DropdownMenuItem onClick={() => router.push(`/nfes/${nfe.id}/editar`)}>
+                <DropdownMenuItem onClick={() => router.push(`/fiscal/nfe/${nfe.id}/editar`)}>
                   <IconEdit className="mr-2 h-4 w-4" />
                   Editar
                 </DropdownMenuItem>

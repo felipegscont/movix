@@ -82,7 +82,7 @@ export function NfeBreadcrumb({ nfeNumero, nfeSerie, currentStep }: NfeBreadcrum
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href="/nfes">
+              <Link href="/fiscal/nfe">
                 <IconFileInvoice className="h-4 w-4 mr-1" />
                 NFes
               </Link>

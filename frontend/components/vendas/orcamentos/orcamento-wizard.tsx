@@ -4,15 +4,6 @@ import { useState, useEffect } from "react"
 import { Form } from "@/components/ui/form"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { 
-  Breadcrumb, 
-  BreadcrumbItem, 
-  BreadcrumbLink, 
-  BreadcrumbList, 
-  BreadcrumbPage, 
-  BreadcrumbSeparator 
-} from "@/components/ui/breadcrumb"
 import { IconArrowLeft, IconArrowRight, IconDeviceFloppy, IconLoader2 } from "@tabler/icons-react"
 import { useOrcamentoForm } from "@/hooks/vendas/use-orcamento-form"
 import { OrcamentoStepCabecalho } from "./steps/orcamento-step-cabecalho"
@@ -20,6 +11,7 @@ import { OrcamentoStepItens } from "./steps/orcamento-step-itens"
 import { OrcamentoStepTotais } from "./steps/orcamento-step-totais"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { IconAlertCircle } from "@tabler/icons-react"
+import { WizardProgressBar } from "../shared/wizard-progress-bar"
 
 interface OrcamentoWizardProps {
   pedidoId?: string
@@ -138,59 +130,16 @@ export function OrcamentoWizard({ pedidoId, onSuccess }: OrcamentoWizardProps) {
 
   return (
     <div className="space-y-6">
-      {/* Breadcrumb de navegação */}
-      <Card className="py-3">
-        <CardContent className="py-3">
-          <Breadcrumb>
-            <BreadcrumbList>
-              {STEPS.map((step, index) => (
-                <div key={step.id} className="flex items-center">
-                  <BreadcrumbItem>
-                    {currentStep === step.id ? (
-                      <BreadcrumbPage className="font-semibold">
-                        {step.name}
-                      </BreadcrumbPage>
-                    ) : (
-                      <BreadcrumbLink
-                        onClick={() => handleStepClick(step.id)}
-                        className={`cursor-pointer ${
-                          completedSteps.includes(step.id) || step.id < currentStep
-                            ? 'text-primary hover:text-primary/80'
-                            : 'text-muted-foreground cursor-not-allowed'
-                        }`}
-                      >
-                        {step.name}
-                      </BreadcrumbLink>
-                    )}
-                  </BreadcrumbItem>
-                  {index < STEPS.length - 1 && <BreadcrumbSeparator />}
-                </div>
-              ))}
-            </BreadcrumbList>
-          </Breadcrumb>
-
-          {/* Resumo rápido */}
-          <div className="mt-4 flex items-center justify-between text-sm">
-            <div className="text-muted-foreground">
-              {STEPS[currentStep - 1].description}
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="text-muted-foreground">
-                Itens: <span className="font-semibold text-foreground">{form.watch('itens')?.length || 0}</span>
-              </div>
-              <Separator orientation="vertical" className="h-4" />
-              <div className="text-muted-foreground">
-                Total: <span className="font-semibold text-foreground">
-                  {totals.valorTotal.toLocaleString('pt-BR', {
-                    style: 'currency',
-                    currency: 'BRL'
-                  })}
-                </span>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Barra de Progresso Visual */}
+      <WizardProgressBar
+        steps={STEPS}
+        currentStep={currentStep}
+        completedSteps={completedSteps}
+        onStepClick={handleStepClick}
+        form={form}
+        totals={totals}
+        itemsCount={form.watch('itens')?.length || 0}
+      />
 
       {/* Formulário */}
       <Form {...form}>

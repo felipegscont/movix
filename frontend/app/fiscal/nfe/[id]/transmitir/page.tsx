@@ -41,7 +41,7 @@ export default function TransmitirNfePage({ params }: { params: { id: string } }
     } catch (error) {
       console.error("Erro ao carregar NFe:", error)
       toast.error("Erro ao carregar NFe")
-      router.push("/nfes")
+      router.push("/fiscal/nfe")
     } finally {
       setLoading(false)
     }
@@ -82,7 +82,7 @@ export default function TransmitirNfePage({ params }: { params: { id: string } }
 
       // Aguardar 2 segundos e redirecionar
       setTimeout(() => {
-        router.push(`/nfes/${params.id}`)
+        router.push(`/fiscal/nfe/${params.id}`)
       }, 2000)
     } catch (error: any) {
       setTransmissionStatus('error')
@@ -251,7 +251,7 @@ export default function TransmitirNfePage({ params }: { params: { id: string } }
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => router.push("/nfes")}
+                    onClick={() => router.push("/fiscal/nfe")}
                     disabled={transmitting || transmissionStatus === 'success'}
                   >
                     <IconX className="h-4 w-4 mr-2" />

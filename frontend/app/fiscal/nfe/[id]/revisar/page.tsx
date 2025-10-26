@@ -45,7 +45,7 @@ export default function RevisarNfePage({ params }: { params: { id: string } }) {
     } catch (error) {
       console.error("Erro ao carregar NFe:", error)
       toast.error("Erro ao carregar NFe")
-      router.push("/nfes")
+      router.push("/fiscal/nfe")
     } finally {
       setLoading(false)
     }
@@ -202,7 +202,7 @@ export default function RevisarNfePage({ params }: { params: { id: string } }) {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => router.push("/nfes")}
+                    onClick={() => router.push("/fiscal/nfe")}
                     disabled={workflow.state.isProcessing}
                   >
                     <IconX className="h-4 w-4 mr-2" />

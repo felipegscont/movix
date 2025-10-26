@@ -11,7 +11,7 @@ export default function EditarNfePage() {
   const nfeId = params.id as string
 
   const handleSuccess = () => {
-    router.push('/nfes')
+    router.push('/fiscal/nfe')
   }
 
   return (
