@@ -13,6 +13,12 @@ interface PedidoStepCabecalhoProps {
 }
 
 export function PedidoStepCabecalho({ form, proximoNumero }: PedidoStepCabecalhoProps) {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+    }
+  }
+
   return (
     <div className="space-y-4">
       {/* Informações Gerais */}
@@ -55,6 +61,7 @@ export function PedidoStepCabecalho({ form, proximoNumero }: PedidoStepCabecalho
                     <Input
                       type="date"
                       className="h-9 text-sm"
+                      onKeyDown={handleKeyDown}
                       {...field}
                     />
                   </FormControl>
@@ -113,6 +120,7 @@ export function PedidoStepCabecalho({ form, proximoNumero }: PedidoStepCabecalho
                   <Input
                     placeholder="Digite o nome do vendedor..."
                     className="h-9 text-sm"
+                    onKeyDown={handleKeyDown}
                     {...field}
                     value={field.value || ''}
                   />

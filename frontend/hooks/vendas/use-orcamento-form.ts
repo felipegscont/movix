@@ -91,7 +91,7 @@ export function useOrcamentoForm({ orcamentoId, onSuccess }: UseOrcamentoFormPro
 
   const loadProximoNumero = async () => {
     try {
-      const numero = await PedidoService.getProximoNumero()
+      const numero = await OrcamentoService.getProximoNumero()
       setProximoNumero(numero)
       form.setValue('numero', numero)
     } catch (error) {
@@ -105,7 +105,7 @@ export function useOrcamentoForm({ orcamentoId, onSuccess }: UseOrcamentoFormPro
 
     try {
       setLoadingOrcamento(true)
-      const orcamentoData = await PedidoService.getById(orcamentoId)
+      const orcamentoData = await OrcamentoService.getById(orcamentoId)
       setOrcamento(orcamentoData)
 
       // Preencher formulário

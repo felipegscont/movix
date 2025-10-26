@@ -57,6 +57,13 @@ export function OrcamentoAddItemQuick({ onAddItem }: OrcamentoAddItemQuickProps)
     return (quantidade * valorUnitario) - valorDesconto
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    // Prevenir submit ao pressionar Enter
+    if (e.key === 'Enter') {
+      e.preventDefault()
+    }
+  }
+
   const handleAddItem = () => {
     if (!produtoId || !produto) {
       toast.error("Selecione um produto")
@@ -149,6 +156,7 @@ export function OrcamentoAddItemQuick({ onAddItem }: OrcamentoAddItemQuickProps)
                     min="0.0001"
                     value={quantidade}
                     onChange={(e) => setQuantidade(Number(e.target.value))}
+                    onKeyDown={handleKeyDown}
                     className="h-9 text-sm"
                   />
                 </div>
@@ -162,6 +170,7 @@ export function OrcamentoAddItemQuick({ onAddItem }: OrcamentoAddItemQuickProps)
                     min="0"
                     value={valorUnitario}
                     onChange={(e) => setValorUnitario(Number(e.target.value))}
+                    onKeyDown={handleKeyDown}
                     className="h-9 text-sm"
                   />
                 </div>
@@ -175,6 +184,7 @@ export function OrcamentoAddItemQuick({ onAddItem }: OrcamentoAddItemQuickProps)
                     min="0"
                     value={valorDesconto}
                     onChange={(e) => setValorDesconto(Number(e.target.value))}
+                    onKeyDown={handleKeyDown}
                     className="h-9 text-sm"
                   />
                 </div>

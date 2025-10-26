@@ -14,12 +14,19 @@ interface TotaisSectionProps {
   showObservacoes?: boolean
 }
 
-export function TotaisSection({ 
-  form, 
-  subtotal, 
+export function TotaisSection({
+  form,
+  subtotal,
   valorTotal,
-  showObservacoes = true 
+  showObservacoes = true
 }: TotaisSectionProps) {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    // Prevenir submit ao pressionar Enter
+    if (e.key === 'Enter') {
+      e.preventDefault()
+    }
+  }
+
   return (
     <div className="space-y-4">
       {/* Totais */}
@@ -61,6 +68,7 @@ export function TotaisSection({
                       min="0"
                       placeholder="0,00"
                       className="h-9 text-sm"
+                      onKeyDown={handleKeyDown}
                       {...field}
                     />
                   </FormControl>
@@ -83,6 +91,7 @@ export function TotaisSection({
                       min="0"
                       placeholder="0,00"
                       className="h-9 text-sm"
+                      onKeyDown={handleKeyDown}
                       {...field}
                     />
                   </FormControl>
@@ -105,6 +114,7 @@ export function TotaisSection({
                       min="0"
                       placeholder="0,00"
                       className="h-9 text-sm"
+                      onKeyDown={handleKeyDown}
                       {...field}
                     />
                   </FormControl>

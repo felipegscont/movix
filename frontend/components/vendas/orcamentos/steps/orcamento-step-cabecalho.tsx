@@ -13,6 +13,12 @@ interface OrcamentoStepCabecalhoProps {
 }
 
 export function OrcamentoStepCabecalho({ form, proximoNumero }: OrcamentoStepCabecalhoProps) {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+    }
+  }
+
   return (
     <div className="space-y-4">
       {/* Informações Gerais */}
