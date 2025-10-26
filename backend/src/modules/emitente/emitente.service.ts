@@ -146,14 +146,24 @@ export class EmitenteService {
   }
 
   async getProximoNumeroNfe(emitenteId: string): Promise<number> {
-    const emitente = await this.findOne(emitenteId);
+    // Buscar configuração de NFe
+    const config = await this.prisma.configuracaoNfe.findUnique({
+      where: { emitenteId },
+    });
 
-    const proximoNumero = emitente.proximoNumeroNfe;
+    if (!config) {
+      throw new NotFoundException('Configuração de NFe não encontrada');
+    }
+
+    // Usar o número do ambiente ativo
+    const isHomologacao = config.ambienteAtivo === 2;
+    const proximoNumero = isHomologacao ? config.proximoNumeroHomologacao : config.proximoNumeroProducao;
+    const campoProximoNumero = isHomologacao ? 'proximoNumeroHomologacao' : 'proximoNumeroProducao';
 
     // Incrementar o próximo número
-    await this.prisma.emitente.update({
-      where: { id: emitenteId },
-      data: { proximoNumeroNfe: proximoNumero + 1 },
+    await this.prisma.configuracaoNfe.update({
+      where: { emitenteId },
+      data: { [campoProximoNumero]: proximoNumero + 1 },
     });
 
     return proximoNumero;

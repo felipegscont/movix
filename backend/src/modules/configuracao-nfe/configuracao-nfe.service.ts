@@ -42,10 +42,15 @@ export class ConfiguracaoNfeService {
       throw new NotFoundException('Configuração de NFe não encontrada');
     }
 
+    // Incrementar o número do ambiente ativo
+    const isHomologacao = config.ambienteAtivo === 2;
+    const campoProximoNumero = isHomologacao ? 'proximoNumeroHomologacao' : 'proximoNumeroProducao';
+    const valorAtual = isHomologacao ? config.proximoNumeroHomologacao : config.proximoNumeroProducao;
+
     return this.prisma.configuracaoNfe.update({
       where: { emitenteId },
       data: {
-        proximoNumero: config.proximoNumero + 1,
+        [campoProximoNumero]: valorAtual + 1,
       },
     });
   }

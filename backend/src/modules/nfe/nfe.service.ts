@@ -21,6 +21,15 @@ export class NfeService {
     // Buscar emitente ativo (sempre o mesmo para o sistema)
     const emitente = await this.emitenteService.getEmitenteAtivo();
 
+    // Buscar configuração de NFe
+    const configNfe = await this.prisma.configuracaoNfe.findUnique({
+      where: { emitenteId: emitente.id },
+    });
+
+    if (!configNfe) {
+      throw new NotFoundException('Configuração de NFe não encontrada. Configure em Configurações > Fiscal > NFe');
+    }
+
     // Verificar se cliente existe
     const cliente = await this.prisma.cliente.findUnique({
       where: { id: createNfeDto.clienteId },
@@ -36,13 +45,17 @@ export class NfeService {
     // Calcular totais
     const totais = await this.calcularTotais(createNfeDto);
 
+    // Usar série do ambiente ativo
+    const isHomologacao = configNfe.ambienteAtivo === 2;
+    const serieAtiva = isHomologacao ? configNfe.serieHomologacao : configNfe.serieProducao;
+
     // Criar NFe no banco
     const nfe = await this.prisma.nfe.create({
       data: {
         emitenteId: emitente.id, // Usar emitente ativo
         clienteId: createNfeDto.clienteId,
         numero: proximoNumero,
-        serie: createNfeDto.serie || emitente.serieNfe, // Usar série do emitente se não informada
+        serie: createNfeDto.serie || serieAtiva, // Usar série da configuração se não informada
         codigoNumerico: String(Math.floor(Math.random() * 100000000)).padStart(8, '0'),
         naturezaOperacao: createNfeDto.naturezaOperacao,
         tipoOperacao: createNfeDto.tipoOperacao,

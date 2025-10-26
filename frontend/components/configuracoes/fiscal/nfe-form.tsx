@@ -4,53 +4,47 @@ import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
+import { toast } from "sonner"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+import { Switch } from "@/components/ui/switch"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
-import { StaticCombobox, AMBIENTE_NFE_OPTIONS } from "@/components/shared/combobox/static-combobox"
-import { IconLoader2, IconDeviceFloppy, IconAlertCircle, IconFileText, IconAlertTriangle } from "@tabler/icons-react"
-import { toast } from "sonner"
+import { IconLoader2, IconDeviceFloppy, IconAlertCircle, IconAlertTriangle, IconCloud, IconFlask } from "@tabler/icons-react"
 import { EmitenteService } from "@/lib/services/emitente.service"
 import { ConfiguracaoNfeService } from "@/lib/services/configuracao-nfe.service"
-
-const TIPO_FRETE_OPTIONS = [
-  { value: 0, label: "0 - Contratação do Frete por conta do Remetente (CIF)" },
-  { value: 1, label: "1 - Contratação do Frete por conta do Destinatário (FOB)" },
-  { value: 2, label: "2 - Contratação do Frete por conta de Terceiros" },
-  { value: 3, label: "3 - Transporte Próprio por conta do Remetente" },
-  { value: 4, label: "4 - Transporte Próprio por conta do Destinatário" },
-  { value: 9, label: "9 - Sem Ocorrência de Transporte" },
-]
-
-const INDICADOR_PRESENCA_OPTIONS = [
-  { value: 0, label: "0 - Não se aplica" },
-  { value: 1, label: "1 - Operação presencial" },
-  { value: 2, label: "2 - Operação não presencial, pela Internet" },
-  { value: 3, label: "3 - Operação não presencial, Teleatendimento" },
-  { value: 4, label: "4 - NFC-e em operação com entrega a domicílio" },
-  { value: 5, label: "5 - Operação presencial, fora do estabelecimento" },
-  { value: 9, label: "9 - Operação não presencial, outros" },
-]
-
-const ORIENTACAO_IMPRESSAO_OPTIONS = [
-  { value: 1, label: "Retrato" },
-  { value: 2, label: "Paisagem" },
-]
+import { NfeConfigFields, NfeInutilizacaoFields } from "./nfe-form-tabs"
 
 const nfeSchema = z.object({
-  ambienteNfe: z.number().min(1).max(2),
-  serieNfe: z.number().min(1).max(999),
-  proximoNumeroNfe: z.number().min(1),
-  tipoFrete: z.number().min(0).max(9).optional(),
-  indicadorPresenca: z.number().min(0).max(9).optional(),
-  orientacaoImpressao: z.number().min(1).max(2).optional(),
-  ieSubstitutoTributario: z.string().optional(),
-  observacoesNfe: z.string().optional(),
-  documentosAutorizados: z.string().optional(),
+  habilitarHomologacao: z.boolean(),
+  serieProducao: z.number().min(1).max(999),
+  proximoNumeroProducao: z.number().min(1),
+  tipoFreteProducao: z.number().optional(),
+  indicadorPresencaProducao: z.number().optional(),
+  orientacaoImpressaoProducao: z.number().optional(),
+  ieSubstitutoProducao: z.string().optional(),
+  observacoesProducao: z.string().optional(),
+  documentosAutorizadosProducao: z.string().optional(),
+  numeroInicialInutilizarProducao: z.number().optional(),
+  numeroFinalInutilizarProducao: z.number().optional(),
+  serieInutilizarProducao: z.number().optional(),
+  anoInutilizarProducao: z.number().optional(),
+  justificativaInutilizarProducao: z.string().optional(),
+  serieHomologacao: z.number().min(1).max(999),
+  proximoNumeroHomologacao: z.number().min(1),
+  tipoFreteHomologacao: z.number().optional(),
+  indicadorPresencaHomologacao: z.number().optional(),
+  orientacaoImpressaoHomologacao: z.number().optional(),
+  ieSubstitutoHomologacao: z.string().optional(),
+  observacoesHomologacao: z.string().optional(),
+  documentosAutorizadosHomologacao: z.string().optional(),
+  numeroInicialInutilizarHomologacao: z.number().optional(),
+  numeroFinalInutilizarHomologacao: z.number().optional(),
+  serieInutilizarHomologacao: z.number().optional(),
+  anoInutilizarHomologacao: z.number().optional(),
+  justificativaInutilizarHomologacao: z.string().optional(),
 })
 
 type NfeFormData = z.infer<typeof nfeSchema>
@@ -63,15 +57,17 @@ export function NfeForm() {
   const form = useForm<NfeFormData>({
     resolver: zodResolver(nfeSchema),
     defaultValues: {
-      ambienteNfe: 2,
-      serieNfe: 1,
-      proximoNumeroNfe: 1,
-      tipoFrete: 1,
-      indicadorPresenca: 2,
-      orientacaoImpressao: 1,
-      ieSubstitutoTributario: "",
-      observacoesNfe: "",
-      documentosAutorizados: "",
+      habilitarHomologacao: true,
+      serieProducao: 1, proximoNumeroProducao: 1, tipoFreteProducao: 1,
+      indicadorPresencaProducao: 2, orientacaoImpressaoProducao: 1,
+      ieSubstitutoProducao: "", observacoesProducao: "", documentosAutorizadosProducao: "",
+      numeroInicialInutilizarProducao: undefined, numeroFinalInutilizarProducao: undefined,
+      serieInutilizarProducao: undefined, anoInutilizarProducao: undefined, justificativaInutilizarProducao: "",
+      serieHomologacao: 1, proximoNumeroHomologacao: 1, tipoFreteHomologacao: 1,
+      indicadorPresencaHomologacao: 2, orientacaoImpressaoHomologacao: 1,
+      ieSubstitutoHomologacao: "", observacoesHomologacao: "", documentosAutorizadosHomologacao: "",
+      numeroInicialInutilizarHomologacao: undefined, numeroFinalInutilizarHomologacao: undefined,
+      serieInutilizarHomologacao: undefined, anoInutilizarHomologacao: undefined, justificativaInutilizarHomologacao: "",
     },
   })
 
@@ -79,73 +75,52 @@ export function NfeForm() {
     async function loadData() {
       try {
         setLoadingData(true)
-
-        // Buscar emitente ativo
         const emitente = await EmitenteService.getEmitenteAtivo()
-
-        if (!emitente) {
-          toast.error("Nenhum emitente encontrado")
-          return
-        }
+        if (!emitente) return toast.error("Nenhum emitente encontrado")
 
         setEmitenteId(emitente.id)
-
-        // Buscar configuração de NFe
         const response = await ConfiguracaoNfeService.getByEmitente(emitente.id)
 
         if (response.success && response.data) {
+          const d = response.data
           form.reset({
-            ambienteNfe: response.data.ambiente,
-            serieNfe: response.data.serie,
-            proximoNumeroNfe: response.data.proximoNumero,
-            tipoFrete: response.data.tipoFrete || 1,
-            indicadorPresenca: response.data.indicadorPresenca || 2,
-            orientacaoImpressao: response.data.orientacaoImpressao || 1,
-            ieSubstitutoTributario: response.data.ieSubstitutoTributario || "",
-            observacoesNfe: response.data.observacoesPadrao || "",
-            documentosAutorizados: response.data.documentosAutorizados || "",
+            habilitarHomologacao: d.ambienteAtivo === 2,
+            serieProducao: d.serieProducao || 1, proximoNumeroProducao: d.proximoNumeroProducao || 1,
+            tipoFreteProducao: d.tipoFreteProducao || 1, indicadorPresencaProducao: d.indicadorPresencaProducao || 2,
+            orientacaoImpressaoProducao: d.orientacaoImpressaoProducao || 1, ieSubstitutoProducao: d.ieSubstitutoProducao || "",
+            observacoesProducao: d.observacoesProducao || "", documentosAutorizadosProducao: d.documentosAutorizadosProducao || "",
+            numeroInicialInutilizarProducao: d.numeroInicialInutilizarProducao, numeroFinalInutilizarProducao: d.numeroFinalInutilizarProducao,
+            serieInutilizarProducao: d.serieInutilizarProducao, anoInutilizarProducao: d.anoInutilizarProducao,
+            justificativaInutilizarProducao: d.justificativaInutilizarProducao || "",
+            serieHomologacao: d.serieHomologacao || 1, proximoNumeroHomologacao: d.proximoNumeroHomologacao || 1,
+            tipoFreteHomologacao: d.tipoFreteHomologacao || 1, indicadorPresencaHomologacao: d.indicadorPresencaHomologacao || 2,
+            orientacaoImpressaoHomologacao: d.orientacaoImpressaoHomologacao || 1, ieSubstitutoHomologacao: d.ieSubstitutoHomologacao || "",
+            observacoesHomologacao: d.observacoesHomologacao || "", documentosAutorizadosHomologacao: d.documentosAutorizadosHomologacao || "",
+            numeroInicialInutilizarHomologacao: d.numeroInicialInutilizarHomologacao, numeroFinalInutilizarHomologacao: d.numeroFinalInutilizarHomologacao,
+            serieInutilizarHomologacao: d.serieInutilizarHomologacao, anoInutilizarHomologacao: d.anoInutilizarHomologacao,
+            justificativaInutilizarHomologacao: d.justificativaInutilizarHomologacao || "",
           })
         }
       } catch (error) {
-        console.error("Erro ao carregar dados:", error)
         toast.error("Erro ao carregar dados")
       } finally {
         setLoadingData(false)
       }
     }
-
     loadData()
   }, [form])
 
   const onSubmit = async (data: NfeFormData) => {
-    if (!emitenteId) {
-      toast.error("Configure os dados da empresa primeiro")
-      return
-    }
-
+    if (!emitenteId) return toast.error("Configure os dados da empresa primeiro")
     try {
       setLoading(true)
-
-      const response = await ConfiguracaoNfeService.upsert(emitenteId, {
-        ambiente: data.ambienteNfe,
-        serie: data.serieNfe,
-        proximoNumero: data.proximoNumeroNfe,
-        tipoFrete: data.tipoFrete,
-        indicadorPresenca: data.indicadorPresenca,
-        orientacaoImpressao: data.orientacaoImpressao,
-        ieSubstitutoTributario: data.ieSubstitutoTributario,
-        observacoesPadrao: data.observacoesNfe,
-        documentosAutorizados: data.documentosAutorizados,
-      })
-
-      if (response.success) {
-        toast.success("Configurações de NF-e salvas com sucesso!")
-      } else {
-        toast.error(response.error || "Erro ao salvar configurações")
-      }
+      // Remover habilitarHomologacao e adicionar ambienteAtivo
+      const { habilitarHomologacao, ...rest } = data
+      const payload = { ...rest, ambienteAtivo: habilitarHomologacao ? 2 : 1 }
+      const response = await ConfiguracaoNfeService.upsert(emitenteId, payload)
+      response.success ? toast.success("Configurações salvas!") : toast.error(response.error || "Erro ao salvar")
     } catch (error: any) {
-      console.error("Erro ao salvar:", error)
-      toast.error(error.message || "Erro ao salvar configurações")
+      toast.error(error.message || "Erro ao salvar")
     } finally {
       setLoading(false)
     }
@@ -161,255 +136,122 @@ export function NfeForm() {
         <IconAlertCircle className="h-4 w-4" />
         <AlertTitle>Empresa não configurada</AlertTitle>
         <AlertDescription>
-          Configure os dados da empresa em{" "}
-          <a href="/configuracoes/empresa/geral" className="underline font-medium">
-            Configurações &gt; Empresa &gt; Geral
-          </a>
+          Configure em <a href="/configuracoes/empresa/geral" className="underline font-medium">Empresa &gt; Geral</a>
         </AlertDescription>
       </Alert>
     )
   }
 
-  const ambienteAtual = form.watch("ambienteNfe")
+  const habilitarHomologacao = form.watch("habilitarHomologacao")
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {/* Alerta de Ambiente */}
-        {ambienteAtual === 1 && (
-          <Alert variant="destructive">
-            <IconAlertTriangle className="h-4 w-4" />
-            <AlertTitle>Ambiente de Produção</AlertTitle>
-            <AlertDescription>
-              Você está no ambiente de <strong>PRODUÇÃO</strong>. As notas emitidas terão validade fiscal.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {ambienteAtual === 2 && (
-          <Alert>
-            <IconAlertCircle className="h-4 w-4" />
-            <AlertTitle>Ambiente de Homologação</AlertTitle>
-            <AlertDescription>
-              Você está no ambiente de <strong>HOMOLOGAÇÃO</strong>. Use para testes.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* Card Principal */}
+        {/* Card de Ambiente Ativo */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <IconFileText className="h-5 w-5" />
-              Configurações da NF-e
-            </CardTitle>
-            <CardDescription>
-              Configure ambiente, numeração e parâmetros da Nota Fiscal Eletrônica
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Ambiente e Numeração */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <FormField
-                control={form.control}
-                name="ambienteNfe"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Ambiente *</FormLabel>
-                    <FormControl>
-                      <StaticCombobox
-                        options={AMBIENTE_NFE_OPTIONS}
-                        value={field.value}
-                        onValueChange={(value) => field.onChange(value as number)}
-                        placeholder="Selecione"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="serieNfe"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Série *</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="number"
-                        min={1}
-                        max={999}
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="proximoNumeroNfe"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Próximo Número *</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="number"
-                        min={1}
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {/* Tipo de Frete e Indicador de Presença */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="tipoFrete"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tipo de Frete Padrão</FormLabel>
-                    <FormControl>
-                      <StaticCombobox
-                        options={TIPO_FRETE_OPTIONS}
-                        value={field.value}
-                        onValueChange={(value) => field.onChange(value as number)}
-                        placeholder="Selecione"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="indicadorPresenca"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Indicador de Presença</FormLabel>
-                    <FormControl>
-                      <StaticCombobox
-                        options={INDICADOR_PRESENCA_OPTIONS}
-                        value={field.value}
-                        onValueChange={(value) => field.onChange(value as number)}
-                        placeholder="Selecione"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {/* Orientação e IE Substituto */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="orientacaoImpressao"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Orientação da Impressão</FormLabel>
-                    <FormControl>
-                      <StaticCombobox
-                        options={ORIENTACAO_IMPRESSAO_OPTIONS}
-                        value={field.value}
-                        onValueChange={(value) => field.onChange(value as number)}
-                        placeholder="Selecione"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="ieSubstitutoTributario"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>IE do Substituto Tributário</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Inscrição Estadual" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {/* Observações */}
+          <CardContent className="pt-6">
             <FormField
               control={form.control}
-              name="observacoesNfe"
+              name="habilitarHomologacao"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Observações Padrão na NF-e</FormLabel>
+                <FormItem className="flex items-center justify-between space-y-0">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base font-semibold">
+                      Ambiente Ativo
+                    </FormLabel>
+                    <FormDescription>
+                      {habilitarHomologacao ? (
+                        <span className="flex items-center gap-2 text-orange-600">
+                          <IconFlask className="h-4 w-4" />
+                          Homologação - Ambiente de testes
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-2 text-green-600">
+                          <IconCloud className="h-4 w-4" />
+                          Produção - Notas com validade fiscal
+                        </span>
+                      )}
+                    </FormDescription>
+                  </div>
                   <FormControl>
-                    <Textarea
-                      {...field}
-                      placeholder="Observações que aparecerão em todas as notas"
-                      rows={3}
-                    />
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
                   </FormControl>
-                  <FormDescription>
-                    Texto que será incluído automaticamente em todas as NF-e
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Documentos Autorizados */}
-            <FormField
-              control={form.control}
-              name="documentosAutorizados"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Documentos Autorizados (CNPJ/CPF)</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      placeholder="Digite os CNPJ ou CPF autorizados, separados por vírgula"
-                      rows={2}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Documentos autorizados a fazer download do XML da NF-e
-                  </FormDescription>
-                  <FormMessage />
                 </FormItem>
               )}
             />
           </CardContent>
         </Card>
 
-        {/* Botão Salvar */}
+        {/* Card de Configurações com Tabs */}
+        <Card>
+          <CardHeader className="pb-3">
+            <Tabs defaultValue="producao" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="producao" className="flex items-center gap-2">
+                  <IconCloud className="h-4 w-4" />
+                  Produção
+                </TabsTrigger>
+                <TabsTrigger value="homologacao" className="flex items-center gap-2">
+                  <IconFlask className="h-4 w-4" />
+                  Homologação
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="producao" className="w-full">
+              <TabsContent value="producao" className="mt-0">
+                <NfeConfigFields form={form} prefix="Producao" showInutilizacao={false} />
+              </TabsContent>
+
+              <TabsContent value="homologacao" className="mt-0">
+                <NfeConfigFields form={form} prefix="Homologacao" showInutilizacao={false} />
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+
+        {/* Card de Inutilização com Tabs */}
+        <Card>
+          <CardHeader className="pb-3">
+            <Tabs defaultValue="producao" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="producao" className="flex items-center gap-2">
+                  <IconCloud className="h-4 w-4" />
+                  Produção
+                </TabsTrigger>
+                <TabsTrigger value="homologacao" className="flex items-center gap-2">
+                  <IconFlask className="h-4 w-4" />
+                  Homologação
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="producao" className="w-full">
+              <TabsContent value="producao" className="mt-0">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Inutilizar Numeração de Nota Fiscal</h3>
+                  <NfeInutilizacaoFields form={form} prefix="Producao" />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="homologacao" className="mt-0">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Inutilizar Numeração de Nota Fiscal</h3>
+                  <NfeInutilizacaoFields form={form} prefix="Homologacao" />
+                </div>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+
         <div className="flex justify-end">
           <Button type="submit" disabled={loading} size="lg">
-            {loading ? (
-              <>
-                <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />
-                Salvando...
-              </>
-            ) : (
-              <>
-                <IconDeviceFloppy className="mr-2 h-4 w-4" />
-                Salvar Configurações
-              </>
-            )}
+            {loading ? <><IconLoader2 className="mr-2 h-4 w-4 animate-spin" />Salvando...</> : <><IconDeviceFloppy className="mr-2 h-4 w-4" />Salvar</>}
           </Button>
         </div>
       </form>
     </Form>
   )
 }
-

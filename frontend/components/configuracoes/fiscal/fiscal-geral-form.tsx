@@ -57,22 +57,22 @@ export function FiscalGeralForm() {
     async function loadEmitente() {
       try {
         setLoadingData(true)
-        const response = await EmitenteService.getFirst()
-        
-        if (response.data) {
-          setEmitenteId(response.data.id)
-          
+        const emitente = await EmitenteService.getEmitenteAtivo()
+
+        if (emitente) {
+          setEmitenteId(emitente.id)
+
           // Preencher formulário
           form.reset({
-            regimeTributario: response.data.regimeTributario || 1,
-            enviarNotasPorEmail: response.data.enviarNotasPorEmail || false,
+            regimeTributario: emitente.regimeTributario || 1,
+            enviarNotasPorEmail: emitente.enviarNotasPorEmail || false,
           })
 
           // Carregar informações do certificado se existir
-          if (response.data.certificadoPath) {
-            const certInfo = await EmitenteService.getCertificadoInfo(response.data.id)
-            if (certInfo.data) {
-              setCertificadoInfoFromDb(certInfo.data)
+          if (emitente.certificadoPath) {
+            const certInfo = await EmitenteService.getCertificadoAtivo(emitente.id)
+            if (certInfo) {
+              setCertificadoInfoFromDb(certInfo)
             }
           }
         }

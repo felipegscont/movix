@@ -80,18 +80,6 @@ export class CreateEmitenteDto {
   certificadoPassword?: string;
 
   @IsOptional()
-  @IsInt()
-  ambienteNfe?: number;
-
-  @IsOptional()
-  @IsInt()
-  proximoNumeroNfe?: number;
-
-  @IsOptional()
-  @IsInt()
-  serieNfe?: number;
-
-  @IsOptional()
   @IsBoolean()
   ativo?: boolean;
 }

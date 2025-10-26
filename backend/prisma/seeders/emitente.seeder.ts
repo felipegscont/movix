@@ -74,12 +74,17 @@ export async function seedEmitentePlaceholder(prisma: PrismaClient): Promise<voi
   await prisma.configuracaoNfe.create({
     data: {
       emitenteId: emitente.id,
-      ambiente: 2, // Homologação (seguro para testes)
-      serie: 1,
-      proximoNumero: 1,
-      tipoFrete: 1,
-      indicadorPresenca: 2,
-      orientacaoImpressao: 1,
+      ambienteAtivo: 2, // Homologação (seguro para testes)
+      serieProducao: 1,
+      proximoNumeroProducao: 1,
+      tipoFreteProducao: 1,
+      indicadorPresencaProducao: 2,
+      orientacaoImpressaoProducao: 1,
+      serieHomologacao: 1,
+      proximoNumeroHomologacao: 1,
+      tipoFreteHomologacao: 1,
+      indicadorPresencaHomologacao: 2,
+      orientacaoImpressaoHomologacao: 1,
     },
   })
 

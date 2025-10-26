@@ -209,20 +209,41 @@ model ConfiguracaoNfe {
   id         String @id @default(cuid())
   emitenteId String @unique
 
-  // Ambiente e Numeração
-  ambiente      Int @default(2) // 1=Produção, 2=Homologação
-  serie         Int @default(1)
-  proximoNumero Int @default(1)
+  // Ambiente Ativo
+  ambienteAtivo Int @default(2) // 1=Produção, 2=Homologação
 
-  // Configurações de Emissão
-  tipoFrete           Int? @default(1) // 0=CIF, 1=FOB, etc
-  indicadorPresenca   Int? @default(2) // 0-9
-  orientacaoImpressao Int? @default(1) // 1=Retrato, 2=Paisagem
+  // Configurações PRODUÇÃO
+  serieProducao                    Int     @default(1)
+  proximoNumeroProducao            Int     @default(1)
+  tipoFreteProducao                Int?    @default(1)
+  indicadorPresencaProducao        Int?    @default(2)
+  orientacaoImpressaoProducao      Int?    @default(1)
+  ieSubstitutoProducao             String? @db.VarChar(20)
+  observacoesProducao              String? @db.Text
+  documentosAutorizadosProducao    String? @db.Text
+  numeroInicialInutilizarProducao  Int?
+  numeroFinalInutilizarProducao    Int?
+  serieInutilizarProducao          Int?
+  anoInutilizarProducao            Int?
+  justificativaInutilizarProducao  String? @db.Text
 
-  // Informações Adicionais
-  ieSubstitutoTributario String? @db.VarChar(20)
-  observacoesPadrao      String? @db.Text
-  documentosAutorizados  String? @db.Text
+  // Configurações HOMOLOGAÇÃO
+  serieHomologacao                 Int     @default(1)
+  proximoNumeroHomologacao         Int     @default(1)
+  tipoFreteHomologacao             Int?    @default(1)
+  indicadorPresencaHomologacao     Int?    @default(2)
+  orientacaoImpressaoHomologacao   Int?    @default(1)
+  ieSubstitutoHomologacao          String? @db.VarChar(20)
+  observacoesHomologacao           String? @db.Text
+  documentosAutorizadosHomologacao String? @db.Text
+  numeroInicialInutilizarHomologacao Int?
+  numeroFinalInutilizarHomologacao   Int?
+  serieInutilizarHomologacao         Int?
+  anoInutilizarHomologacao           Int?
+  justificativaInutilizarHomologacao String? @db.Text
+
+  // Modelo (comum para ambos)
+  modeloNfe String @default("4.00") @db.VarChar(10)
 
   // Controle
   ativo     Boolean  @default(true)

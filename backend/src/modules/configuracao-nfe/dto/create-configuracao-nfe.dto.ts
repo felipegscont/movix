@@ -5,47 +5,118 @@ export class CreateConfiguracaoNfeDto {
   @Min(1)
   @Max(2)
   @IsOptional()
-  ambiente?: number;
+  ambienteAtivo?: number;
 
+  // Produção
   @IsInt()
   @Min(1)
   @Max(999)
   @IsOptional()
-  serie?: number;
+  serieProducao?: number;
 
   @IsInt()
   @Min(1)
   @IsOptional()
-  proximoNumero?: number;
+  proximoNumeroProducao?: number;
 
   @IsInt()
-  @Min(0)
-  @Max(9)
   @IsOptional()
-  tipoFrete?: number;
+  tipoFreteProducao?: number;
 
   @IsInt()
-  @Min(0)
-  @Max(9)
   @IsOptional()
-  indicadorPresenca?: number;
+  indicadorPresencaProducao?: number;
+
+  @IsInt()
+  @IsOptional()
+  orientacaoImpressaoProducao?: number;
+
+  @IsString()
+  @IsOptional()
+  ieSubstitutoProducao?: string;
+
+  @IsString()
+  @IsOptional()
+  observacoesProducao?: string;
+
+  @IsString()
+  @IsOptional()
+  documentosAutorizadosProducao?: string;
+
+  @IsInt()
+  @IsOptional()
+  numeroInicialInutilizarProducao?: number;
+
+  @IsInt()
+  @IsOptional()
+  numeroFinalInutilizarProducao?: number;
+
+  @IsInt()
+  @IsOptional()
+  serieInutilizarProducao?: number;
+
+  @IsInt()
+  @IsOptional()
+  anoInutilizarProducao?: number;
+
+  @IsString()
+  @IsOptional()
+  justificativaInutilizarProducao?: string;
+
+  // Homologação
+  @IsInt()
+  @Min(1)
+  @Max(999)
+  @IsOptional()
+  serieHomologacao?: number;
 
   @IsInt()
   @Min(1)
-  @Max(2)
   @IsOptional()
-  orientacaoImpressao?: number;
+  proximoNumeroHomologacao?: number;
+
+  @IsInt()
+  @IsOptional()
+  tipoFreteHomologacao?: number;
+
+  @IsInt()
+  @IsOptional()
+  indicadorPresencaHomologacao?: number;
+
+  @IsInt()
+  @IsOptional()
+  orientacaoImpressaoHomologacao?: number;
 
   @IsString()
   @IsOptional()
-  ieSubstitutoTributario?: string;
+  ieSubstitutoHomologacao?: string;
 
   @IsString()
   @IsOptional()
-  observacoesPadrao?: string;
+  observacoesHomologacao?: string;
 
   @IsString()
   @IsOptional()
-  documentosAutorizados?: string;
+  documentosAutorizadosHomologacao?: string;
+
+  @IsInt()
+  @IsOptional()
+  numeroInicialInutilizarHomologacao?: number;
+
+  @IsInt()
+  @IsOptional()
+  numeroFinalInutilizarHomologacao?: number;
+
+  @IsInt()
+  @IsOptional()
+  serieInutilizarHomologacao?: number;
+
+  @IsInt()
+  @IsOptional()
+  anoInutilizarHomologacao?: number;
+
+  @IsString()
+  @IsOptional()
+  justificativaInutilizarHomologacao?: string;
 }
 

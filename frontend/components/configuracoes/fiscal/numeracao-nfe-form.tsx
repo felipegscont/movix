@@ -14,6 +14,7 @@ import { StaticCombobox, AMBIENTE_NFE_OPTIONS } from "@/components/shared/combob
 import { IconLoader2, IconDeviceFloppy, IconAlertCircle, IconReceipt, IconAlertTriangle } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { EmitenteService } from "@/lib/services/emitente.service"
+import { ConfiguracaoNfeService } from "@/lib/services/configuracao-nfe.service"
 
 const numeracaoNfeSchema = z.object({
   ambienteNfe: z.number().min(1).max(2),
@@ -39,30 +40,37 @@ export function NumeracaoNfeForm() {
 
   // Carregar dados do emitente
   useEffect(() => {
-    async function loadEmitente() {
+    async function loadData() {
       try {
         setLoadingData(true)
-        const response = await EmitenteService.getFirst()
-        
-        if (response.data) {
-          setEmitenteId(response.data.id)
-          
-          // Preencher formulário com dados existentes
+        const emitente = await EmitenteService.getEmitenteAtivo()
+
+        if (!emitente) {
+          toast.error("Nenhum emitente encontrado")
+          return
+        }
+
+        setEmitenteId(emitente.id)
+
+        // Buscar configuração de NFe
+        const response = await ConfiguracaoNfeService.getByEmitente(emitente.id)
+
+        if (response.success && response.data) {
           form.reset({
-            ambienteNfe: response.data.ambienteNfe || 2,
-            serieNfe: response.data.serieNfe || 1,
-            proximoNumeroNfe: response.data.proximoNumeroNfe || 1,
+            ambienteNfe: response.data.ambiente,
+            serieNfe: response.data.serie,
+            proximoNumeroNfe: response.data.proximoNumero,
           })
         }
       } catch (error) {
-        console.error("Erro ao carregar emitente:", error)
-        toast.error("Erro ao carregar dados do emitente")
+        console.error("Erro ao carregar dados:", error)
+        toast.error("Erro ao carregar dados")
       } finally {
         setLoadingData(false)
       }
     }
 
-    loadEmitente()
+    loadData()
   }, [form])
 
   const onSubmit = async (data: NumeracaoNfeFormData) => {
@@ -74,10 +82,10 @@ export function NumeracaoNfeForm() {
     try {
       setLoading(true)
 
-      const response = await EmitenteService.update(emitenteId, {
-        ambienteNfe: data.ambienteNfe,
-        serieNfe: data.serieNfe,
-        proximoNumeroNfe: data.proximoNumeroNfe,
+      const response = await ConfiguracaoNfeService.upsert(emitenteId, {
+        ambiente: data.ambienteNfe,
+        serie: data.serieNfe,
+        proximoNumero: data.proximoNumeroNfe,
       })
 
       if (response.success) {
