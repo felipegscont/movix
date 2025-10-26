@@ -11,7 +11,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { Skeleton } from "@/components/ui/skeleton"
-import { IconLoader2, IconDeviceFloppy, IconBuilding, IconMapPin, IconPhone } from "@tabler/icons-react"
+import { IconLoader2, IconDeviceFloppy, IconBuilding, IconMapPin, IconPhone, IconAlertCircle } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { EmitenteService } from "@/lib/services/emitente.service"
 import { useEmitenteForm } from "@/hooks/emitente/use-emitente-form"
@@ -66,6 +66,7 @@ export function EmitenteForm() {
         toast.success("Emitente cadastrado com sucesso!")
       }
     } catch (error: any) {
+      console.error("Erro ao salvar emitente:", error)
       toast.error(error.message || "Erro ao salvar emitente")
     } finally {
       setLoading(false)

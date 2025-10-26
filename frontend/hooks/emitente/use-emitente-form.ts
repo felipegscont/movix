@@ -36,9 +36,6 @@ export function useEmitenteForm() {
       telefone: "",
       email: "",
       site: "",
-      ambienteNfe: 2,
-      serieNfe: 1,
-      proximoNumeroNfe: 1,
       ativo: true,
     },
   })
@@ -118,9 +115,6 @@ export function useEmitenteForm() {
           telefone: emitente.telefone || "",
           email: emitente.email || "",
           site: emitente.site || "",
-          ambienteNfe: emitente.ambienteNfe,
-          serieNfe: emitente.serieNfe,
-          proximoNumeroNfe: emitente.proximoNumeroNfe,
           ativo: emitente.ativo,
         })
       }

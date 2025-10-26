@@ -3,6 +3,9 @@ import * as z from "zod"
 /**
  * Schema de validação do Emitente
  * Usado para validação de formulários de emitente
+ *
+ * NOTA: Os campos de configuração de NFe (ambienteNfe, serieNfe, proximoNumeroNfe)
+ * foram migrados para a tabela ConfiguracaoNfe e são configurados em /configuracoes/fiscal/nfe
  */
 export const emitenteSchema = z.object({
   cnpj: z.string().min(14, "CNPJ deve ter 14 dígitos").max(14),
@@ -22,9 +25,6 @@ export const emitenteSchema = z.object({
   telefone: z.string().optional(),
   email: z.string().email("Email inválido").optional().or(z.literal("")),
   site: z.string().optional(),
-  ambienteNfe: z.number().min(1).max(2),
-  serieNfe: z.number().min(1).max(999),
-  proximoNumeroNfe: z.number().min(1),
   ativo: z.boolean().optional(),
 })
 

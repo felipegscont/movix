@@ -81,5 +81,9 @@ export class CreateEmitenteDto {
 
   @IsOptional()
   @IsBoolean()
+  enviarNotasPorEmail?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
   ativo?: boolean;
 }

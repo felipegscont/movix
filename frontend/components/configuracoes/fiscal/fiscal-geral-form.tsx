@@ -25,7 +25,8 @@ const REGIME_TRIBUTARIO_OPTIONS = [
 
 const fiscalGeralSchema = z.object({
   regimeTributario: z.number().min(1).max(3),
-  enviarNotasPorEmail: z.boolean().default(false),
+  // NOTA: enviarNotasPorEmail foi removido pois não existe no schema do backend
+  // Se necessário, adicionar primeiro no Prisma schema e criar migration
 })
 
 type FiscalGeralFormData = z.infer<typeof fiscalGeralSchema>
