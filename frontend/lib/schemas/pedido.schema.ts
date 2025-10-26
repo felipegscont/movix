@@ -16,6 +16,10 @@ export const pedidoItemFormSchema = z.object({
 
 export type PedidoItemFormData = z.infer<typeof pedidoItemFormSchema>
 
+// Alias para compatibilidade
+export const itemFormSchema = pedidoItemFormSchema
+export type ItemFormData = PedidoItemFormData
+
 // Schema para pagamento do pedido
 export const pedidoPagamentoFormSchema = z.object({
   parcela: z.number().int().min(1),

@@ -18,10 +18,14 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { IconHome, IconShoppingCart } from "@tabler/icons-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { PedidoWizard } from "@/components/vendas/pedidos/pedido-wizard"
 
 export default function NovoPedidoPage() {
   const router = useRouter()
+
+  const handleSuccess = () => {
+    router.push('/vendas/pedidos')
+  }
 
   return (
     <SidebarProvider style={{ "--sidebar-width": "350px" } as React.CSSProperties}>
@@ -59,21 +63,7 @@ export default function NovoPedidoPage() {
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 px-4 md:gap-6 md:py-6 md:px-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Novo Pedido de Venda</CardTitle>
-                  <CardDescription>
-                    Crie um novo pedido de venda
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-center py-12">
-                    <p className="text-muted-foreground">
-                      Formulário de pedido em desenvolvimento...
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+              <PedidoWizard onSuccess={handleSuccess} />
             </div>
           </div>
         </div>
