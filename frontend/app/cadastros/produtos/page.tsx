@@ -4,7 +4,7 @@ import Link from "next/link"
 import { AppSidebar } from "@/components/layout"
 import { Separator } from "@/components/ui/separator"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
-import { ProdutosSectionCards, ProdutosDataTable } from "@/components/cadastros/produtos"
+import { ProdutosDataTable } from "@/components/cadastros/produtos"
 
 import {
   Breadcrumb,
@@ -47,7 +47,6 @@ export default function ProdutosPage() {
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-              <ProdutosSectionCards />
               <ProdutosDataTable />
             </div>
           </div>
