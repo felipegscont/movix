@@ -14,6 +14,16 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { IconHome, IconBuilding } from "@tabler/icons-react"
+
+/**
+ * Página principal de gerenciamento de fornecedores
+ *
+ * Funcionalidades:
+ * - Listagem de fornecedores com filtros e paginação
+ * - Criação, edição e exclusão de fornecedores
+ * - Busca e filtros avançados
+ */
 export default function FornecedoresPage() {
   return (
     <SidebarProvider style={{ "--sidebar-width": "350px" } as React.CSSProperties}>
@@ -25,15 +35,18 @@ export default function FornecedoresPage() {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator className="hidden md:block" />
-              <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href="/cadastros">Cadastros</BreadcrumbLink>
+                <BreadcrumbLink asChild>
+                  <Link href="/dashboard">
+                    <IconHome className="h-4 w-4" />
+                  </Link>
+                </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage>Fornecedores</BreadcrumbPage>
+                <BreadcrumbPage className="flex items-center gap-1.5">
+                  <IconBuilding className="h-4 w-4" />
+                  Fornecedores
+                </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>

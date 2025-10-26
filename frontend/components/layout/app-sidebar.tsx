@@ -53,53 +53,82 @@ const data = {
       items: [],
     },
     {
-      title: "Cadastros",
-      url: "/cadastros",
-      icon: Database,
+      title: "Clientes",
+      url: "/clientes",
+      icon: Users,
       isActive: false,
       items: [
         {
-          title: "Clientes",
-          url: "/cadastros/clientes",
+          title: "Todos os Clientes",
+          url: "/clientes",
         },
         {
-          title: "Fornecedores",
-          url: "/cadastros/fornecedores",
+          title: "Funil de Vendas",
+          url: "/clientes/funil",
         },
         {
-          title: "Produtos",
-          url: "/cadastros/produtos",
-          isGroup: true,
-          items: [
-            {
-              title: "Lista de Produtos",
-              url: "/cadastros/produtos",
-            },
-            {
-              title: "Categorias",
-              url: "/cadastros/produtos/categorias",
-            },
-            {
-              title: "Marcas",
-              url: "/cadastros/produtos/marcas",
-            },
-            {
-              title: "Unidades de Medida",
-              url: "/cadastros/produtos/unidades",
-            },
-            {
-              title: "Serviços",
-              url: "/cadastros/produtos/servicos",
-            },
-            {
-              title: "Combos",
-              url: "/cadastros/produtos/combos",
-            },
-            {
-              title: "Etiquetas",
-              url: "/cadastros/produtos/etiquetas",
-            },
-          ],
+          title: "Segmentação",
+          url: "/clientes/segmentacao",
+        },
+        {
+          title: "Histórico de Compras",
+          url: "/clientes/historico",
+        },
+        {
+          title: "Análise de Clientes",
+          url: "/clientes/analise",
+        },
+        {
+          title: "Comunicação",
+          url: "/clientes/comunicacao",
+        },
+      ],
+    },
+    {
+      title: "Fornecedores",
+      url: "/fornecedores",
+      icon: Building2,
+      isActive: false,
+      items: [
+        {
+          title: "Lista de Fornecedores",
+          url: "/fornecedores",
+        },
+      ],
+    },
+    {
+      title: "Produtos",
+      url: "/produtos",
+      icon: Package,
+      isActive: false,
+      items: [
+        {
+          title: "Lista de Produtos",
+          url: "/produtos",
+        },
+        {
+          title: "Categorias",
+          url: "/produtos/categorias",
+        },
+        {
+          title: "Marcas",
+          url: "/produtos/marcas",
+        },
+        {
+          title: "Unidades de Medida",
+          url: "/produtos/unidades",
+        },
+        {
+          title: "Serviços",
+          url: "/produtos/servicos",
+        },
+        {
+          title: "Combos",
+          url: "/produtos/combos",
+        },
+        {
+          title: "Etiquetas",
+          url: "/produtos/etiquetas",
         },
       ],
     },

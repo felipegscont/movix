@@ -16,6 +16,15 @@ import {
 } from "@/components/ui/breadcrumb"
 import { IconHome, IconPackage } from "@tabler/icons-react"
 
+/**
+ * Página principal de gerenciamento de produtos
+ *
+ * Funcionalidades:
+ * - Listagem de produtos com filtros e paginação
+ * - Criação, edição e exclusão de produtos
+ * - Busca e filtros avançados
+ * - Gestão de categorias, marcas, unidades, serviços, combos e etiquetas
+ */
 export default function ProdutosPage() {
   return (
     <SidebarProvider style={{ "--sidebar-width": "350px" } as React.CSSProperties}>
@@ -31,12 +40,6 @@ export default function ProdutosPage() {
                     <Link href="/dashboard">
                       <IconHome className="h-4 w-4" />
                     </Link>
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink asChild>
-                    <Link href="/cadastros">Cadastros</Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
