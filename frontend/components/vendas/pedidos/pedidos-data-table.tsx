@@ -409,32 +409,47 @@ export function PedidosDataTable() {
           <Table>
             <TableHeader className="bg-muted">
               <TableRow>
-                <TableHead className="w-12"><Skeleton className="h-4 w-4" /></TableHead>
-                <TableHead><Skeleton className="h-4 w-24" /></TableHead>
-                <TableHead><Skeleton className="h-4 w-20" /></TableHead>
-                <TableHead><Skeleton className="h-4 w-32" /></TableHead>
-                <TableHead><Skeleton className="h-4 w-24" /></TableHead>
-                <TableHead><Skeleton className="h-4 w-24" /></TableHead>
-                <TableHead className="w-12"><Skeleton className="h-4 w-4" /></TableHead>
+                <TableHead className="w-12"><Skeleton className="h-3 w-3" /></TableHead>
+                <TableHead><Skeleton className="h-3 w-20" /></TableHead>
+                <TableHead><Skeleton className="h-3 w-16" /></TableHead>
+                <TableHead><Skeleton className="h-3 w-24" /></TableHead>
+                <TableHead><Skeleton className="h-3 w-20" /></TableHead>
+                <TableHead><Skeleton className="h-3 w-20" /></TableHead>
+                <TableHead className="w-12"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {[...Array(5)].map((_, i) => (
+              {[...Array(10)].map((_, i) => (
                 <TableRow key={i}>
-                  <TableCell><Skeleton className="h-4 w-4" /></TableCell>
-                  <TableCell><Skeleton className="h-12 w-full" /></TableCell>
-                  <TableCell><Skeleton className="h-6 w-20" /></TableCell>
-                  <TableCell><Skeleton className="h-10 w-full" /></TableCell>
-                  <TableCell><Skeleton className="h-10 w-24" /></TableCell>
-                  <TableCell><Skeleton className="h-10 w-24" /></TableCell>
-                  <TableCell><Skeleton className="h-8 w-8" /></TableCell>
+                  <TableCell className="py-2"><Skeleton className="h-3 w-3" /></TableCell>
+                  <TableCell className="py-2">
+                    <div className="space-y-1">
+                      <Skeleton className="h-3 w-16" />
+                      <Skeleton className="h-2 w-20" />
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-2"><Skeleton className="h-5 w-16" /></TableCell>
+                  <TableCell className="py-2">
+                    <div className="space-y-1">
+                      <Skeleton className="h-3 w-32" />
+                      <Skeleton className="h-2 w-24" />
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-2"><Skeleton className="h-3 w-20" /></TableCell>
+                  <TableCell className="py-2">
+                    <div className="space-y-1">
+                      <Skeleton className="h-3 w-20" />
+                      <Skeleton className="h-2 w-16" />
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-2"><Skeleton className="h-6 w-6 rounded" /></TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </div>
         <div className="flex items-center justify-between px-4">
-          <Skeleton className="h-4 w-48" />
+          <Skeleton className="h-3 w-48" />
           <div className="flex items-center gap-2">
             <Skeleton className="h-8 w-8" />
             <Skeleton className="h-8 w-8" />
