@@ -12,9 +12,9 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { IconHome, IconFilter } from "@tabler/icons-react"
+import { IconHome, IconChartLine } from "@tabler/icons-react"
 
-export default function SegmentacaoPage() {
+export default function AnaliseClientesPage() {
   return (
     <SidebarProvider style={{ "--sidebar-width": "350px" } as React.CSSProperties}>
       <AppSidebar />
@@ -40,8 +40,8 @@ export default function SegmentacaoPage() {
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
                 <BreadcrumbPage className="flex items-center gap-1.5">
-                  <IconFilter className="h-4 w-4" />
-                  Segmentação
+                  <IconChartLine className="h-4 w-4" />
+                  Análise de Clientes
                 </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
@@ -53,8 +53,8 @@ export default function SegmentacaoPage() {
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
               <div className="flex items-center justify-center h-96">
                 <div className="text-center">
-                  <IconFilter className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-                  <h2 className="text-2xl font-bold mb-2">Segmentação de Clientes</h2>
+                  <IconChartLine className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+                  <h2 className="text-2xl font-bold mb-2">Análise de Clientes</h2>
                   <p className="text-muted-foreground">Em desenvolvimento</p>
                 </div>
               </div>

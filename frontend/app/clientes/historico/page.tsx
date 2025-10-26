@@ -1,8 +1,9 @@
+"use client"
+
 import Link from "next/link"
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/layout/app-sidebar"
-import { SidebarTrigger } from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/layout"
 import { Separator } from "@/components/ui/separator"
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -12,41 +13,8 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { IconHome, IconHistory } from "@tabler/icons-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
-/**
- * Página de Histórico de Compras
- * 
- * Timeline completo de interações e compras de cada cliente
- */
 export default function HistoricoComprasPage() {
-  const eventos = [
-    {
-      data: "26/10/2025 - 14:30",
-      tipo: "email",
-      titulo: "Email enviado: Proposta Comercial",
-      status: "Aberto",
-    },
-    {
-      data: "20/10/2025 - 10:15",
-      tipo: "ligacao",
-      titulo: "Ligação realizada (15 min)",
-      status: "Follow-up proposta",
-    },
-    {
-      data: "15/10/2025",
-      tipo: "pedido",
-      titulo: "Pedido #1234 - R$ 5.800,00",
-      status: "Entregue",
-    },
-    {
-      data: "10/10/2025",
-      tipo: "reuniao",
-      titulo: "Reunião presencial",
-      status: "Apresentação de produtos",
-    },
-  ]
-
   return (
     <SidebarProvider style={{ "--sidebar-width": "350px" } as React.CSSProperties}>
       <AppSidebar />
@@ -79,75 +47,19 @@ export default function HistoricoComprasPage() {
             </BreadcrumbList>
           </Breadcrumb>
         </header>
-
-        <div className="flex flex-1 flex-col gap-4 p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Histórico de Compras</h1>
-              <p className="text-muted-foreground">
-                Timeline completo de interações e compras dos clientes
-              </p>
+        
+        <div className="flex flex-1 flex-col">
+          <div className="@container/main flex flex-1 flex-col gap-2">
+            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+              <div className="flex items-center justify-center h-96">
+                <div className="text-center">
+                  <IconHistory className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+                  <h2 className="text-2xl font-bold mb-2">Histórico de Compras</h2>
+                  <p className="text-muted-foreground">Em desenvolvimento</p>
+                </div>
+              </div>
             </div>
           </div>
-
-          <div className="grid gap-4 md:grid-cols-3">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total de Pedidos</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">1.245</div>
-                <p className="text-xs text-muted-foreground">+12% em relação ao mês anterior</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Ticket Médio</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">R$ 3.450</div>
-                <p className="text-xs text-muted-foreground">+5% em relação ao mês anterior</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Interações</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">3.892</div>
-                <p className="text-xs text-muted-foreground">Emails, ligações e reuniões</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Timeline de Eventos</CardTitle>
-              <CardDescription>
-                Histórico de todas as interações com clientes
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {eventos.map((evento, index) => (
-                  <div key={index} className="flex gap-4 border-b pb-4 last:border-b-0">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                      <IconHistory className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-semibold">{evento.titulo}</h4>
-                        <span className="text-sm text-muted-foreground">{evento.data}</span>
-                      </div>
-                      <p className="text-sm text-muted-foreground">{evento.status}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </SidebarInset>
     </SidebarProvider>
