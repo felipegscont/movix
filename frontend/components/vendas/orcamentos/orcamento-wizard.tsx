@@ -80,9 +80,15 @@ export function OrcamentoWizard({ pedidoId, onSuccess }: OrcamentoWizardProps) {
     return result
   }
 
-  const handleNext = async () => {
+  const handleNext = async (e?: React.MouseEvent) => {
+    // Prevenir propagação do evento para evitar submit acidental
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+
     const isValid = await validateStep(currentStep)
-    
+
     if (!isValid) {
       return
     }
@@ -108,6 +114,17 @@ export function OrcamentoWizard({ pedidoId, onSuccess }: OrcamentoWizardProps) {
     if (step < currentStep || completedSteps.includes(step - 1)) {
       setCurrentStep(step)
       window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+
+    // Só permitir submit se estiver no último step
+    if (currentStep === STEPS.length) {
+      handleSubmit(e)
+    } else {
+      console.log('⚠️ Submit bloqueado - não está no último step')
     }
   }
 
@@ -179,7 +196,7 @@ export function OrcamentoWizard({ pedidoId, onSuccess }: OrcamentoWizardProps) {
 
       {/* Formulário */}
       <Form {...form}>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleFormSubmit} className="space-y-6">
           {/* Step 1: Cabeçalho */}
           {currentStep === 1 && (
             <OrcamentoStepCabecalho form={form} proximoNumero={proximoNumero} />

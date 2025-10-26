@@ -248,9 +248,6 @@ export function usePedidoForm({ pedidoId, onSuccess }: UsePedidoFormProps = {}):
         enderecoEntrega: data.enderecoEntrega || undefined,
       }
 
-      console.log('📋 Dados do formulário:', data);
-      console.log('🧹 Dados limpos:', cleanData);
-
       if (pedidoId) {
         // Atualizar
         await PedidoService.update(pedidoId, cleanData)

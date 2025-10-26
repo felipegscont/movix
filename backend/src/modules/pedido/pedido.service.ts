@@ -11,33 +11,28 @@ export class PedidoService {
    * Criar novo pedido
    */
   async create(createPedidoDto: CreatePedidoDto) {
-    try {
-      console.log('📥 Recebendo pedido:', JSON.stringify(createPedidoDto, null, 2));
+    // Verificar se cliente existe
+    const cliente = await this.prisma.cliente.findUnique({
+      where: { id: createPedidoDto.clienteId },
+    });
 
-      // Verificar se cliente existe
-      const cliente = await this.prisma.cliente.findUnique({
-        where: { id: createPedidoDto.clienteId },
-      });
+    if (!cliente) {
+      throw new NotFoundException('Cliente não encontrado');
+    }
 
-      if (!cliente) {
-        throw new NotFoundException('Cliente não encontrado');
-      }
+    // Verificar se número já existe
+    const pedidoExistente = await this.prisma.pedido.findUnique({
+      where: { numero: createPedidoDto.numero },
+    });
 
-      // Verificar se número já existe
-      const pedidoExistente = await this.prisma.pedido.findUnique({
-        where: { numero: createPedidoDto.numero },
-      });
+    if (pedidoExistente) {
+      throw new BadRequestException('Já existe um pedido com este número');
+    }
 
-      if (pedidoExistente) {
-        throw new BadRequestException('Já existe um pedido com este número');
-      }
+    // Criar pedido com itens e pagamentos
+    const { itens, pagamentos, ...pedidoData } = createPedidoDto;
 
-      // Criar pedido com itens e pagamentos
-      const { itens, pagamentos, ...pedidoData } = createPedidoDto;
-
-      console.log('📝 Criando pedido no banco...');
-
-      return this.prisma.pedido.create({
+    return this.prisma.pedido.create({
         data: {
           ...pedidoData,
           itens: {
@@ -91,11 +86,6 @@ export class PedidoService {
         },
       },
     });
-    } catch (error) {
-      console.error('❌ Erro ao criar pedido:', error);
-      console.error('❌ Stack:', error.stack);
-      throw error;
-    }
   }
 
   /**
