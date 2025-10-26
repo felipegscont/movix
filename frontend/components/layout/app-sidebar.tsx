@@ -13,7 +13,9 @@ import {
   Settings,
   BarChart3,
   HelpCircle,
-  Command
+  Command,
+  ChevronRight,
+  Database
 } from "lucide-react"
 
 import { NavUser } from "@/components/layout/nav-user"
@@ -32,6 +34,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { Switch } from "@/components/ui/switch"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { cn } from "@/lib/utils"
 
 // Dados do sistema
 const data = {
@@ -49,11 +53,55 @@ const data = {
       items: [],
     },
     {
-      title: "Fornecedores",
-      url: "/fornecedores",
-      icon: Building2,
+      title: "Cadastros",
+      url: "/cadastros",
+      icon: Database,
       isActive: false,
-      items: [],
+      items: [
+        {
+          title: "Clientes",
+          url: "/cadastros/clientes",
+        },
+        {
+          title: "Fornecedores",
+          url: "/cadastros/fornecedores",
+        },
+        {
+          title: "Produtos",
+          url: "/cadastros/produtos",
+          isGroup: true,
+          items: [
+            {
+              title: "Lista de Produtos",
+              url: "/cadastros/produtos",
+            },
+            {
+              title: "Categorias",
+              url: "/cadastros/produtos/categorias",
+            },
+            {
+              title: "Marcas",
+              url: "/cadastros/produtos/marcas",
+            },
+            {
+              title: "Unidades de Medida",
+              url: "/cadastros/produtos/unidades",
+            },
+            {
+              title: "Serviços",
+              url: "/cadastros/produtos/servicos",
+            },
+            {
+              title: "Combos",
+              url: "/cadastros/produtos/combos",
+            },
+            {
+              title: "Etiquetas",
+              url: "/cadastros/produtos/etiquetas",
+            },
+          ],
+        },
+      ],
     },
     {
       title: "Vendas",
@@ -85,61 +133,21 @@ const data = {
           title: "Comissões",
           url: "/vendas/comissoes",
         },
-      ],
-    },
-    {
-      title: "Clientes",
-      url: "/clientes",
-      icon: Users,
-      isActive: false,
-      items: [
-        {
-          title: "Lista de Clientes",
-          url: "/clientes/lista",
-        },
-        {
-          title: "CRM",
-          url: "/clientes/crm",
-        },
-      ],
-    },
-    {
-      title: "Produtos",
-      url: "/produtos",
-      icon: Package,
-      isActive: false,
-      items: [
-        {
-          title: "Lista de Produtos",
-          url: "/produtos/lista",
-        },
-        {
-          title: "Serviços",
-          url: "/produtos/servicos",
-        },
-        {
-          title: "Combos",
-          url: "/produtos/combos",
-        },
-        {
-          title: "Categorias",
-          url: "/produtos/categorias",
-        },
-        {
-          title: "Marcas",
-          url: "/produtos/marcas",
-        },
-        {
-          title: "Unidades de Medida",
-          url: "/produtos/unidades",
-        },
-        {
-          title: "Etiquetas",
-          url: "/produtos/etiquetas",
-        },
         {
           title: "Lista de Preços",
-          url: "/produtos/precos",
+          url: "/vendas/precos",
+        },
+      ],
+    },
+    {
+      title: "Fiscal",
+      url: "/fiscal",
+      icon: FileText,
+      isActive: false,
+      items: [
+        {
+          title: "NF-e",
+          url: "/fiscal/nfe",
         },
       ],
     },
@@ -160,34 +168,68 @@ const data = {
       ],
     },
     {
-      title: "Fiscal",
-      url: "/fiscal",
-      icon: FileText,
-      isActive: false,
-      items: [
-        {
-          title: "Notas Fiscais (NFe)",
-          url: "/fiscal/nfe/nfes",
-        },
-      ],
-    },
-    {
       title: "Configurações",
       url: "/configuracoes",
       icon: Settings,
       isActive: false,
       items: [
         {
-          title: "Emitente",
-          url: "/configuracoes/emitente",
+          title: "Empresa",
+          url: "/configuracoes/empresa",
+          isGroup: true,
+          items: [
+            {
+              title: "Geral",
+              url: "/configuracoes/empresa/geral",
+            },
+            {
+              title: "Funcionários",
+              url: "/configuracoes/empresa/funcionarios",
+            },
+            {
+              title: "Usuários",
+              url: "/configuracoes/empresa/usuarios",
+            },
+            {
+              title: "Permissões",
+              url: "/configuracoes/empresa/permissoes",
+            },
+          ],
         },
         {
-          title: "Naturezas de Operação",
-          url: "/configuracoes/fiscal/naturezas-operacao",
-        },
-        {
-          title: "Matrizes Fiscais",
-          url: "/configuracoes/fiscal/matrizes-fiscais",
+          title: "Fiscal",
+          url: "/configuracoes/fiscal",
+          isGroup: true,
+          items: [
+            {
+              title: "Geral",
+              url: "/configuracoes/fiscal/geral",
+            },
+            {
+              title: "NF-e",
+              url: "/configuracoes/fiscal/nfe",
+            },
+            {
+              title: "NFC-e",
+              url: "/configuracoes/fiscal/nfce",
+            },
+            {
+              title: "CT-e",
+              url: "/configuracoes/fiscal/cte",
+            },
+            {
+              title: "NFS-e",
+              url: "/configuracoes/fiscal/nfse",
+            },
+            {
+              title: "Matrizes Fiscais",
+              url: "/configuracoes/fiscal/matrizes-fiscais",
+            },
+            {
+              title: "Naturezas de Operação",
+              url: "/configuracoes/fiscal/naturezas-operacao",
+            },
+          ],
         },
       ],
     },
@@ -226,6 +268,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           if (pathname.startsWith(subItem.url)) {
             return item
           }
+          // Verificar se o subitem tem subitens aninhados (grupos)
+          if (subItem.items && subItem.items.length > 0) {
+            for (const nestedItem of subItem.items) {
+              if (pathname.startsWith(nestedItem.url)) {
+                return item
+              }
+            }
+          }
         }
       }
     }
@@ -236,6 +286,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [activeItem, setActiveItem] = React.useState(getActiveItem())
   const [previousActiveItem, setPreviousActiveItem] = React.useState(getActiveItem())
 
+  // Estado para controlar quais grupos estão abertos
+  const [openGroups, setOpenGroups] = React.useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {}
+    activeItem?.items?.forEach((subItem) => {
+      if (subItem.isGroup && subItem.items) {
+        const isGroupActive = subItem.items.some(
+          (item) => pathname === item.url || pathname.startsWith(item.url + '/')
+        )
+        initial[subItem.title] = isGroupActive
+      }
+    })
+    return initial
+  })
+
   // Atualizar o item ativo quando a rota mudar
   React.useEffect(() => {
     const newActiveItem = getActiveItem()
@@ -243,6 +307,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const itemChanged = previousActiveItem?.title !== newActiveItem.title
 
     setActiveItem(newActiveItem)
+
+    // Atualizar grupos abertos baseado na rota atual
+    const newOpenGroups: Record<string, boolean> = {}
+    newActiveItem?.items?.forEach((subItem) => {
+      if (subItem.isGroup && subItem.items) {
+        const isGroupActive = subItem.items.some(
+          (item) => pathname === item.url || pathname.startsWith(item.url + '/')
+        )
+        newOpenGroups[subItem.title] = isGroupActive
+      }
+    })
+    setOpenGroups(newOpenGroups)
 
     // Só alterar o estado do sidebar se mudou de item principal
     if (itemChanged) {
@@ -347,13 +423,87 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               {activeItem?.items && activeItem.items.length > 0 ? (
                 <SidebarMenu>
                   {activeItem.items.map((subItem) => {
+                    // Se o subitem é um grupo colapsável
+                    if (subItem.isGroup && subItem.items && subItem.items.length > 0) {
+                      const isOpen = openGroups[subItem.title] || false
+
+                      const handleToggle = (open: boolean) => {
+                        setOpenGroups(prev => ({
+                          ...prev,
+                          [subItem.title]: open
+                        }))
+                      }
+
+                      return (
+                        <Collapsible
+                          key={subItem.title}
+                          open={isOpen}
+                          onOpenChange={handleToggle}
+                          className="group/collapsible"
+                        >
+                          <SidebarMenuItem>
+                            <CollapsibleTrigger asChild>
+                              <SidebarMenuButton
+                                className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex items-center justify-between gap-2 px-4 py-3 text-sm leading-tight"
+                              >
+                                <span className="font-medium">{subItem.title}</span>
+                                <ChevronRight
+                                  className={cn(
+                                    "h-4 w-4 shrink-0 transition-transform duration-200",
+                                    isOpen && "rotate-90"
+                                  )}
+                                />
+                              </SidebarMenuButton>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                              <SidebarMenu className="border-l-2 border-sidebar-border ml-3">
+                                {subItem.items.map((nestedItem) => {
+                                  // Lógica de ativação mais precisa:
+                                  // 1. Comparação exata com a URL
+                                  // 2. OU pathname começa com a URL + '/' (para rotas filhas como /produtos/[id])
+                                  // 3. MAS não ativa se houver uma URL mais específica que também combina
+                                  const exactMatch = pathname === nestedItem.url
+                                  const childMatch = pathname.startsWith(nestedItem.url + '/')
+
+                                  // Verifica se existe outro item com URL mais específica que também combina
+                                  const hasMoreSpecificMatch = subItem.items.some(
+                                    (otherItem) =>
+                                      otherItem.url !== nestedItem.url &&
+                                      otherItem.url.startsWith(nestedItem.url) &&
+                                      (pathname === otherItem.url || pathname.startsWith(otherItem.url + '/'))
+                                  )
+
+                                  const isActive = (exactMatch || childMatch) && !hasMoreSpecificMatch
+
+                                  return (
+                                    <SidebarMenuItem key={nestedItem.title}>
+                                      <SidebarMenuButton asChild isActive={isActive}>
+                                        <a
+                                          href={nestedItem.url}
+                                          className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex items-center gap-2 py-3 pl-3 pr-4 text-sm leading-tight"
+                                        >
+                                          <span>{nestedItem.title}</span>
+                                        </a>
+                                      </SidebarMenuButton>
+                                    </SidebarMenuItem>
+                                  )
+                                })}
+                              </SidebarMenu>
+                            </CollapsibleContent>
+                          </SidebarMenuItem>
+                        </Collapsible>
+                      )
+                    }
+
+                    // Subitem normal (sem grupo)
+                    // Comparação exata ou se o pathname começa com a URL seguida de /
                     const isActive = pathname === subItem.url || pathname.startsWith(subItem.url + '/')
                     return (
                       <SidebarMenuItem key={subItem.title}>
                         <SidebarMenuButton asChild isActive={isActive}>
                           <a
                             href={subItem.url}
-                            className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex items-center gap-2 border-b p-4 text-sm leading-tight last:border-b-0"
+                            className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex items-center gap-2 border-b px-4 py-3 text-sm leading-tight last:border-b-0"
                           >
                             <span className="font-medium">{subItem.title}</span>
                           </a>

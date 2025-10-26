@@ -38,7 +38,7 @@ export async function seedEmitentePlaceholder(prisma: PrismaClient): Promise<voi
   }
 
   // Criar emitente placeholder com dados fake
-  await prisma.emitente.create({
+  const emitente = await prisma.emitente.create({
     data: {
       cnpj: '00000000000000',
       razaoSocial: 'CONFIGURAR EMITENTE',
@@ -62,14 +62,24 @@ export async function seedEmitentePlaceholder(prisma: PrismaClient): Promise<voi
       email: null,
       site: null,
 
-      // Configurações NFe
+      // Certificado
       certificadoPath: null,
       certificadoPassword: null,
-      ambienteNfe: 2, // Homologação (seguro para testes)
-      proximoNumeroNfe: 1,
-      serieNfe: 1,
 
       ativo: true,
+    },
+  })
+
+  // Criar configuração de NFe padrão
+  await prisma.configuracaoNfe.create({
+    data: {
+      emitenteId: emitente.id,
+      ambiente: 2, // Homologação (seguro para testes)
+      serie: 1,
+      proximoNumero: 1,
+      tipoFrete: 1,
+      indicadorPresenca: 2,
+      orientacaoImpressao: 1,
     },
   })
 

@@ -1,8 +1,8 @@
 "use client"
 
-import { AppSidebar } from "@/components/layout"
-import { Separator } from "@/components/ui/separator"
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import Link from "next/link"
+import { AppSidebar } from "@/components/layout/app-sidebar"
+import { EmitenteForm } from "@/components/configuracoes/emitente"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -11,11 +11,15 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { IconHome, IconSettings } from "@tabler/icons-react"
-import Link from "next/link"
+import { Separator } from "@/components/ui/separator"
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar"
+import { IconHome, IconSettings, IconBuilding } from "@tabler/icons-react"
 
-export default function ConfiguracoesPage() {
-
+export default function ConfiguracoesEmitentePage() {
   return (
     <SidebarProvider style={{ "--sidebar-width": "350px" } as React.CSSProperties}>
       <AppSidebar />
@@ -34,9 +38,24 @@ export default function ConfiguracoesPage() {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link href="/configuracoes" className="flex items-center gap-1.5">
+                      <IconSettings className="h-4 w-4" />
+                      Configurações
+                    </Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem className="hidden md:block">
+                  <BreadcrumbLink asChild>
+                    <Link href="/configuracoes/empresa">Empresa</Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className="hidden md:block" />
+                <BreadcrumbItem>
                   <BreadcrumbPage className="flex items-center gap-1.5">
-                    <IconSettings className="h-4 w-4" />
-                    Configurações
+                    <IconBuilding className="h-4 w-4" />
+                    Geral
                   </BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
@@ -45,12 +64,9 @@ export default function ConfiguracoesPage() {
         
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
-            <div className="flex flex-col gap-4 py-4 px-4 md:gap-6 md:py-6 md:px-6">
-              <div className="space-y-2">
-                <h1 className="text-3xl font-bold tracking-tight">Configurações</h1>
-                <p className="text-muted-foreground">
-                  Gerencie as configurações do sistema através do menu lateral.
-                </p>
+            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+              <div className="px-4 lg:px-6">
+                <EmitenteForm />
               </div>
             </div>
           </div>
@@ -59,4 +75,3 @@ export default function ConfiguracoesPage() {
     </SidebarProvider>
   )
 }
-

@@ -183,24 +183,135 @@ model Emitente {
   email    String? @db.VarChar(100)
   site     String? @db.VarChar(100)
 
-  // Configurações NFe
+  // Certificado (mantido aqui por ser geral)
   certificadoPath     String? @db.VarChar(500)
   certificadoPassword String? @db.VarChar(100)
-  ambienteNfe         Int     @default(2) // 1=Produção, 2=Homologação
-  proximoNumeroNfe    Int     @default(1)
-  serieNfe            Int     @default(1)
 
   ativo     Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relacionamentos
-  municipio    Municipio            @relation(fields: [municipioId], references: [id])
-  estado       Estado               @relation(fields: [estadoId], references: [id])
-  nfes         Nfe[]
-  certificados CertificadoDigital[]
+  municipio        Municipio            @relation(fields: [municipioId], references: [id])
+  estado           Estado               @relation(fields: [estadoId], references: [id])
+  nfes             Nfe[]
+  certificados     CertificadoDigital[]
+  configuracaoNfe  ConfiguracaoNfe?
+  configuracaoNfce ConfiguracaoNfce?
+  configuracaoCte  ConfiguracaoCte?
+  configuracaoNfse ConfiguracaoNfse?
 
   @@map("emitentes")
+}
+
+// Configuração de NF-e
+model ConfiguracaoNfe {
+  id         String @id @default(cuid())
+  emitenteId String @unique
+
+  // Ambiente e Numeração
+  ambiente      Int @default(2) // 1=Produção, 2=Homologação
+  serie         Int @default(1)
+  proximoNumero Int @default(1)
+
+  // Configurações de Emissão
+  tipoFrete           Int? @default(1) // 0=CIF, 1=FOB, etc
+  indicadorPresenca   Int? @default(2) // 0-9
+  orientacaoImpressao Int? @default(1) // 1=Retrato, 2=Paisagem
+
+  // Informações Adicionais
+  ieSubstitutoTributario String? @db.VarChar(20)
+  observacoesPadrao      String? @db.Text
+  documentosAutorizados  String? @db.Text
+
+  // Controle
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relacionamento
+  emitente Emitente @relation(fields: [emitenteId], references: [id], onDelete: Cascade)
+
+  @@map("configuracoes_nfe")
+}
+
+// Configuração de NFC-e
+model ConfiguracaoNfce {
+  id         String @id @default(cuid())
+  emitenteId String @unique
+
+  // Ambiente e Numeração
+  ambiente      Int @default(2)
+  serie         Int @default(1)
+  proximoNumero Int @default(1)
+
+  // Configurações Específicas
+  cfopPadrao        String? @db.VarChar(4)
+  formatoImpressao  String? @db.VarChar(10) // 80mm, 58mm
+  cscId             String? @db.VarChar(10)
+  csc               String? @db.VarChar(100)
+  observacoesPadrao String? @db.Text
+
+  // Controle
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relacionamento
+  emitente Emitente @relation(fields: [emitenteId], references: [id], onDelete: Cascade)
+
+  @@map("configuracoes_nfce")
+}
+
+// Configuração de CT-e
+model ConfiguracaoCte {
+  id         String @id @default(cuid())
+  emitenteId String @unique
+
+  // Ambiente e Numeração
+  ambiente      Int @default(2)
+  serie         Int @default(0)
+  proximoNumero Int @default(1)
+
+  // Configurações
+  orientacaoImpressao    Int?    @default(1)
+  ieSubstitutoTributario String? @db.VarChar(20)
+  observacoesPadrao      String? @db.Text
+
+  // Controle
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relacionamento
+  emitente Emitente @relation(fields: [emitenteId], references: [id], onDelete: Cascade)
+
+  @@map("configuracoes_cte")
+}
+
+// Configuração de NFS-e
+model ConfiguracaoNfse {
+  id         String @id @default(cuid())
+  emitenteId String @unique
+
+  // Numeração
+  proximoRps Int @default(1)
+  serie      Int @default(1)
+
+  // Configurações
+  regimeTributacao  Int? // 1=ME/EPP, 2=Lucro Presumido, etc
+  incentivoFiscal   Boolean @default(false)
+  observacoesPadrao String? @db.Text
+
+  // Controle
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relacionamento
+  emitente Emitente @relation(fields: [emitenteId], references: [id], onDelete: Cascade)
+
+  @@map("configuracoes_nfse")
 }
 
 // Certificado Digital
@@ -274,11 +385,11 @@ model Cliente {
   updatedAt DateTime @updatedAt
 
   // Relacionamentos
-  municipio Municipio @relation(fields: [municipioId], references: [id])
-  estado    Estado    @relation(fields: [estadoId], references: [id])
-  nfes      Nfe[]
+  municipio  Municipio   @relation(fields: [municipioId], references: [id])
+  estado     Estado      @relation(fields: [estadoId], references: [id])
+  nfes       Nfe[]
   orcamentos Orcamento[]
-  pedidos   Pedido[]
+  pedidos    Pedido[]
 
   @@map("clientes")
 }
@@ -363,13 +474,13 @@ model Produto {
   updatedAt DateTime @updatedAt
 
   // Relacionamentos
-  ncm              NCM              @relation(fields: [ncmId], references: [id])
-  cest             CEST?            @relation(fields: [cestId], references: [id])
-  fornecedor       Fornecedor?      @relation(fields: [fornecedorId], references: [id])
-  nfeItens         NfeItem[]
-  orcamentoItens   OrcamentoItem[]
-  pedidoItens      PedidoItem[]
-  matrizesFiscais  MatrizFiscal[] // Matrizes que filtram por produto específico
+  ncm             NCM             @relation(fields: [ncmId], references: [id])
+  cest            CEST?           @relation(fields: [cestId], references: [id])
+  fornecedor      Fornecedor?     @relation(fields: [fornecedorId], references: [id])
+  nfeItens        NfeItem[]
+  orcamentoItens  OrcamentoItem[]
+  pedidoItens     PedidoItem[]
+  matrizesFiscais MatrizFiscal[] // Matrizes que filtram por produto específico
 
   @@map("produtos")
 }
@@ -435,16 +546,16 @@ model Nfe {
   modelo Int     @default(55) // 55=NFe, 65=NFCe
 
   // Identificação
-  naturezaOperacao  String  @db.VarChar(200)
+  naturezaOperacao   String  @db.VarChar(200)
   naturezaOperacaoId String? // Referência à natureza de operação (aplicada na transmissão)
-  tipoOperacao      Int // 0=Entrada, 1=Saída
-  codigoNumerico    String @db.VarChar(8) // Código numérico aleatório
-  tipoEmissao       Int    @default(1) // 1=Normal, 2=Contingência, etc
-  digitoVerificador Int?
-  ambiente          Int    @default(2) // 1=Produção, 2=Homologação
-  finalidade        Int    @default(1) // 1=Normal, 2=Complementar, 3=Ajuste, 4=Devolução
-  consumidorFinal   Int    @default(0) // 0=Não, 1=Sim
-  presencaComprador Int    @default(1) // 0=Não se aplica, 1=Presencial, etc
+  tipoOperacao       Int // 0=Entrada, 1=Saída
+  codigoNumerico     String  @db.VarChar(8) // Código numérico aleatório
+  tipoEmissao        Int     @default(1) // 1=Normal, 2=Contingência, etc
+  digitoVerificador  Int?
+  ambiente           Int     @default(2) // 1=Produção, 2=Homologação
+  finalidade         Int     @default(1) // 1=Normal, 2=Complementar, 3=Ajuste, 4=Devolução
+  consumidorFinal    Int     @default(0) // 0=Não, 1=Sim
+  presencaComprador  Int     @default(1) // 0=Não se aplica, 1=Presencial, etc
 
   // Datas
   dataEmissao DateTime
@@ -498,15 +609,15 @@ model Nfe {
   updatedAt DateTime @updatedAt
 
   // Relacionamentos
-  emitente           Emitente           @relation(fields: [emitenteId], references: [id])
-  cliente            Cliente            @relation(fields: [clienteId], references: [id])
-  pedido             Pedido?            @relation(fields: [pedidoId], references: [id])
-  naturezaOp         NaturezaOperacao?  @relation(fields: [naturezaOperacaoId], references: [id])
-  itens              NfeItem[]
-  cobranca           NfeCobranca?
-  duplicatas         NfeDuplicata[]
-  pagamentos         NfePagamento[]
-  eventos            NfeEvento[]
+  emitente   Emitente          @relation(fields: [emitenteId], references: [id])
+  cliente    Cliente           @relation(fields: [clienteId], references: [id])
+  pedido     Pedido?           @relation(fields: [pedidoId], references: [id])
+  naturezaOp NaturezaOperacao? @relation(fields: [naturezaOperacaoId], references: [id])
+  itens      NfeItem[]
+  cobranca   NfeCobranca?
+  duplicatas NfeDuplicata[]
+  pagamentos NfePagamento[]
+  eventos    NfeEvento[]
 
   @@unique([emitenteId, serie, numero])
   @@map("nfes")
@@ -990,37 +1101,37 @@ model Orcamento {
   id String @id @default(cuid())
 
   // Identificação
-  numero           Int      @unique // Número sequencial do orçamento
-  dataEmissao      DateTime @default(now())
-  dataValidade     DateTime // Data de validade da proposta
-  status           String   @default("EM_ABERTO") @db.VarChar(20) // EM_ABERTO, APROVADO, CANCELADO
+  numero       Int      @unique // Número sequencial do orçamento
+  dataEmissao  DateTime @default(now())
+  dataValidade DateTime // Data de validade da proposta
+  status       String   @default("EM_ABERTO") @db.VarChar(20) // EM_ABERTO, APROVADO, CANCELADO
 
   // Cliente
-  clienteId        String
-  vendedorNome     String?  @db.VarChar(100) // Nome do vendedor
+  clienteId    String
+  vendedorNome String? @db.VarChar(100) // Nome do vendedor
 
   // Valores
-  subtotal         Decimal  @default(0) @db.Decimal(15, 2)
-  valorDesconto    Decimal  @default(0) @db.Decimal(15, 2)
-  valorFrete       Decimal  @default(0) @db.Decimal(15, 2)
-  valorOutros      Decimal  @default(0) @db.Decimal(15, 2)
-  valorTotal       Decimal  @default(0) @db.Decimal(15, 2)
+  subtotal      Decimal @default(0) @db.Decimal(15, 2)
+  valorDesconto Decimal @default(0) @db.Decimal(15, 2)
+  valorFrete    Decimal @default(0) @db.Decimal(15, 2)
+  valorOutros   Decimal @default(0) @db.Decimal(15, 2)
+  valorTotal    Decimal @default(0) @db.Decimal(15, 2)
 
   // Observações
-  observacoes      String?  @db.Text
+  observacoes String? @db.Text
 
   // Conversão
-  pedidoId         String?  @unique // Pedido gerado a partir deste orçamento
-  dataConversao    DateTime? // Data em que foi convertido em pedido
+  pedidoId      String?   @unique // Pedido gerado a partir deste orçamento
+  dataConversao DateTime? // Data em que foi convertido em pedido
 
   // Auditoria
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relacionamentos
-  cliente          Cliente  @relation(fields: [clienteId], references: [id])
-  itens            OrcamentoItem[]
-  pedido           Pedido?  @relation(fields: [pedidoId], references: [id])
+  cliente Cliente         @relation(fields: [clienteId], references: [id])
+  itens   OrcamentoItem[]
+  pedido  Pedido?         @relation(fields: [pedidoId], references: [id])
 
   @@index([numero])
   @@index([clienteId])
@@ -1033,31 +1144,31 @@ model Orcamento {
 model OrcamentoItem {
   id String @id @default(cuid())
 
-  orcamentoId         String
-  numeroItem          Int
-  produtoId           String
+  orcamentoId String
+  numeroItem  Int
+  produtoId   String
 
   // Dados do produto (snapshot)
-  codigo              String  @db.VarChar(50)
-  descricao           String  @db.VarChar(500)
-  unidade             String  @db.VarChar(10)
+  codigo    String @db.VarChar(50)
+  descricao String @db.VarChar(500)
+  unidade   String @db.VarChar(10)
 
   // Quantidades e Valores
-  quantidade          Decimal @db.Decimal(15, 4)
-  valorUnitario       Decimal @db.Decimal(15, 4)
-  valorDesconto       Decimal @default(0) @db.Decimal(15, 2)
-  valorTotal          Decimal @db.Decimal(15, 2)
+  quantidade    Decimal @db.Decimal(15, 4)
+  valorUnitario Decimal @db.Decimal(15, 4)
+  valorDesconto Decimal @default(0) @db.Decimal(15, 2)
+  valorTotal    Decimal @db.Decimal(15, 2)
 
   // Observações
-  observacoes         String? @db.Text
+  observacoes String? @db.Text
 
   // Auditoria
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relacionamentos
-  orcamento           Orcamento @relation(fields: [orcamentoId], references: [id], onDelete: Cascade)
-  produto             Produto   @relation(fields: [produtoId], references: [id])
+  orcamento Orcamento @relation(fields: [orcamentoId], references: [id], onDelete: Cascade)
+  produto   Produto   @relation(fields: [produtoId], references: [id])
 
   @@unique([orcamentoId, numeroItem])
   @@index([orcamentoId])
@@ -1070,38 +1181,38 @@ model Pedido {
   id String @id @default(cuid())
 
   // Identificação
-  numero           Int      @unique // Número sequencial do pedido
-  dataEmissao      DateTime @default(now())
-  dataEntrega      DateTime? // Data prevista de entrega
-  status           String   @default("ABERTO") @db.VarChar(20) // ABERTO, FATURADO, CANCELADO
+  numero      Int       @unique // Número sequencial do pedido
+  dataEmissao DateTime  @default(now())
+  dataEntrega DateTime? // Data prevista de entrega
+  status      String    @default("ABERTO") @db.VarChar(20) // ABERTO, FATURADO, CANCELADO
 
   // Cliente
-  clienteId        String
-  vendedorNome     String?  @db.VarChar(100) // Nome do vendedor
+  clienteId    String
+  vendedorNome String? @db.VarChar(100) // Nome do vendedor
 
   // Endereço de Entrega (pode ser diferente do cadastro)
-  enderecoEntrega  String?  @db.Text
+  enderecoEntrega String? @db.Text
 
   // Valores
-  subtotal         Decimal  @default(0) @db.Decimal(15, 2)
-  valorDesconto    Decimal  @default(0) @db.Decimal(15, 2)
-  valorFrete       Decimal  @default(0) @db.Decimal(15, 2)
-  valorOutros      Decimal  @default(0) @db.Decimal(15, 2)
-  valorTotal       Decimal  @default(0) @db.Decimal(15, 2)
+  subtotal      Decimal @default(0) @db.Decimal(15, 2)
+  valorDesconto Decimal @default(0) @db.Decimal(15, 2)
+  valorFrete    Decimal @default(0) @db.Decimal(15, 2)
+  valorOutros   Decimal @default(0) @db.Decimal(15, 2)
+  valorTotal    Decimal @default(0) @db.Decimal(15, 2)
 
   // Observações
-  observacoes      String?  @db.Text
+  observacoes String? @db.Text
 
   // Auditoria
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relacionamentos
-  cliente          Cliente  @relation(fields: [clienteId], references: [id])
-  itens            PedidoItem[]
-  pagamentos       PedidoPagamento[]
-  nfes             Nfe[] // NFes geradas a partir deste pedido
-  orcamento        Orcamento? // Orçamento que originou este pedido
+  cliente    Cliente           @relation(fields: [clienteId], references: [id])
+  itens      PedidoItem[]
+  pagamentos PedidoPagamento[]
+  nfes       Nfe[] // NFes geradas a partir deste pedido
+  orcamento  Orcamento? // Orçamento que originou este pedido
 
   @@index([numero])
   @@index([clienteId])
@@ -1114,31 +1225,31 @@ model Pedido {
 model PedidoItem {
   id String @id @default(cuid())
 
-  pedidoId            String
-  numeroItem          Int
-  produtoId           String
+  pedidoId   String
+  numeroItem Int
+  produtoId  String
 
   // Dados do produto (snapshot)
-  codigo              String  @db.VarChar(50)
-  descricao           String  @db.VarChar(500)
-  unidade             String  @db.VarChar(10)
+  codigo    String @db.VarChar(50)
+  descricao String @db.VarChar(500)
+  unidade   String @db.VarChar(10)
 
   // Quantidades e Valores
-  quantidade          Decimal @db.Decimal(15, 4)
-  valorUnitario       Decimal @db.Decimal(15, 4)
-  valorDesconto       Decimal @default(0) @db.Decimal(15, 2)
-  valorTotal          Decimal @db.Decimal(15, 2)
+  quantidade    Decimal @db.Decimal(15, 4)
+  valorUnitario Decimal @db.Decimal(15, 4)
+  valorDesconto Decimal @default(0) @db.Decimal(15, 2)
+  valorTotal    Decimal @db.Decimal(15, 2)
 
   // Observações
-  observacoes         String? @db.Text
+  observacoes String? @db.Text
 
   // Auditoria
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relacionamentos
-  pedido              Pedido  @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
-  produto             Produto @relation(fields: [produtoId], references: [id])
+  pedido  Pedido  @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  produto Produto @relation(fields: [produtoId], references: [id])
 
   @@unique([pedidoId, numeroItem])
   @@index([pedidoId])
@@ -1150,20 +1261,20 @@ model PedidoItem {
 model PedidoPagamento {
   id String @id @default(cuid())
 
-  pedidoId           String
-  parcela            Int // 1, 2, 3...
-  formaPagamentoId   String
-  dataVencimento     DateTime
-  valor              Decimal @db.Decimal(15, 2)
-  observacoes        String? @db.Text
+  pedidoId         String
+  parcela          Int // 1, 2, 3...
+  formaPagamentoId String
+  dataVencimento   DateTime
+  valor            Decimal  @db.Decimal(15, 2)
+  observacoes      String?  @db.Text
 
   // Auditoria
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relacionamentos
-  pedido             Pedido        @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
-  formaPagamento     FormaPagamento @relation(fields: [formaPagamentoId], references: [id])
+  pedido         Pedido         @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  formaPagamento FormaPagamento @relation(fields: [formaPagamentoId], references: [id])
 
   @@unique([pedidoId, parcela])
   @@index([pedidoId])

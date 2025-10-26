@@ -16,6 +16,7 @@ import { FormaPagamentoModule } from './modules/forma-pagamento/forma-pagamento.
 import { MatrizFiscalModule } from './modules/matriz-fiscal/matriz-fiscal.module';
 import { OrcamentoModule } from './modules/orcamento/orcamento.module';
 import { PedidoModule } from './modules/pedido/pedido.module';
+import { ConfiguracaoNfeModule } from './modules/configuracao-nfe/configuracao-nfe.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -38,6 +39,7 @@ import configuration from './config/configuration';
     MatrizFiscalModule,
     OrcamentoModule,
     PedidoModule,
+    ConfiguracaoNfeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

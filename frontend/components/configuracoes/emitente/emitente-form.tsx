@@ -11,7 +11,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { Skeleton } from "@/components/ui/skeleton"
-import { IconLoader2, IconDeviceFloppy, IconAlertCircle, IconBuilding, IconMapPin, IconPhone, IconCertificate, IconFileTypePdf, IconReceipt } from "@tabler/icons-react"
+import { IconLoader2, IconDeviceFloppy, IconBuilding, IconMapPin, IconPhone } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { EmitenteService } from "@/lib/services/emitente.service"
 import { useEmitenteForm } from "@/hooks/emitente/use-emitente-form"
@@ -21,7 +21,6 @@ import { useCepLookup } from "@/hooks/emitente/use-cep-lookup"
 import { DadosBasicosSection } from "./sections/dados-basicos-section"
 import { EnderecoSection } from "./sections/endereco-section"
 import { ContatoSection } from "./sections/contato-section"
-import { NfeSection } from "./sections/nfe-section"
 import { CertificadoSection } from "./sections/certificado-section"
 import type { EmitenteFormData } from "@/lib/schemas/emitente.schema"
 
@@ -56,40 +55,15 @@ export function EmitenteForm() {
 
   const onSubmit = async (data: EmitenteFormData) => {
     try {
-      // Validar certificado antes de salvar, se houver
-      if (certificado.file && certificado.password) {
-        if (certificado.valid === null) {
-          toast.error("Aguarde a validação do certificado antes de salvar")
-          return
-        }
-        if (certificado.valid === false) {
-          toast.error("Certificado inválido. Corrija o certificado antes de salvar.")
-          return
-        }
-        if (certificado.info?.expired) {
-          toast.error("Certificado expirado. Não é possível salvar com certificado vencido.")
-          return
-        }
-      }
-
       setLoading(true)
-
-      let savedEmitenteId = emitenteId
 
       if (emitenteId) {
         await EmitenteService.update(emitenteId, data)
-        toast.success("Emitente atualizado com sucesso!")
+        toast.success("Dados do emitente atualizados com sucesso!")
       } else {
         const emitente = await EmitenteService.create(data)
-        savedEmitenteId = emitente.id
         setEmitenteId(emitente.id)
         toast.success("Emitente cadastrado com sucesso!")
-      }
-
-      // Se há certificado selecionado e validado, fazer upload automaticamente
-      if (certificado.file && certificado.password && savedEmitenteId && certificado.valid) {
-        toast.info("Enviando certificado digital...")
-        await uploadCertificado(savedEmitenteId)
       }
     } catch (error: any) {
       toast.error(error.message || "Erro ao salvar emitente")
@@ -219,51 +193,7 @@ export function EmitenteForm() {
             </AccordionContent>
           </AccordionItem>
 
-          {/* Accordion: Configurações NFe */}
-          <AccordionItem value="nfe" className="border rounded-lg !border-b">
-            <AccordionTrigger className="px-6 py-4 hover:no-underline">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
-                  <IconReceipt className="h-5 w-5 text-primary" />
-                </div>
-                <div className="text-left">
-                  <h3 className="text-base font-semibold">Configurações de NFe</h3>
-                  <p className="text-sm text-muted-foreground">Parâmetros para emissão de Notas Fiscais</p>
-                </div>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="px-6 pb-6">
-              <div className="pt-4">
-                <NfeSection form={form as any} />
-              </div>
-            </AccordionContent>
-          </AccordionItem>
 
-          {/* Accordion: Certificado Digital */}
-          <AccordionItem value="certificado" className="border rounded-lg !border-b">
-            <AccordionTrigger className="px-6 py-4 hover:no-underline">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
-                  <IconFileTypePdf className="h-5 w-5 text-primary" />
-                </div>
-                <div className="text-left">
-                  <h3 className="text-base font-semibold">Certificado Digital</h3>
-                  <p className="text-sm text-muted-foreground">Certificado A1 para assinatura de NFes</p>
-                </div>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="px-6 pb-6">
-              <div className="pt-4">
-                <CertificadoSection
-                  certificado={certificado}
-                  certificadoInfoFromDb={certificadoInfoFromDb}
-                  onFileChange={handleFileChange}
-                  onPasswordChange={handlePasswordChange}
-                  onPasswordBlur={handlePasswordBlur}
-                />
-              </div>
-            </AccordionContent>
-          </AccordionItem>
         </Accordion>
 
         {/* Botões de Ação */}
@@ -271,7 +201,7 @@ export function EmitenteForm() {
           <Button type="submit" disabled={loading}>
             {loading && <IconLoader2 className="h-4 w-4 mr-2 animate-spin" />}
             {!loading && <IconDeviceFloppy className="h-4 w-4 mr-2" />}
-            {loading ? "Salvando..." : emitenteId ? "Atualizar Configurações" : "Salvar Configurações"}
+            {loading ? "Salvando..." : emitenteId ? "Atualizar Dados" : "Salvar Dados"}
           </Button>
         </div>
       </form>
