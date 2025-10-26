@@ -36,8 +36,7 @@ const REGIME_TRIBUTARIO_OPTIONS = [
 
 const fiscalGeralSchema = z.object({
   regimeTributario: z.number().min(1).max(3),
-  // NOTA: enviarNotasPorEmail foi removido pois não existe no schema do backend
-  // Se necessário, adicionar primeiro no Prisma schema e criar migration
+  enviarNotasPorEmail: z.boolean().default(false),
 })
 
 type FiscalGeralFormData = z.infer<typeof fiscalGeralSchema>
@@ -71,16 +70,29 @@ export function FiscalGeralForm() {
     async function loadEmitente() {
       try {
         setLoadingData(true)
+        console.log("🔵 [FiscalGeralForm] Carregando emitente...")
         const emitente = await EmitenteService.getEmitenteAtivo()
+        console.log("📦 [FiscalGeralForm] Emitente recebido:", emitente)
 
         if (emitente) {
           setEmitenteId(emitente.id)
+          console.log("🆔 [FiscalGeralForm] EmitenteId definido:", emitente.id)
+
+          // Verificar se o campo existe
+          console.log("📧 [FiscalGeralForm] enviarNotasPorEmail do backend:", emitente.enviarNotasPorEmail)
+          console.log("📧 [FiscalGeralForm] Tipo:", typeof emitente.enviarNotasPorEmail)
 
           // Preencher formulário
-          form.reset({
+          const formData = {
             regimeTributario: emitente.regimeTributario || 1,
             enviarNotasPorEmail: emitente.enviarNotasPorEmail || false,
-          })
+          }
+          console.log("📝 [FiscalGeralForm] Dados para form.reset:", formData)
+
+          form.reset(formData)
+
+          console.log("✅ [FiscalGeralForm] Formulário resetado")
+          console.log("📋 [FiscalGeralForm] Valores do formulário após reset:", form.getValues())
 
           // Carregar informações do certificado se existir
           if (emitente.certificadoPath) {
@@ -90,14 +102,16 @@ export function FiscalGeralForm() {
             }
           }
         } else {
+          console.warn("⚠️ [FiscalGeralForm] Nenhum emitente encontrado")
           // Nenhum emitente encontrado - mostrar dialog
           setShowNoEmitenteDialog(true)
         }
       } catch (error) {
-        console.error("Erro ao carregar emitente:", error)
+        console.error("❌ [FiscalGeralForm] Erro ao carregar emitente:", error)
         toast.error("Erro ao carregar dados")
       } finally {
         setLoadingData(false)
+        console.log("🏁 [FiscalGeralForm] Carregamento finalizado")
       }
     }
 

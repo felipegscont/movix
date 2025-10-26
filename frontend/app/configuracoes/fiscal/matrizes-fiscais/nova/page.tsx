@@ -39,7 +39,7 @@ export default function NovaMatrizFiscalPage() {
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem className="hidden md:block">
                   <BreadcrumbLink asChild>
-                    <Link href="/matrizes-fiscais" className="flex items-center gap-1.5">
+                    <Link href="/configuracoes/fiscal/matrizes-fiscais" className="flex items-center gap-1.5">
                       <IconTable className="h-4 w-4" />
                       Matrizes Fiscais
                     </Link>

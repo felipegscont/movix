@@ -78,16 +78,22 @@ export class EmitenteService {
   }
 
   static async getEmitenteAtivo(): Promise<Emitente | null> {
+    console.log("🔵 [EmitenteService] Buscando emitente ativo...")
     const response = await fetch(`${API_BASE_URL}/emitentes/ativo/principal`);
     if (!response.ok) {
       // Se for 404, retorna null (emitente não existe ainda)
       if (response.status === 404) {
+        console.warn("⚠️ [EmitenteService] Nenhum emitente ativo encontrado (404)")
         return null;
       }
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.message || 'Erro ao buscar emitente ativo');
     }
-    return response.json();
+    const data = await response.json();
+    console.log("📦 [EmitenteService] Emitente recebido da API:", data)
+    console.log("📧 [EmitenteService] enviarNotasPorEmail:", data.enviarNotasPorEmail)
+    console.log("📧 [EmitenteService] Tipo:", typeof data.enviarNotasPorEmail)
+    return data;
   }
 
   static async getById(id: string): Promise<Emitente> {
@@ -124,6 +130,11 @@ export class EmitenteService {
   }
 
   static async update(id: string, data: Partial<CreateEmitenteData>): Promise<Emitente> {
+    console.log("🔵 [EmitenteService.update] Atualizando emitente...")
+    console.log("🆔 [EmitenteService.update] ID:", id)
+    console.log("📝 [EmitenteService.update] Dados enviados:", data)
+    console.log("📧 [EmitenteService.update] enviarNotasPorEmail:", data.enviarNotasPorEmail)
+
     const response = await fetch(`${API_BASE_URL}/emitentes/${id}`, {
       method: 'PATCH',
       headers: {
@@ -134,10 +145,15 @@ export class EmitenteService {
 
     if (!response.ok) {
       const error = await response.json();
+      console.error("❌ [EmitenteService.update] Erro:", error)
       throw new Error(error.message || 'Erro ao atualizar emitente');
     }
 
-    return response.json();
+    const result = await response.json();
+    console.log("✅ [EmitenteService.update] Resposta do backend:", result)
+    console.log("📧 [EmitenteService.update] enviarNotasPorEmail salvo:", result.enviarNotasPorEmail)
+
+    return result;
   }
 
   static async delete(id: string): Promise<void> {

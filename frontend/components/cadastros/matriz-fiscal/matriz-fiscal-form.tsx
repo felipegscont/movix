@@ -153,7 +153,7 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
     } catch (error: any) {
       console.error("Erro ao carregar matriz fiscal:", error)
       toast.error("Erro ao carregar matriz fiscal")
-      router.push("/matrizes-fiscais")
+      router.push("/configuracoes/fiscal/matrizes-fiscais")
     } finally {
       setLoadingData(false)
     }
@@ -188,7 +188,7 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
         toast.success("Matriz fiscal criada com sucesso!")
       }
 
-      router.push("/matrizes-fiscais")
+      router.push("/configuracoes/fiscal/matrizes-fiscais")
     } catch (error: any) {
       console.error("Erro ao salvar matriz fiscal:", error)
       toast.error(error.message || "Erro ao salvar matriz fiscal")
@@ -638,7 +638,7 @@ export function MatrizFiscalForm({ matrizId }: MatrizFiscalFormProps) {
             type="button"
             variant="ghost"
             className="h-7 w-full sm:w-auto"
-            onClick={() => router.push("/matrizes-fiscais")}
+            onClick={() => router.push("/configuracoes/fiscal/matrizes-fiscais")}
             disabled={loading}
           >
             <IconArrowLeft className="mr-2 h-4 w-4" />

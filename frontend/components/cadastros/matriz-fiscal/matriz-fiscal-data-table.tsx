@@ -254,7 +254,7 @@ export function MatrizFiscalDataTable() {
   }, [currentPage, filterImposto, filterUfDestino, filterAtivo])
 
   const handleEdit = (matriz: MatrizFiscal) => {
-    router.push(`/matrizes-fiscais/${matriz.id}`)
+    router.push(`/configuracoes/fiscal/matrizes-fiscais/${matriz.id}`)
   }
 
   const handleDelete = async (id: string) => {
@@ -396,7 +396,7 @@ export function MatrizFiscalDataTable() {
           <Button
             variant="outline"
             className="h-7"
-            onClick={() => router.push("/matrizes-fiscais/nova")}
+            onClick={() => router.push("/configuracoes/fiscal/matrizes-fiscais/nova")}
           >
             <IconPlus className="size-4" />
             <span className="hidden lg:inline">Nova Matriz</span>

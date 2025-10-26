@@ -285,7 +285,7 @@ export function ClientesDataTable() {
         return (
           <div className="flex flex-col">
             <button
-              onClick={() => router.push(`/cadastros/clientes/${clienteId}`)}
+              onClick={() => handleEdit(clienteId)}
               className="font-medium text-left hover:text-primary hover:underline transition-colors"
             >
               {nome}
@@ -365,10 +365,6 @@ export function ClientesDataTable() {
             <DropdownMenuContent align="end" className="w-40">
               <DropdownMenuLabel>Ações</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => router.push(`/cadastros/clientes/${cliente.id}`)}>
-                <IconEye className="mr-2 h-4 w-4" />
-                Visualizar
-              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleEdit(cliente.id)}>
                 <IconEdit className="mr-2 h-4 w-4" />
                 Editar

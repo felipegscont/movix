@@ -1,3 +1,4 @@
+import { useEffect } from "react"
 import {
   FormControl,
   FormDescription,
@@ -14,7 +15,20 @@ export function ProdutoEstoqueSection({ form }: ProdutoSectionProps) {
   const watchValorCusto = form.watch("valorCusto")
   const watchMargemLucro = form.watch("margemLucro")
 
-  // Calcular valor unitário baseado no custo e margem
+  // Calcular e preencher automaticamente o valor unitário quando custo ou margem mudarem
+  useEffect(() => {
+    if (watchValorCusto && watchMargemLucro) {
+      const custo = Number(watchValorCusto)
+      const margem = Number(watchMargemLucro)
+
+      if (custo > 0 && margem >= 0) {
+        const valorCalculado = custo * (1 + margem / 100)
+        form.setValue("valorUnitario", Number(valorCalculado.toFixed(2)))
+      }
+    }
+  }, [watchValorCusto, watchMargemLucro, form])
+
+  // Calcular valor unitário baseado no custo e margem (para exibição)
   const calcularValorUnitario = () => {
     if (watchValorCusto && watchMargemLucro) {
       const custo = Number(watchValorCusto)
