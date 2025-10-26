@@ -29,7 +29,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { IconPlus, IconShoppingCart, IconFileInvoice } from "@tabler/icons-react"
+import { IconPlus, IconShoppingCart, IconFileInvoice, IconHome } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { PedidoService, type Pedido } from "@/lib/services/pedido.service"
 import { formatCurrency } from "@/lib/utils"
@@ -97,11 +97,18 @@ export default function PedidosPage() {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+                <BreadcrumbLink asChild>
+                  <Link href="/dashboard">
+                    <IconHome className="h-4 w-4" />
+                  </Link>
+                </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage>Pedidos</BreadcrumbPage>
+                <BreadcrumbPage className="flex items-center gap-1.5">
+                  <IconShoppingCart className="h-4 w-4" />
+                  Pedidos
+                </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>

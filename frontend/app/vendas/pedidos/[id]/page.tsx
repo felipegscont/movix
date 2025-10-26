@@ -32,7 +32,8 @@ import { Badge } from "@/components/ui/badge"
 import {
   IconShoppingCart,
   IconFileInvoice,
-  IconTrash
+  IconTrash,
+  IconHome
 } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { PedidoService, type Pedido } from "@/lib/services/pedido.service"
@@ -137,15 +138,24 @@ export default function PedidoDetalhesPage() {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+                <BreadcrumbLink asChild>
+                  <Link href="/dashboard">
+                    <IconHome className="h-4 w-4" />
+                  </Link>
+                </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbLink href="/vendas/pedidos">Pedidos</BreadcrumbLink>
+                <BreadcrumbLink asChild>
+                  <Link href="/vendas/pedidos" className="flex items-center gap-1.5">
+                    <IconShoppingCart className="h-4 w-4" />
+                    Pedidos
+                  </Link>
+                </BreadcrumbLink>
               </BreadcrumbItem>
-              <BreadcrumbSeparator className="hidden md:block" />
+              <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>Pedido #{pedido.numero}</BreadcrumbPage>
+                <BreadcrumbPage>#{pedido.numero}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
