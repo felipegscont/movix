@@ -276,8 +276,60 @@ export function MatrizFiscalDataTable() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-12">
-        <IconLoader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <div className="flex flex-col gap-4 px-4 lg:px-6">
+        <div className="flex items-center justify-between gap-4">
+          <Skeleton className="h-9 w-64" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-9 w-32" />
+            <Skeleton className="h-9 w-32" />
+            <Skeleton className="h-9 w-32" />
+            <Skeleton className="h-9 w-32" />
+          </div>
+        </div>
+        <div className="overflow-hidden rounded-lg border">
+          <Table>
+            <TableHeader className="bg-muted">
+              <TableRow>
+                <TableHead><Skeleton className="h-3 w-16" /></TableHead>
+                <TableHead><Skeleton className="h-3 w-32" /></TableHead>
+                <TableHead><Skeleton className="h-3 w-20" /></TableHead>
+                <TableHead><Skeleton className="h-3 w-20" /></TableHead>
+                <TableHead><Skeleton className="h-3 w-20" /></TableHead>
+                <TableHead><Skeleton className="h-3 w-24" /></TableHead>
+                <TableHead><Skeleton className="h-3 w-16" /></TableHead>
+                <TableHead className="w-32"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {[...Array(10)].map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell className="py-2"><Skeleton className="h-5 w-12" /></TableCell>
+                  <TableCell className="py-2"><Skeleton className="h-3 w-40" /></TableCell>
+                  <TableCell className="py-2"><Skeleton className="h-5 w-16" /></TableCell>
+                  <TableCell className="py-2"><Skeleton className="h-5 w-16" /></TableCell>
+                  <TableCell className="py-2"><Skeleton className="h-5 w-16" /></TableCell>
+                  <TableCell className="py-2"><Skeleton className="h-3 w-20" /></TableCell>
+                  <TableCell className="py-2"><Skeleton className="h-5 w-12" /></TableCell>
+                  <TableCell className="py-2">
+                    <div className="flex gap-2">
+                      <Skeleton className="h-8 w-16" />
+                      <Skeleton className="h-8 w-16" />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+        <div className="flex items-center justify-between px-4">
+          <Skeleton className="h-3 w-48" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-8 w-8" />
+            <Skeleton className="h-8 w-8" />
+            <Skeleton className="h-8 w-8" />
+            <Skeleton className="h-8 w-8" />
+          </div>
+        </div>
       </div>
     )
   }

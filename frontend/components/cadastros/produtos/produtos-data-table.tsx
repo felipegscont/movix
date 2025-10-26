@@ -61,12 +61,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs"
 
 import { ProdutoService, type Produto } from "@/lib/services/produto.service"
 import { ProdutoFormDialog } from "./produto-form-dialog"
@@ -97,17 +91,6 @@ const filterColumnsConfig = [
     .displayName("Código")
     .icon(IconBarcode)
     .accessor((row) => row.codigo || "")
-    .build(),
-  dtf
-    .option()
-    .id("tipo")
-    .displayName("Tipo")
-    .icon(IconPackage)
-    .accessor((row) => row.tipo)
-    .options([
-      { value: "PRODUTO", label: "Produto" },
-      { value: "SERVICO", label: "Serviço" },
-    ])
     .build(),
   dtf
     .option()
@@ -454,19 +437,12 @@ const columns: ColumnDef<Produto>[] = [
 
   return (
     <>
-    <Tabs defaultValue="todos" className="w-full flex-col justify-start gap-6">
-      <div className="flex items-center justify-between px-4 lg:px-6">
-        <TabsList className="**:data-[slot=badge]:bg-muted-foreground/30 **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:px-1">
-          <TabsTrigger value="todos">Todos os Produtos</TabsTrigger>
-          <TabsTrigger value="ativos">
-            Ativos <Badge variant="secondary">798</Badge>
-          </TabsTrigger>
-          <TabsTrigger value="inativos">
-            Inativos <Badge variant="secondary">58</Badge>
-          </TabsTrigger>
-        </TabsList>
+    <div className="flex flex-col gap-4 px-4 lg:px-6">
+      {/* Header com filtros e ações */}
+      <div className="flex items-center justify-between gap-4">
         <div className="flex flex-1 items-center gap-4">
           <DataTableFilter
+            strategy="client"
             filters={bazzaFilters}
             columns={bazzaColumns}
             actions={bazzaActions}
@@ -520,11 +496,9 @@ const columns: ColumnDef<Produto>[] = [
           </Button>
         </div>
       </div>
-      <TabsContent
-        value="todos"
-        className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
-      >
-        <div className="overflow-hidden rounded-lg border">
+
+      {/* Tabela */}
+      <div className="overflow-hidden rounded-lg border">
           <Table>
             <TableHeader className="bg-muted sticky top-0 z-10">
               {table.getHeaderGroups().map((headerGroup) => (
@@ -577,7 +551,9 @@ const columns: ColumnDef<Produto>[] = [
             </TableBody>
           </Table>
         </div>
-        <div className="flex items-center justify-between px-4">
+
+      {/* Footer com paginação */}
+      <div className="flex items-center justify-between px-4">
           <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
             {table.getFilteredSelectedRowModel().rows.length} de{" "}
             {table.getFilteredRowModel().rows.length} linha(s) selecionada(s).
@@ -654,8 +630,7 @@ const columns: ColumnDef<Produto>[] = [
             </div>
           </div>
         </div>
-      </TabsContent>
-    </Tabs>
+      </div>
 
     <ProdutoFormDialog
       open={dialogOpen}

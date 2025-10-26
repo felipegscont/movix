@@ -62,39 +62,118 @@ const data = {
           title: "Pedidos",
           url: "/vendas/pedidos",
         },
-      ],
-    },
-    {
-      title: "Notas Fiscais",
-      url: "/notas-fiscais",
-      icon: FileText,
-      isActive: false,
-      items: [
         {
-          title: "NFe",
-          url: "/nfes",
+          title: "Cupons",
+          url: "/vendas/cupons",
+        },
+        {
+          title: "Consignados",
+          url: "/vendas/consignados",
+        },
+        {
+          title: "Devoluções",
+          url: "/vendas/devolucoes",
+        },
+        {
+          title: "Comissões",
+          url: "/vendas/comissoes",
         },
       ],
     },
     {
-      title: "Cadastros",
-      url: "/cadastros",
+      title: "Clientes",
+      url: "/clientes",
       icon: Users,
       isActive: false,
       items: [
         {
-          title: "Clientes",
-          url: "/cadastros/clientes",
+          title: "Lista de Clientes",
+          url: "/clientes/lista",
         },
         {
-          title: "Fornecedores",
-          url: "/cadastros/fornecedores",
-        },
-        {
-          title: "Produtos",
-          url: "/cadastros/produtos",
+          title: "CRM",
+          url: "/clientes/crm",
         },
       ],
+    },
+    {
+      title: "Produtos",
+      url: "/produtos",
+      icon: Package,
+      isActive: false,
+      items: [
+        {
+          title: "Lista de Produtos",
+          url: "/produtos/lista",
+        },
+        {
+          title: "Serviços",
+          url: "/produtos/servicos",
+        },
+        {
+          title: "Combos",
+          url: "/produtos/combos",
+        },
+        {
+          title: "Categorias",
+          url: "/produtos/categorias",
+        },
+        {
+          title: "Marcas",
+          url: "/produtos/marcas",
+        },
+        {
+          title: "Unidades de Medida",
+          url: "/produtos/unidades",
+        },
+        {
+          title: "Lista de Preços",
+          url: "/produtos/precos",
+        },
+      ],
+    },
+    {
+      title: "Serviços",
+      url: "/servicos",
+      icon: Command,
+      isActive: false,
+      items: [
+        {
+          title: "Ordem de Serviço (O.S.)",
+          url: "/servicos/os",
+        },
+        {
+          title: "Serviços Prestados",
+          url: "/servicos/prestados",
+        },
+      ],
+    },
+    {
+      title: "Fiscal",
+      url: "/fiscal",
+      icon: FileText,
+      isActive: false,
+      items: [
+        {
+          title: "Notas Fiscais (NFe)",
+          url: "/fiscal/nfe",
+        },
+        {
+          title: "Naturezas de Operação",
+          url: "/fiscal/naturezas",
+        },
+        {
+          title: "Matrizes Fiscais",
+          url: "/fiscal/matrizes",
+        },
+      ],
+    },
+    {
+      title: "Fornecedores",
+      url: "/fornecedores",
+      icon: Building2,
+      isActive: false,
+      items: [],
     },
     {
       title: "Configurações",
@@ -105,14 +184,6 @@ const data = {
         {
           title: "Emitente",
           url: "/configuracoes/emitente",
-        },
-        {
-          title: "Naturezas de Operação",
-          url: "/configuracoes/naturezas-operacao",
-        },
-        {
-          title: "Matrizes Fiscais",
-          url: "/matrizes-fiscais",
         },
       ],
     },

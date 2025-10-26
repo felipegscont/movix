@@ -458,6 +458,7 @@ export function NaturezaOperacaoDataTable({ onEdit }: NaturezaOperacaoDataTableP
       <div className="flex items-center justify-between gap-4">
         <div className="flex flex-1 items-center space-x-2">
           <DataTableFilter
+            strategy="client"
             filters={bazzaFilters}
             columns={bazzaColumns}
             actions={bazzaActions}
