@@ -38,6 +38,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { Skeleton } from "@/components/ui/skeleton"
 import { ProdutoService, type Produto } from "@/lib/services/produto.service"
 import { toast } from "sonner"
 
@@ -105,10 +106,49 @@ export default function ProdutoViewPage() {
       <SidebarProvider style={{ "--sidebar-width": "350px" } as React.CSSProperties}>
         <AppSidebar />
         <SidebarInset>
-          <div className="flex flex-1 items-center justify-center">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-              <span>Carregando produto...</span>
+          <header className="bg-background sticky top-0 flex shrink-0 items-center gap-2 border-b p-4 z-10">
+            <SidebarTrigger className="-ml-1" />
+            <Separator orientation="vertical" className="mr-2 h-4" />
+            <Skeleton className="h-4 w-64" />
+          </header>
+          <div className="flex flex-1 flex-col">
+            <div className="@container/main flex flex-1 flex-col gap-4 p-4 md:gap-6 md:p-6">
+              <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+                <div className="flex items-start gap-4">
+                  <Skeleton className="h-16 w-16 rounded-full" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-8 w-64" />
+                    <Skeleton className="h-4 w-48" />
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Skeleton className="h-10 w-24" />
+                  <Skeleton className="h-10 w-24" />
+                </div>
+              </div>
+              <div className="grid gap-6 lg:grid-cols-3">
+                <div className="lg:col-span-2 space-y-6">
+                  {[1, 2, 3].map((i) => (
+                    <Card key={i}>
+                      <CardHeader><Skeleton className="h-6 w-48" /></CardHeader>
+                      <CardContent className="space-y-3">
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-3/4" />
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+                <div className="space-y-6">
+                  <Card>
+                    <CardHeader><Skeleton className="h-6 w-32" /></CardHeader>
+                    <CardContent className="space-y-3">
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-full" />
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
             </div>
           </div>
         </SidebarInset>

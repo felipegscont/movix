@@ -29,6 +29,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   IconFileText,
   IconX,
@@ -142,8 +143,45 @@ export default function OrcamentoDetalhesPage() {
       <SidebarProvider style={{ "--sidebar-width": "350px" } as React.CSSProperties}>
         <AppSidebar />
         <SidebarInset>
-          <div className="flex flex-1 items-center justify-center">
-            <p className="text-muted-foreground">Carregando...</p>
+          <header className="bg-background sticky top-0 flex shrink-0 items-center gap-2 border-b p-4">
+            <SidebarTrigger className="-ml-1" />
+            <Separator orientation="vertical" className="mr-2 h-4" />
+            <Skeleton className="h-4 w-64" />
+          </header>
+          <div className="flex flex-1 flex-col gap-4 p-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <Skeleton className="h-8 w-64" />
+                <Skeleton className="h-4 w-48" />
+              </div>
+              <div className="flex gap-2">
+                <Skeleton className="h-10 w-32" />
+                <Skeleton className="h-10 w-32" />
+              </div>
+            </div>
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-48" />
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="space-y-3">
+                    <Skeleton className="h-5 w-32" />
+                    <div className="grid gap-3 md:grid-cols-2">
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-full" />
+                    </div>
+                  </div>
+                ))}
+                <div className="border rounded-lg">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="p-4 border-b last:border-b-0">
+                      <Skeleton className="h-4 w-full" />
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </SidebarInset>
       </SidebarProvider>
