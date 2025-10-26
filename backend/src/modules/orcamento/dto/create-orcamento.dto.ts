@@ -15,9 +15,23 @@ export class CreateOrcamentoDto {
   @IsInt()
   numero: number;
 
+  @Transform(({ value }) => {
+    if (value && value.includes('T')) return value;
+    if (value && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      return `${value}T00:00:00.000Z`;
+    }
+    return value;
+  })
   @IsDateString()
   dataEmissao: string;
 
+  @Transform(({ value }) => {
+    if (value && value.includes('T')) return value;
+    if (value && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      return `${value}T00:00:00.000Z`;
+    }
+    return value;
+  })
   @IsDateString()
   dataValidade: string;
 

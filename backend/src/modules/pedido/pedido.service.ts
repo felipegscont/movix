@@ -11,39 +11,44 @@ export class PedidoService {
    * Criar novo pedido
    */
   async create(createPedidoDto: CreatePedidoDto) {
-    // Verificar se cliente existe
-    const cliente = await this.prisma.cliente.findUnique({
-      where: { id: createPedidoDto.clienteId },
-    });
+    try {
+      console.log('📥 Recebendo pedido:', JSON.stringify(createPedidoDto, null, 2));
 
-    if (!cliente) {
-      throw new NotFoundException('Cliente não encontrado');
-    }
+      // Verificar se cliente existe
+      const cliente = await this.prisma.cliente.findUnique({
+        where: { id: createPedidoDto.clienteId },
+      });
 
-    // Verificar se número já existe
-    const pedidoExistente = await this.prisma.pedido.findUnique({
-      where: { numero: createPedidoDto.numero },
-    });
+      if (!cliente) {
+        throw new NotFoundException('Cliente não encontrado');
+      }
 
-    if (pedidoExistente) {
-      throw new BadRequestException('Já existe um pedido com este número');
-    }
+      // Verificar se número já existe
+      const pedidoExistente = await this.prisma.pedido.findUnique({
+        where: { numero: createPedidoDto.numero },
+      });
 
-    // Criar pedido com itens e pagamentos
-    const { itens, pagamentos, ...pedidoData } = createPedidoDto;
+      if (pedidoExistente) {
+        throw new BadRequestException('Já existe um pedido com este número');
+      }
 
-    return this.prisma.pedido.create({
-      data: {
-        ...pedidoData,
-        itens: {
-          create: itens,
+      // Criar pedido com itens e pagamentos
+      const { itens, pagamentos, ...pedidoData } = createPedidoDto;
+
+      console.log('📝 Criando pedido no banco...');
+
+      return this.prisma.pedido.create({
+        data: {
+          ...pedidoData,
+          itens: {
+            create: itens,
+          },
+          pagamentos: pagamentos
+            ? {
+                create: pagamentos,
+              }
+            : undefined,
         },
-        pagamentos: pagamentos
-          ? {
-              create: pagamentos,
-            }
-          : undefined,
-      },
       include: {
         cliente: {
           select: {
@@ -86,6 +91,11 @@ export class PedidoService {
         },
       },
     });
+    } catch (error) {
+      console.error('❌ Erro ao criar pedido:', error);
+      console.error('❌ Stack:', error.stack);
+      throw error;
+    }
   }
 
   /**

@@ -16,10 +16,27 @@ export class CreatePedidoDto {
   @IsInt()
   numero: number;
 
+  @Transform(({ value }) => {
+    // Se já for ISO completo, retorna como está
+    if (value && value.includes('T')) return value;
+    // Se for apenas data (YYYY-MM-DD), adiciona hora
+    if (value && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      return `${value}T00:00:00.000Z`;
+    }
+    return value;
+  })
   @IsDateString()
   dataEmissao: string;
 
   @IsOptional()
+  @Transform(({ value }) => {
+    if (!value) return undefined;
+    if (value.includes('T')) return value;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      return `${value}T00:00:00.000Z`;
+    }
+    return value;
+  })
   @IsDateString()
   dataEntrega?: string;
 

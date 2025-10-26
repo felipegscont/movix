@@ -126,6 +126,8 @@ export class PedidoService {
    * Criar novo pedido
    */
   static async create(data: CreatePedidoDto): Promise<Pedido> {
+    console.log('📤 Enviando pedido para o backend:', JSON.stringify(data, null, 2));
+
     const response = await fetch(`${API_BASE_URL}/pedidos`, {
       method: 'POST',
       headers: {
@@ -133,12 +135,14 @@ export class PedidoService {
       },
       body: JSON.stringify(data),
     });
-    
+
     if (!response.ok) {
       const error = await response.json();
+      console.error('❌ Erro do backend:', JSON.stringify(error, null, 2));
+      console.error('❌ Status:', response.status);
       throw new Error(error.message || 'Erro ao criar pedido');
     }
-    
+
     return response.json();
   }
 

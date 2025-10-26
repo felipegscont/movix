@@ -230,22 +230,37 @@ export function usePedidoForm({ pedidoId, onSuccess }: UsePedidoFormProps = {}):
   const handleSubmit = form.handleSubmit(async (data: PedidoFormData) => {
     try {
       setLoading(true)
-      
+
       // Recalcular totais antes de salvar
       const totals = calculateTotals()
       data.subtotal = totals.subtotal
       data.valorTotal = totals.valorTotal
-      
+
+      // Garantir que valores opcionais sejam números (não strings vazias ou null)
+      const cleanData = {
+        ...data,
+        valorDesconto: Number(data.valorDesconto) || 0,
+        valorFrete: Number(data.valorFrete) || 0,
+        valorOutros: Number(data.valorOutros) || 0,
+        vendedorNome: data.vendedorNome || undefined,
+        observacoes: data.observacoes || undefined,
+        dataEntrega: data.dataEntrega || undefined,
+        enderecoEntrega: data.enderecoEntrega || undefined,
+      }
+
+      console.log('📋 Dados do formulário:', data);
+      console.log('🧹 Dados limpos:', cleanData);
+
       if (pedidoId) {
         // Atualizar
-        await PedidoService.update(pedidoId, data)
+        await PedidoService.update(pedidoId, cleanData)
         toast.success("Pedido atualizado com sucesso!")
       } else {
         // Criar
-        await PedidoService.create(data)
+        await PedidoService.create(cleanData)
         toast.success("Pedido criado com sucesso!")
       }
-      
+
       if (onSuccess) {
         onSuccess()
       } else {

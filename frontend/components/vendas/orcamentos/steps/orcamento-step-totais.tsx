@@ -3,13 +3,13 @@
 import { UseFormReturn } from "react-hook-form"
 import { TotaisSection } from "@/components/vendas/shared/totais-section"
 
-interface PedidoStepTotaisProps {
+interface OrcamentoStepTotaisProps {
   form: UseFormReturn<any>
   subtotal: number
   valorTotal: number
 }
 
-export function PedidoStepTotais({ form, subtotal, valorTotal }: PedidoStepTotaisProps) {
+export function OrcamentoStepTotais({ form, subtotal, valorTotal }: OrcamentoStepTotaisProps) {
   return (
     <TotaisSection
       form={form}

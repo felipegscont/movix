@@ -14,32 +14,32 @@ import {
   BreadcrumbSeparator 
 } from "@/components/ui/breadcrumb"
 import { IconArrowLeft, IconArrowRight, IconDeviceFloppy, IconLoader2 } from "@tabler/icons-react"
-import { usePedidoForm } from "@/hooks/vendas/use-pedido-form"
-import { PedidoStepCabecalho } from "./steps/pedido-step-cabecalho"
-import { PedidoStepItens } from "./steps/pedido-step-itens"
-import { PedidoStepTotais } from "./steps/pedido-step-totais"
+import { useOrcamentoForm } from "@/hooks/vendas/use-orcamento-form"
+import { OrcamentoStepCabecalho } from "./steps/orcamento-step-cabecalho"
+import { OrcamentoStepItens } from "./steps/orcamento-step-itens"
+import { OrcamentoStepTotais } from "./steps/orcamento-step-totais"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { IconAlertCircle } from "@tabler/icons-react"
 
-interface PedidoWizardProps {
+interface OrcamentoWizardProps {
   pedidoId?: string
   onSuccess?: () => void
 }
 
 const STEPS = [
-  { id: 1, name: "Cabeçalho", description: "Dados gerais do pedido" },
+  { id: 1, name: "Cabeçalho", description: "Dados gerais do orçamento" },
   { id: 2, name: "Itens", description: "Produtos e serviços" },
   { id: 3, name: "Totais", description: "Valores e observações" },
 ]
 
-export function PedidoWizard({ pedidoId, onSuccess }: PedidoWizardProps) {
+export function OrcamentoWizard({ pedidoId, onSuccess }: OrcamentoWizardProps) {
   const [currentStep, setCurrentStep] = useState(1)
   const [completedSteps, setCompletedSteps] = useState<number[]>([])
 
   const {
     form,
     loading,
-    loadingPedido,
+    loadingOrcamento,
     proximoNumero,
     handleSubmit,
     addItem,
@@ -47,7 +47,7 @@ export function PedidoWizard({ pedidoId, onSuccess }: PedidoWizardProps) {
     removeItem,
     calculateItemTotal,
     calculateTotals,
-  } = usePedidoForm({ pedidoId, onSuccess })
+  } = useOrcamentoForm({ pedidoId, onSuccess })
 
   // Recalcular totais quando valores mudarem
   useEffect(() => {
@@ -113,7 +113,7 @@ export function PedidoWizard({ pedidoId, onSuccess }: PedidoWizardProps) {
 
   const totals = calculateTotals()
 
-  if (loadingPedido) {
+  if (loadingOrcamento) {
     return (
       <div className="flex items-center justify-center py-12">
         <IconLoader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -182,12 +182,12 @@ export function PedidoWizard({ pedidoId, onSuccess }: PedidoWizardProps) {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Step 1: Cabeçalho */}
           {currentStep === 1 && (
-            <PedidoStepCabecalho form={form} proximoNumero={proximoNumero} />
+            <OrcamentoStepCabecalho form={form} proximoNumero={proximoNumero} />
           )}
 
           {/* Step 2: Itens */}
           {currentStep === 2 && (
-            <PedidoStepItens
+            <OrcamentoStepItens
               form={form}
               addItem={addItem}
               updateItem={updateItem}
@@ -197,7 +197,7 @@ export function PedidoWizard({ pedidoId, onSuccess }: PedidoWizardProps) {
 
           {/* Step 3: Totais */}
           {currentStep === 3 && (
-            <PedidoStepTotais
+            <OrcamentoStepTotais
               form={form}
               subtotal={totals.subtotal}
               valorTotal={totals.valorTotal}

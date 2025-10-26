@@ -239,14 +239,24 @@ export function useOrcamentoForm({ orcamentoId, onSuccess }: UseOrcamentoFormPro
       data.subtotal = totals.subtotal
       data.valorTotal = totals.valorTotal
       
+      // Garantir que valores opcionais sejam números (não strings vazias ou null)
+      const cleanData = {
+        ...data,
+        valorDesconto: Number(data.valorDesconto) || 0,
+        valorFrete: Number(data.valorFrete) || 0,
+        valorOutros: Number(data.valorOutros) || 0,
+        vendedorNome: data.vendedorNome || undefined,
+        observacoes: data.observacoes || undefined,
+      }
+
       if (orcamentoId) {
         // Atualizar
-        await PedidoService.update(orcamentoId, data)
-        toast.success("Orcamento atualizado com sucesso!")
+        await OrcamentoService.update(orcamentoId, cleanData)
+        toast.success("Orçamento atualizado com sucesso!")
       } else {
         // Criar
-        await PedidoService.create(data)
-        toast.success("Orcamento criado com sucesso!")
+        await OrcamentoService.create(cleanData)
+        toast.success("Orçamento criado com sucesso!")
       }
       
       if (onSuccess) {

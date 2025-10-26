@@ -10,13 +10,13 @@ import { IconPlus, IconLoader2 } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { ProdutoCombobox } from "@/components/shared/combobox/produto-combobox"
 import { ProdutoService } from "@/lib/services/produto.service"
-import { type ItemFormData } from "@/lib/schemas/pedido.schema"
+import { type OrcamentoItemFormData } from "@/lib/schemas/orcamento.schema"
 
-interface PedidoAddItemQuickProps {
-  onAddItem: (item: ItemFormData) => void
+interface OrcamentoAddItemQuickProps {
+  onAddItem: (item: OrcamentoItemFormData) => void
 }
 
-export function PedidoAddItemQuick({ onAddItem }: PedidoAddItemQuickProps) {
+export function OrcamentoAddItemQuick({ onAddItem }: OrcamentoAddItemQuickProps) {
   const [produtoId, setProdutoId] = useState<string>("")
   const [produto, setProduto] = useState<any>(null)
   const [loading, setLoading] = useState(false)
@@ -74,7 +74,7 @@ export function PedidoAddItemQuick({ onAddItem }: PedidoAddItemQuickProps) {
     }
 
     // Montar item
-    const item: ItemFormData = {
+    const item: OrcamentoItemFormData = {
       produtoId: produto.id,
       codigo: produto.codigo,
       descricao: produto.descricao,

@@ -8,24 +8,24 @@ import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { itemFormSchema, type ItemFormData } from "@/lib/schemas/pedido.schema"
+import { orcamentoItemFormSchema, type OrcamentoItemFormData } from "@/lib/schemas/orcamento.schema"
 import { IconDeviceFloppy, IconX } from "@tabler/icons-react"
 
-interface PedidoEditItemDialogProps {
+interface OrcamentoEditItemDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  item: ItemFormData
-  onSave: (item: ItemFormData) => void
+  item: OrcamentoItemFormData
+  onSave: (item: OrcamentoItemFormData) => void
 }
 
-export function PedidoEditItemDialog({
+export function OrcamentoEditItemDialog({
   open,
   onOpenChange,
   item,
   onSave
-}: PedidoEditItemDialogProps) {
-  const form = useForm<ItemFormData>({
-    resolver: zodResolver(itemFormSchema) as any,
+}: OrcamentoEditItemDialogProps) {
+  const form = useForm<OrcamentoItemFormData>({
+    resolver: zodResolver(orcamentoItemFormSchema) as any,
     defaultValues: item
   })
 

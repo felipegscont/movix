@@ -18,10 +18,14 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { IconHome, IconFileText } from "@tabler/icons-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { OrcamentoWizard } from "@/components/vendas/orcamentos/orcamento-wizard"
 
 export default function NovoOrcamentoPage() {
   const router = useRouter()
+
+  const handleSuccess = () => {
+    router.push('/vendas/orcamentos')
+  }
 
   return (
     <SidebarProvider style={{ "--sidebar-width": "350px" } as React.CSSProperties}>
@@ -59,21 +63,7 @@ export default function NovoOrcamentoPage() {
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 px-4 md:gap-6 md:py-6 md:px-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Novo Orçamento</CardTitle>
-                  <CardDescription>
-                    Crie uma nova proposta comercial
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-center py-12">
-                    <p className="text-muted-foreground">
-                      Formulário de orçamento em desenvolvimento...
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+              <OrcamentoWizard onSuccess={handleSuccess} />
             </div>
           </div>
         </div>
