@@ -17,8 +17,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { IconHome, IconSettings, IconReceipt } from "@tabler/icons-react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { IconAlertCircle } from "@tabler/icons-react"
+import { NfceForm } from "@/components/configuracoes/fiscal/nfce-form"
 
 export default function Page() {
   return (
@@ -61,14 +60,8 @@ export default function Page() {
                 <h1 className="text-3xl font-bold tracking-tight">Configurações NFC-e</h1>
                 <p className="text-muted-foreground">Configure o cupom fiscal eletrônico</p>
               </div>
-              
-              <Alert>
-                <IconAlertCircle className="h-4 w-4" />
-                <AlertTitle>Em Desenvolvimento</AlertTitle>
-                <AlertDescription>
-                  Esta página está em desenvolvimento e será implementada em breve.
-                </AlertDescription>
-              </Alert>
+
+              <NfceForm />
             </div>
           </div>
         </div>

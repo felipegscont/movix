@@ -17,7 +17,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { IconHome, IconSettings } from "@tabler/icons-react"
-import { NfseForm } from "@/components/configuracoes/fiscal/nfse-form"
+import { MdfeForm } from "@/components/configuracoes/fiscal/mdfe-form"
 
 export default function Page() {
   return (
@@ -47,7 +47,7 @@ export default function Page() {
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage>Configurações NFS-e</BreadcrumbPage>
+                <BreadcrumbPage>Configurações MDF-e</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
@@ -57,11 +57,11 @@ export default function Page() {
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 px-4 md:gap-6 md:py-6 md:px-6">
               <div className="space-y-2">
-                <h1 className="text-3xl font-bold tracking-tight">Configurações NFS-e</h1>
-                <p className="text-muted-foreground">Configure a nota fiscal de serviços eletrônica</p>
+                <h1 className="text-3xl font-bold tracking-tight">Configurações MDF-e</h1>
+                <p className="text-muted-foreground">Configure o manifesto de documentos fiscais eletrônico</p>
               </div>
               
-              <NfseForm />
+              <MdfeForm />
             </div>
           </div>
         </div>

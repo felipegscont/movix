@@ -16,7 +16,7 @@ import { IconLoader2, IconDeviceFloppy, IconAlertCircle, IconAlertTriangle, Icon
 import { EmitenteService } from "@/lib/services/emitente.service"
 import { ConfiguracaoNfseService } from "@/lib/services/configuracao-nfse.service"
 import { InutilizacaoNfseService } from "@/lib/services/inutilizacao-nfse.service"
-import { NfeConfigFields, NfeInutilizacaoFields } from "./nfse-form-tabs"
+import { NfseConfigFields, NfseInutilizacaoFields } from "./nfse-form-tabs"
 
 // Schema para Configurações NFe
 const nfeConfigSchema = z.object({
@@ -312,13 +312,13 @@ export function NfseForm() {
 
               <TabsContent value="producao" className="mt-4">
                 <div className="rounded-md border-l-2 border-l-green-500 bg-green-50/50 dark:bg-green-950/20 p-3">
-                  <NfeConfigFields form={form} prefix="Producao" showInutilizacao={false} />
+                  <NfseConfigFields form={form} prefix="Producao" showInutilizacao={false} />
                 </div>
               </TabsContent>
 
               <TabsContent value="homologacao" className="mt-4">
                 <div className="rounded-md border-l-2 border-l-orange-500 bg-orange-50/50 dark:bg-orange-950/20 p-3">
-                  <NfeConfigFields form={form} prefix="Homologacao" showInutilizacao={false} />
+                  <NfseConfigFields form={form} prefix="Homologacao" showInutilizacao={false} />
                 </div>
               </TabsContent>
             </Tabs>
@@ -411,7 +411,7 @@ export function NfseForm() {
                 <div className="rounded-md border-l-2 border-l-green-500 bg-green-50/50 dark:bg-green-950/20 p-3">
                   <div className="space-y-3">
                     <h4 className="text-xs font-medium text-green-700 dark:text-green-400">Inutilizar Numeração</h4>
-                    <NfeInutilizacaoFields form={form} prefix="Producao" />
+                    <NfseInutilizacaoFields form={form} prefix="Producao" />
                   </div>
                 </div>
               </TabsContent>
@@ -420,7 +420,7 @@ export function NfseForm() {
                 <div className="rounded-md border-l-2 border-l-orange-500 bg-orange-50/50 dark:bg-orange-950/20 p-3">
                   <div className="space-y-3">
                     <h4 className="text-xs font-medium text-orange-700 dark:text-orange-400">Inutilizar Numeração</h4>
-                    <NfeInutilizacaoFields form={form} prefix="Homologacao" />
+                    <NfseInutilizacaoFields form={form} prefix="Homologacao" />
                   </div>
                 </div>
               </TabsContent>

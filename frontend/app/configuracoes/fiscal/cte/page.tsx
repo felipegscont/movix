@@ -16,9 +16,8 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { IconHome, IconSettings, IconTruck } from "@tabler/icons-react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { IconAlertCircle } from "@tabler/icons-react"
+import { IconHome, IconSettings } from "@tabler/icons-react"
+import { CteForm } from "@/components/configuracoes/fiscal/cte-form"
 
 export default function Page() {
   return (
@@ -62,13 +61,7 @@ export default function Page() {
                 <p className="text-muted-foreground">Configure o conhecimento de transporte eletrônico</p>
               </div>
               
-              <Alert>
-                <IconAlertCircle className="h-4 w-4" />
-                <AlertTitle>Em Desenvolvimento</AlertTitle>
-                <AlertDescription>
-                  Esta página está em desenvolvimento e será implementada em breve.
-                </AlertDescription>
-              </Alert>
+              <CteForm />
             </div>
           </div>
         </div>
